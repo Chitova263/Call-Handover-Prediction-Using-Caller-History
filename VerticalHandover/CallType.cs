@@ -1,6 +1,6 @@
 namespace Handoverprediction.VerticalHandover
 {
-    public enum Service
+    public enum CallType
     {
         Voice = 1,
         Data = 2,

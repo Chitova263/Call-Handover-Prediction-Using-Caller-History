@@ -19,6 +19,7 @@ namespace Handoverprediction
             //RAT-1 --Voice 
             var RAT1 = new RAT
             {
+                //Max number of calls supported
                 Capacity = 100,
                 Service = Service.Voice,
                 BasebandUnits = 1
@@ -26,6 +27,7 @@ namespace Handoverprediction
 
             var RAT2 = new RAT
             {
+                //Max number of calls supported
                 Capacity = 100,
                 Service = Service.Data,
                 BasebandUnits = 2,
@@ -33,13 +35,15 @@ namespace Handoverprediction
 
             var RAT3 = new RAT
             {
-                Capacity = 100,
+                //Max number of calls supported
+                Capacity = 100, 
                 Service = Service.VoiceData,
                 BasebandUnits = 2,
             };
 
             var RAT4 = new RAT
             {
+                //Max number of calls supported
                 Capacity = 100,
                 Service = Service.VoiceVideoData,
                 BasebandUnits = 2,

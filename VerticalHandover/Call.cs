@@ -5,9 +5,20 @@ namespace Handoverprediction.VerticalHandover
 {
     public class Call
     {
-        public Guid SessionId { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime Duration { get; set; }
-        public List<MobileTerminalStates> SessionPath { get; set; }
+        public Guid SessionId { get;  }
+        public Guid UserId { get;  }
+        public DateTime StartTime { get;  }
+        public DateTime EndTime { get;  }
+        public int BasebandUnits { get;  }
+        public List<MobileTerminalState> SessionHistory { get;  }
+        public MobileTerminalState State { get; set; }
+
+        public Call(Guid userId, MobileTerminalState state)
+        {
+            StartTime = DateTime.UtcNow;
+            SessionId = Guid.NewGuid();
+            UserId = userId;
+            State = state;
+        }
     }
 }
