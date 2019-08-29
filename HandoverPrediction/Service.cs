@@ -1,4 +1,4 @@
-namespace Handoverprediction.VerticalHandover
+namespace HandoverPrediction
 {
     public enum Service
     {
@@ -7,3 +7,4 @@ namespace Handoverprediction.VerticalHandover
         Video = 3,
     }
 }
+
