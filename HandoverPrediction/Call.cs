@@ -5,7 +5,7 @@ namespace HandoverPrediction
 {
     public class Call : ICall
     {
-        public Guid SessionId { get; private set; }
+        public Guid CallId { get; private set; }
         public MobileTerminal MobileTerminal { get; private set; }
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
@@ -13,9 +13,10 @@ namespace HandoverPrediction
         public int ActiveCallsInSession { get; set; }
         public List<MobileTerminalState> CallSessionSequence { get; private set; } = new List<MobileTerminalState>();
 
+
         private Call(MobileTerminal mobileTerminal, Service service)
         {
-            SessionId = Guid.NewGuid();
+            CallId = Guid.NewGuid();
             StartTime = DateTime.Now;
             MobileTerminal = mobileTerminal;
             Service = service;
@@ -34,6 +35,11 @@ namespace HandoverPrediction
             //Update the call session sequence
             call.CallSessionSequence.Add(call.MobileTerminal.CurrentState);
             return call;
+        }
+
+        public bool TerminateCall()
+        {
+            throw new NotImplementedException();
         }
 
         //compute call duration from the state

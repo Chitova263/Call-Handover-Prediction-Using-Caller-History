@@ -12,7 +12,7 @@ namespace HandoverPrediction
         public int UtilizedCapacity { get; private set; }
         public List<Service> Services { get; private set; }
         //whenever a call is admitted it is added to the list of ongoing sessions, whenever call is terminated its removed from this list of call sessions
-        public List<Call> OngoingSessions { get; private set; } // change this to a hashmap for efficiency
+        public List<CallSession> OngoingSessions { get; private set; } // change this to a hashmap for efficiency
 
         private RAT(int capacity, List<Service> services)
         {
