@@ -9,6 +9,10 @@ namespace HandoverPrediction
         public List<Call> CallHistoryLog { get; private set; }
         public MobileTerminalState CurrentState { get; private set; }
 
+        //Each mobile terminal has a session -------------  remodel
+
+        // Add method to check if MT is on an active session!!!! for preceeding calls
+
         public MobileTerminal(Guid mobileTerminalId)
         {
             MobileTerminalId = mobileTerminalId;
