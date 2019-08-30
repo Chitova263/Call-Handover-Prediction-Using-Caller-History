@@ -11,7 +11,7 @@ namespace HandoverPrediction
         public DateTime EndTime { get; private set; }
         public Service Service { get; private set; }
         public int ActiveCallsInSession { get; set; }
-        public List<MobileTerminalState> CallSessionSequence { get; private set; }
+        public List<MobileTerminalState> CallSessionSequence { get; private set; } = new List<MobileTerminalState>();
 
         private Call(MobileTerminal mobileTerminal, Service service)
         {
@@ -24,7 +24,7 @@ namespace HandoverPrediction
         }
 
         //Factory method to create call
-        public static Call CreateCall(MobileTerminal mobileTerminal, Service service)
+        public static Call InitiateCall(MobileTerminal mobileTerminal, Service service)
         {
             var call = new Call(mobileTerminal, service);
             //Update number of active calls in current session :??? Refactor only update state if call is admitted
