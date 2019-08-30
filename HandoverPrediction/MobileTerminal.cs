@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HandoverPrediction
 {
-    public class MobileTerminal
+    public class MobileTerminal: IMobileTerminal
     {
         public Guid MobileTerminalId { get; private set; }
         public List<Call> CallHistoryLog { get; private set; }

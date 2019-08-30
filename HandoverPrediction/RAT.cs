@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HandoverPrediction
 {
-    public class RAT
+    public class RAT: IRAT
     {
         //Unique identifier of RATs
         public Guid RATid { get; private set; }
@@ -12,7 +12,7 @@ namespace HandoverPrediction
         public int UtilizedCapacity { get; private set; }
         public List<Service> Services { get; private set; }
         //whenever a call is admitted it is added to the list of ongoing sessions, whenever call is terminated its removed from this list of call sessions
-        public List<Call> OngoingSessions { get; private set; }
+        public List<Call> OngoingSessions { get; private set; } // change this to a hashmap for efficiency
 
         private RAT(int capacity, List<Service> services)
         {
@@ -24,6 +24,16 @@ namespace HandoverPrediction
         public static RAT CreateRAT(int capacity, List<Service> services)
         {
             return new RAT(capacity, services);
+        }
+
+        public bool AdmitNewCall(Call call)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int AvailableCapacity()
+        {
+            throw new NotImplementedException();
         }
     }
 }

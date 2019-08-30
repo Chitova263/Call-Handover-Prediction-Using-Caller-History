@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace HandoverPrediction
 {
-    public class Call 
+    public class Call : ICall
     {
         public Guid SessionId { get; private set; }
         public MobileTerminal MobileTerminal { get; private set; }
@@ -20,7 +20,7 @@ namespace HandoverPrediction
             MobileTerminal = mobileTerminal;
             Service = service;
             //refactor this 
-            if(mobileTerminal.CurrentState.Equals(MobileTerminalState.Idle)) CallSessionSequence.Add(MobileTerminalState.Idle);
+            if (mobileTerminal.CurrentState.Equals(MobileTerminalState.Idle)) CallSessionSequence.Add(MobileTerminalState.Idle);
         }
 
         //Factory method to create call
