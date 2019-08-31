@@ -1,4 +1,5 @@
 namespace VerticalHandoverPrediction
+
 {
     public enum MobileTerminalState
     {
