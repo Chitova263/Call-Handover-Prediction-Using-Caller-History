@@ -9,9 +9,6 @@ namespace VerticalHandoverPrediction
         public IMobileTerminal MobileTerminal { get; private set; }
         public Service Service { get; private set; }
 
-        //Inject the JCAC object into Call class to perform Algorithm
-        //??? Use HetNet Object
-
         private Call(IMobileTerminal mobileTerminal, Service service)
         {
             CallId = Guid.NewGuid();

@@ -22,5 +22,23 @@ namespace  VerticalHandoverPrediction
             }
             return utlizedCapacity;
         }
+
+        public static int ComputeCallCapacity(this ICall call)
+        {
+            var utlizedCapacity = 0;
+            switch (call.Service)
+            {
+                case Service.Voice:
+                    utlizedCapacity += 1;
+                    break;
+                case Service.Data:
+                    utlizedCapacity += 2;
+                    break;
+                case Service.Video:
+                    utlizedCapacity += 2;
+                    break;
+            }
+            return utlizedCapacity;
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace VerticalHandoverPrediction
 {
     public interface ICallSession
     {
+        Guid RATId { get; }  //Refference to connected RAT
         Guid CallSessionId { get; }
         DateTime Start { get; }
         DateTime End { get; }

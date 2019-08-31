@@ -34,11 +34,15 @@ namespace VerticalHandoverPrediction
             
             //network.Dump();
            
-            var jcac = JCAC.Initialize(network);
+            var jcac = PredictiveJCAC.Initialize(network);
 
-            var mt = MobileTerminal.CreateMobileTerminal();
-            Call.InitiateCall(mt, Service.Voice, jcac);
-            mt.Dump();
+            
+            var mt1 = MobileTerminal.CreateMobileTerminal();
+            var mt2 = MobileTerminal.CreateMobileTerminal();
+
+            Call.InitiateCall(mt1, Service.Voice, jcac);
+            Call.InitiateCall(mt2, Service.Voice, jcac);
+           
             network.Dump();
 
             //Call.InitiateCall(mt, Service.Voice);

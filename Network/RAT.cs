@@ -39,7 +39,7 @@ namespace VerticalHandoverPrediction
 
             OngoingSessions.Add(session);
             //Update the utilized capacity
-            UtilizedCapacity -= session.ComputeUtilizedCapacity();
+            UtilizedCapacity += session.ComputeUtilizedCapacity();
             //return updated list of ongoing sessions
             return OngoingSessions;
         }
@@ -80,6 +80,17 @@ namespace VerticalHandoverPrediction
         }
 
         public int AvailableBandwidthBasebandUnits() => Capacity - UtilizedCapacity;
+
+        public bool CanAccommodateCall(ICall call)
+        {
+            //check if current RAT can accommodate call
+            var canAccommodateCall = Services.Contains(call.Service);
+            var isBandwidthAvailable = (this.AvailableBandwidthBasebandUnits()
+                > (this.UtilizedCapacity
+                + call.ComputeCallCapacity()))? 
+            true : false;
+            return canAccommodateCall && isBandwidthAvailable;
+        }
     }
 }
 

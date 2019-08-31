@@ -4,6 +4,6 @@ namespace VerticalHandoverPrediction
     {
         IHetNet HetNet { get; }
             
-        JCAC AdmitCall(ICall call, IMobileTerminal mobileTerminal);
+        bool AdmitCall(ICall call, IMobileTerminal mobileTerminal);
     }
 }
