@@ -1,5 +1,6 @@
 namespace VerticalHandoverPrediction
 {
+    //Used by NetSim
     public enum MobileTerminalModality
     {
         SingleMode,

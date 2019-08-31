@@ -8,7 +8,7 @@ namespace VerticalHandoverPrediction
     public class MobileTerminal : IMobileTerminal
     {
         public Guid MobileTerminalId { get; set; }
-        public List<CallSession> CallHistoryLog { get; set; }
+        public List<CallSession> CallHistoryLog { get; set; } = new List<CallSession>();
         public MobileTerminalState CurrentState { get; set; }
         public CallSession CurrentSession { get; set; }
         public MobileTerminalModality Mode { get; set; }
@@ -16,7 +16,6 @@ namespace VerticalHandoverPrediction
         private MobileTerminal()
         {
             MobileTerminalId = Guid.NewGuid();
-            CallHistoryLog = new List<CallSession>();
             CurrentState = MobileTerminalState.Idle;
         }
 

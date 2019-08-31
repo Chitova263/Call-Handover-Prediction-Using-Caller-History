@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace VerticalHandoverPrediction
 {
+    [JsonObject(IsReference = true)]
     public class CallSession : ICallSession
     {
         public Guid CallSessionId { get; private set; }

@@ -1,8 +1,9 @@
 using System;
+using System.Linq;
 
 namespace VerticalHandoverPrediction
 {
-
+    //Refactor and make this a Singleton
     public class JCAC : IJCAC
     {
         public IHetNet HetNet { get; private set; }
@@ -18,9 +19,23 @@ namespace VerticalHandoverPrediction
             return network;
         }
 
-        public bool AdmitCall(ICall call, IMobileTerminal mobileTerminal)
+        //return JCAC object
+        public JCAC AdmitCall(ICall call, IMobileTerminal mobileTerminal)
         {
-            throw new NotImplementedException();
+            //if history is empty and its a new call just find suitable RAT to admit call
+            if(!mobileTerminal.CallHistoryLog.Any() && !mobileTerminal.IsOnActiveSession())
+            {
+                //Find RAT in hetnet to admit service type of call not predicting yet
+                var rat = this.HetNet.RATs
+                    .FirstOrDefault(x => x.Services.Contains(call.Service));
+                    
+                mobileTerminal.SetMobileTerminalCurrentState(call.Service);
+                mobileTerminal.CurrentSession = CallSession.InitiateSession(mobileTerminal);
+                rat.AdmitCallSession(mobileTerminal.CurrentSession);
+
+                mobileTerminal.CurrentSession.ActiveCalls.Add(call);
+            }
+            return this;
         }
 
         //Implement JCAC algorithm

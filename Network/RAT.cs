@@ -11,7 +11,7 @@ namespace VerticalHandoverPrediction
         public int Capacity { get; private set; }
         public int UtilizedCapacity { get; private set; }
         public IList<Service> Services { get; private set; } //JCAC takes care of checking if call can be admitted
-        public IList<ICallSession> OngoingSessions { get; private set; } // change this to a hashmap for efficiency
+        public IList<ICallSession> OngoingSessions { get; private set; } = new List<ICallSession>(); // change this to a hashmap for efficiency
 
         private RAT(IList<Service> services, int capacity)
         {
@@ -32,6 +32,11 @@ namespace VerticalHandoverPrediction
 
         public IList<ICallSession> AdmitCallSession(ICallSession session)
         {
+            if (session is null)
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
+
             OngoingSessions.Add(session);
             //Update the utilized capacity
             UtilizedCapacity -= session.ComputeUtilizedCapacity();

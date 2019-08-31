@@ -32,12 +32,15 @@ namespace VerticalHandoverPrediction
             //Initialize Network
             var network = HetNet.InitializeHetNet(rats);
             
-            
-            network.Dump();
+            //network.Dump();
            
+            var jcac = JCAC.Initialize(network);
 
-            //var mt = MobileTerminal.CreateMobileTerminal();
-            //Call.InitiateCall(mt, Service.Video);
+            var mt = MobileTerminal.CreateMobileTerminal();
+            Call.InitiateCall(mt, Service.Voice, jcac);
+            mt.Dump();
+            network.Dump();
+
             //Call.InitiateCall(mt, Service.Voice);
             //mt.Dump();
             //mt.CurrentSession.TerminateSession(mt);

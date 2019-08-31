@@ -15,36 +15,35 @@ namespace VerticalHandoverPrediction
         private Call(IMobileTerminal mobileTerminal, Service service)
         {
             CallId = Guid.NewGuid();
-            MobileTerminal = mobileTerminal;
+            MobileTerminal = mobileTerminal ?? throw new ArgumentNullException(nameof(mobileTerminal));
             Service = service;
         }
 
         public static Call InitiateCall(IMobileTerminal mobileTerminal, Service service, IJCAC jcac)
         {
             var call = new Call(mobileTerminal, service);
+            
+            //Perform Algorithm When A call is initiated, jcac object handles RAT selection algorithm
+            jcac.AdmitCall(call, mobileTerminal);
+            
 
             //****************************************** */
             //Perform the Algorithm RAT Selection Algorithm Here Before Recording The Call
-
-            //Follow The FlowChart
-            //What happens if history is empty
-            //if history is not empty, do the prediction here
-
             //****************************************** */
 
-            if (!mobileTerminal.IsOnActiveSession())
-            {
+            //if (!mobileTerminal.IsOnActiveSession())
+            //{
 
-                mobileTerminal.SetMobileTerminalCurrentState(service);
-                mobileTerminal.CurrentSession = CallSession.InitiateSession(mobileTerminal);
-            }
-            else
-            {
+            //    mobileTerminal.SetMobileTerminalCurrentState(service);
+            //    mobileTerminal.CurrentSession = CallSession.InitiateSession(mobileTerminal);
+            //}
+            //else
+            //{
                 //if on an active session
-                mobileTerminal.SetMobileTerminalCurrentState(service);
-                mobileTerminal.CurrentSession.UpdateCallSessionSequence(mobileTerminal.CurrentState);
-            }
-            mobileTerminal.CurrentSession.ActiveCalls.Add(call);
+            //    mobileTerminal.SetMobileTerminalCurrentState(service);
+            //    mobileTerminal.CurrentSession.UpdateCallSessionSequence(mobileTerminal.CurrentState);
+            //}
+            //mobileTerminal.CurrentSession.ActiveCalls.Add(call);
             return call;
         }
 
