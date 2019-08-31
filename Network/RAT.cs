@@ -15,6 +15,7 @@ namespace VerticalHandoverPrediction
 
         private RAT(IList<Service> services, int capacity)
         {
+            RATId = Guid.NewGuid();
             Services = services;
             Capacity = capacity;
             UtilizedCapacity = 0;
@@ -72,6 +73,8 @@ namespace VerticalHandoverPrediction
             sessionToUpdate = session;
             return OngoingSessions;
         }
+
+        public int AvailableBandwidthBasebandUnits() => Capacity - UtilizedCapacity;
     }
 }
 

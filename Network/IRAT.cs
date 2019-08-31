@@ -13,6 +13,7 @@ namespace VerticalHandoverPrediction
 
         IList<ICallSession> AdmitCall(ICallSession session);
         IList<ICallSession> AdmitCallSession(ICallSession session);
+        int AvailableBandwidthBasebandUnits();
         IList<ICallSession> DismissCall(ICallSession session);
         IList<ICallSession> DropCallSession(ICallSession session);
     }

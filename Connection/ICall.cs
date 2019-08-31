@@ -4,8 +4,10 @@ namespace VerticalHandoverPrediction
 {
     public interface ICall
     {
-        Guid CallId { get; set; }
-        MobileTerminal MobileTerminal { get; set; }
-        Service Service { get; set; }
+        Guid CallId { get; }
+        IMobileTerminal MobileTerminal { get; }
+        Service Service { get; }
+
+        void TerminateCall(IMobileTerminal mobileTerminal, ICall call);
     }
 }
