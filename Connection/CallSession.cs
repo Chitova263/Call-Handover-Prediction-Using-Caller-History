@@ -3,33 +3,32 @@ using System.Collections.Generic;
 
 namespace VerticalHandoverPrediction
 {
-
     public class CallSession : ICallSession
     {
-        public Guid CallSessionId { get; set; }
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-        public List<MobileTerminalState> CallSessionSequence { get; set; } = new List<MobileTerminalState>() { MobileTerminalState.Idle };
-        public List<Call> ActiveCalls { get; set; } = new List<Call>();
-        private CallSession(MobileTerminal mobileTerminal)
+        public Guid CallSessionId { get; private set; }
+        public DateTime Start { get; private set; }
+        public DateTime End { get; private set; }
+        public IList<MobileTerminalState> CallSessionSequence { get; set; } = new List<MobileTerminalState>() { MobileTerminalState.Idle };
+        public IList<ICall> ActiveCalls { get; set; } = new List<ICall>();
+        private CallSession(IMobileTerminal mobileTerminal)
         {
             CallSessionId = Guid.NewGuid();
             CallSessionSequence.Add(mobileTerminal.CurrentState);
             Start = DateTime.Now;
         }
 
-        public static CallSession InitiateSession(MobileTerminal mobileTerminal)
+        public static CallSession InitiateSession(IMobileTerminal mobileTerminal)
         {
             return new CallSession(mobileTerminal);
         }
 
-        public List<MobileTerminalState> UpdateCallSessionSequence(MobileTerminalState mobileTerminalState)
+        public IList<MobileTerminalState> UpdateCallSessionSequence(MobileTerminalState mobileTerminalState)
         {
             CallSessionSequence.Add(mobileTerminalState);
             return CallSessionSequence;
         }
 
-        public void TerminateSession(MobileTerminal mobileTerminal)
+        public void TerminateSession(IMobileTerminal mobileTerminal)
         {
             //set mobile terminal current state to idle
             mobileTerminal.CurrentState = MobileTerminalState.Idle;
