@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace VerticalHandoverPrediction
 {
@@ -8,6 +9,8 @@ namespace VerticalHandoverPrediction
         public MobileTerminal MobileTerminal { get; set; }
         public Service Service { get; set; }
 
+        //Inject the JCAC object into Call class to perform Algorithm
+        //??? Use HetNet Object
         private Call(MobileTerminal mobileTerminal, Service service)
         {
             CallId = Guid.NewGuid();
@@ -42,6 +45,21 @@ namespace VerticalHandoverPrediction
             }
             mobileTerminal.CurrentSession.ActiveCalls.Add(call);
             return call;
+        }
+
+        public void TerminateCall(IMobileTerminal mobileTerminal, ICall call)
+        {
+            //Find Call From Session
+            var callToTerminate = mobileTerminal.CurrentSession.ActiveCalls
+                .FirstOrDefault(x => x.CallId == call.CallId);
+            //Remove Call From Session
+            mobileTerminal.CurrentSession.ActiveCalls.Remove(callToTerminate);
+            //What happens to the call sequnce
+            /*
+                Only utilized bandwidth is affected, prediction and call sequence not affected
+            */
+
+            //Update utilized bandwidth pass the current session object
         }
 
     }
