@@ -11,6 +11,7 @@ namespace VerticalHandoverPrediction
         public List<CallSession> CallHistoryLog { get; set; }
         public MobileTerminalState CurrentState { get; set; }
         public CallSession CurrentSession { get; set; }
+        public MobileTerminalModality Mode { get; set; }
 
         private MobileTerminal()
         {
