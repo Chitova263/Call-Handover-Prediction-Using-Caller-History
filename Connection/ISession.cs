@@ -3,17 +3,18 @@ using System.Collections.Generic;
 
 namespace VerticalHandoverPrediction
 {
-    public interface ICallSession
+    public interface ISession
     {
-        Guid RATId { get; }  //Refference to connected RAT
-        Guid CallSessionId { get; }
+        Guid SessionId { get; }
+        Guid RATId { get; }
         DateTime Start { get; }
         DateTime End { get; }
-        IList<MobileTerminalState> CallSessionSequence { get; set; }
+        IList<MobileTerminalState> SessionSequence { get; set; }
         IList<ICall> ActiveCalls { get; set; }
 
         TimeSpan SessionDuration();
-        void TerminateSession(IMobileTerminal mobileTerminal);
+        void SetRATId(Guid id);
+        void TerminateSession(IMobileTerminal mobileTerminal, IHetNet hetNet);
         IList<MobileTerminalState> UpdateCallSessionSequence(MobileTerminalState mobileTerminalState);
     }
 }

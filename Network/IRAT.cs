@@ -7,14 +7,16 @@ namespace VerticalHandoverPrediction
     {
         Guid RATId { get; }
         int Capacity { get; }
-        int UtilizedCapacity { get; }
-        IList<Service> Services { get; }
-        IList<ICallSession> OngoingSessions { get; }
+        int UsedCapacity { get; }
+        IList<Service> Services { get; set; }
+        IList<ISession> OngoingSessions { get; set; }
 
-        IList<ICallSession> AdmitCall(ICallSession session);
-        IList<ICallSession> AdmitCallSession(ICallSession session);
-        int AvailableBandwidthBasebandUnits();
-        IList<ICallSession> DismissCall(ICallSession session);
-        IList<ICallSession> DropCallSession(ICallSession session);
+        void AdmitIncomingCallToNewSession(ICall call);
+        void AdmitIncomingCallToOngoingSession(ICall call);
+        int AvailableCapacity();
+        bool CanAccommodateCall(ICall call);
+        void RemoveSessionFromSourceRAT(ISession session);
+        void TerminateSession(Guid sessionId);
+        void TransferSessionTo(ISession currentSession, ICall call);
     }
 }

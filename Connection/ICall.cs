@@ -8,6 +8,6 @@ namespace VerticalHandoverPrediction
         IMobileTerminal MobileTerminal { get; }
         Service Service { get; }
 
-        void TerminateCall(IMobileTerminal mobileTerminal, ICall call);
+        void TerminateCall(ICall call);
     }
 }

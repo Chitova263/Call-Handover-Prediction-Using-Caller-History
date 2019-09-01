@@ -7,6 +7,7 @@ namespace VerticalHandoverPrediction
     {
         Guid HetNetId { get; }
         IList<RAT> RATs { get; }
-        int NumberOfHandovers { get; }
+
+        bool InitiateHandoverProcess(ICall call);
     }
 }

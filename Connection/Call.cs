@@ -12,7 +12,7 @@ namespace VerticalHandoverPrediction
         private Call(IMobileTerminal mobileTerminal, Service service)
         {
             CallId = Guid.NewGuid();
-            MobileTerminal = mobileTerminal ?? throw new ArgumentNullException(nameof(mobileTerminal));
+            MobileTerminal = mobileTerminal;
             Service = service;
         }
 
@@ -20,44 +20,18 @@ namespace VerticalHandoverPrediction
         {
             var call = new Call(mobileTerminal, service);
             
-            //Perform Algorithm When A call is initiated, jcac object handles RAT selection algorithm
-            jcac.AdmitCall(call, mobileTerminal);
-            
+            //Handle Handover Algorithm whenever a new call is initiated
+            jcac.AdmitCall(call);
 
-            //****************************************** */
-            //Perform the Algorithm RAT Selection Algorithm Here Before Recording The Call
-            //****************************************** */
-
-            //if (!mobileTerminal.IsOnActiveSession())
-            //{
-
-            //    mobileTerminal.SetMobileTerminalCurrentState(service);
-            //    mobileTerminal.CurrentSession = CallSession.InitiateSession(mobileTerminal);
-            //}
-            //else
-            //{
-                //if on an active session
-            //    mobileTerminal.SetMobileTerminalCurrentState(service);
-            //    mobileTerminal.CurrentSession.UpdateCallSessionSequence(mobileTerminal.CurrentState);
-            //}
-            //mobileTerminal.CurrentSession.ActiveCalls.Add(call);
             return call;
         }
 
-        public void TerminateCall(IMobileTerminal mobileTerminal, ICall call)
+        public void TerminateCall(ICall call)
         {
-            //Find Call From Session
-            var callToTerminate = mobileTerminal.CurrentSession.ActiveCalls
-                .FirstOrDefault(x => x.CallId == call.CallId);
-            //Remove Call From Session
-            mobileTerminal.CurrentSession.ActiveCalls.Remove(callToTerminate);
-            //What happens to the call sequnce
-            /*
-                Only utilized bandwidth is affected, prediction and call sequence not affected
-            */
-
-            //Update utilized bandwidth pass the current session object
+            //Must be called by the MT / call object ??? remodel MT and Call Objects
+            //Remove call From Session
+            //Free Up AssociatedRAT Bandwidth
+            throw new NotImplementedException();
         }
-
     }
 }

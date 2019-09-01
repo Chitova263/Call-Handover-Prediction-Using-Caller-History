@@ -2,7 +2,7 @@ namespace  VerticalHandoverPrediction
 {
     public static class NetworkExtensions
     {
-        public static int ComputeUtilizedCapacity(this ICallSession session)
+        public static int ComputeRequiredCapacity(this ISession session)
         {
             var utlizedCapacity = 0;
             foreach (var call in session.ActiveCalls)
@@ -23,7 +23,7 @@ namespace  VerticalHandoverPrediction
             return utlizedCapacity;
         }
 
-        public static int ComputeCallCapacity(this ICall call)
+        public static int ComputeRequiredCapacity(this ICall call)
         {
             var utlizedCapacity = 0;
             switch (call.Service)
@@ -40,5 +40,25 @@ namespace  VerticalHandoverPrediction
             }
             return utlizedCapacity;
         }
+
+        public static int ComputeRequiredCapacity(this Service service)
+        {
+            var utlizedCapacity = 0;
+            switch (service)
+            {
+                case Service.Voice:
+                    utlizedCapacity += 1;
+                    break;
+                case Service.Data:
+                    utlizedCapacity += 2;
+                    break;
+                case Service.Video:
+                    utlizedCapacity += 2;
+                    break;
+            }
+            return utlizedCapacity;
+        }
+        
+
     }
 }

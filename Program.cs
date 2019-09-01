@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using VerticalHandoverPrediction.Utils;
-using System.Linq;
 
 namespace VerticalHandoverPrediction
 {
@@ -14,43 +12,44 @@ namespace VerticalHandoverPrediction
                 RAT.CreateRAT(new List<Service>
                 {
                     Service.Voice, Service.Data, Service.Video
-                }, 100),
+                }, 3),
                 RAT.CreateRAT(new List<Service>
                 {
                     Service.Voice
-                }, 100),
+                }, 3),
                 RAT.CreateRAT(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 100),
+                }, 3),
                 RAT.CreateRAT(new List<Service>
                 {
                     Service.Video, Service.Voice,
-                }, 100),
+                }, 3),
             };
 
             //Initialize Network
-            var network = HetNet.InitializeHetNet(rats);
+            IHetNet network = HetNet.InitializeHetNet(rats);
             
             //network.Dump();
            
-            var jcac = PredictiveJCAC.Initialize(network);
+            var jcac = NonPredictiveJCAC.Initialize(network);
 
-            
-            var mt1 = MobileTerminal.CreateMobileTerminal();
-            var mt2 = MobileTerminal.CreateMobileTerminal();
+            var mt1 = MobileTerminal.CreateMobileTerminal(MobileTerminalModality.TrippleMode);
+            var mt2 = MobileTerminal.CreateMobileTerminal(MobileTerminalModality.TrippleMode);
 
-            Call.InitiateCall(mt1, Service.Voice, jcac);
-            Call.InitiateCall(mt2, Service.Voice, jcac);
+            var call1 = Call.InitiateCall(mt1, Service.Voice, jcac);
+            var call2 = Call.InitiateCall(mt1, Service.Data, jcac);
            
-            network.Dump();
+            network.RATs.Dump();
 
-            //Call.InitiateCall(mt, Service.Voice);
-            //mt.Dump();
-            //mt.CurrentSession.TerminateSession(mt);
-            //System.Console.WriteLine("*****************************************************");
-            //mt.Dump();
-            //mt.CurrentSession.SessionDuration().Dump();
+            mt1.TerminateSession(network);
+            
+            System.Console.WriteLine("##########################################");
+
+            network.RATs.Dump();
+
+            System.Console.WriteLine("##########################################");
+            mt1.Dump();
         }
     }
 }

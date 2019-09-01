@@ -5,12 +5,18 @@ namespace VerticalHandoverPrediction
 {
     public interface IMobileTerminal
     {
-        Guid MobileTerminalId { get; set; }
-        List<CallSession> CallHistoryLog { get; set; }
-        MobileTerminalState CurrentState { get; set; }
-        CallSession CurrentSession { get; set; }
+        Guid MobileTerminalId { get; }
+        Guid SessionId { get; }
+        Guid RATId { get; }
+        IList<ISession> CallHistoryLog { get; }
+        MobileTerminalState State { get; }
+        MobileTerminalModality Mode { get; }
 
-        bool IsOnActiveSession();
-        MobileTerminalState SetMobileTerminalCurrentState(Service service);
+        void SetMobileTerminalState(MobileTerminalState state);
+        void SetRATId(Guid ratId);
+        void SetSessionId(Guid sessionId);
+        void TerminateSession(IHetNet hetNet);
+        void UpdateCallHistoryLog(ISession session);
+        MobileTerminalState UpdateMobileTerminalState(Service service);
     }
 }

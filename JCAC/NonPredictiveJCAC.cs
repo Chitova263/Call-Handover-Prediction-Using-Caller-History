@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace VerticalHandoverPrediction
 {
@@ -7,90 +8,62 @@ namespace VerticalHandoverPrediction
     //Refactor and make this a Singleton
     public class NonPredictiveJCAC : IJCAC
     {
-        public IHetNet HetNet { get; private set; }
+        private readonly IHetNet _hetNet;
 
-        private NonPredictiveJCAC(IHetNet hetNet)
-        {
-            this.HetNet = hetNet ?? throw new System.ArgumentNullException(nameof(HetNet));
-        }
+        private NonPredictiveJCAC(IHetNet hetNet) => _hetNet = hetNet;
 
-        public static IJCAC Initialize(IHetNet hetNet)
-        {
-            var network = new NonPredictiveJCAC(hetNet);
-            return network;
-        }
+        public static IJCAC Initialize(IHetNet hetNet) => new NonPredictiveJCAC(hetNet);
 
         //return JCAC object
-        public bool AdmitCall(ICall call, IMobileTerminal mobileTerminal)
+        public bool AdmitCall(ICall call)
         {
-            if(mobileTerminal.IsOnActiveSession())
+            //If incoming call is on a mobile terminal already on another session
+            if (call.MobileTerminal.State != MobileTerminalState.Idle)
             {
-                //Find RAT accommodating current session
-                var rat =  HetNet.RATs
-                    .FirstOrDefault(x => x.RATId == mobileTerminal.CurrentSession.RATId);
-                if(rat.CanAccommodateCall(call))
+                //Find RAT accommodating current call
+                var currentRAT = _hetNet.RATs
+                    .FirstOrDefault(x => x.RATId == call.MobileTerminal.RATId);
+                
+                //Check if current RAT can admit incoming call in terms of the service and available bandwidth
+                if(currentRAT.CanAccommodateCall(call))
                 {
-                    //Admit call to RAT
-                    mobileTerminal.SetMobileTerminalCurrentState(call.Service);
-                    mobileTerminal.CurrentSession.ActiveCalls.Add(call);
-                    rat.AdmitCall(mobileTerminal.CurrentSession);
-                } else {
-                    //Handover call if RAT cannot accommodate
+                    //Call RAT method to accommodate incoming call to an existing session
+                    currentRAT.AdmitIncomingCallToOngoingSession(call);
+                    //successfully admitted call
+                    return true;
                 }
-            } else {
-                //Not on an active session
-                //History can be empty?? History can Exist??
-
-                /*       
-                voice
-                data
-                voice data
-                voice video data
-                 */
-                var rats = HetNet.RATs
+                //If current RAT can't accommodate new call perform a vertical handover
+                else 
+                {
+                    _hetNet.InitiateHandoverProcess(call);
+                }
+            }
+            //New incoming call, no ongoing session
+            else
+            {
+                //Find the candidate RATs from hetnet that can admit incoming call [support and available bbu]
+                var candidateRATs = _hetNet.RATs
                     .Where(x => x.Services.Contains(call.Service))
                     .OrderBy(x => x.Services.Count)
                     .ToList();
                 
-                foreach (var rat in rats)
+                foreach (var rat in candidateRATs)
                 {
                     if(rat.CanAccommodateCall(call))
                     {
-                        //Admit Call
-                        mobileTerminal.SetMobileTerminalCurrentState(call.Service);
-                        mobileTerminal.CurrentSession = CallSession.InitiateSession(mobileTerminal, rat.RATId);
-                        mobileTerminal.CurrentSession.ActiveCalls.Add(call);
-                        rat.AdmitCallSession(mobileTerminal.CurrentSession);
+                        //Start new session
+                        rat.AdmitIncomingCallToNewSession(call);
                         break;
-                    } else {
-                        //Drop the call 
+                    }
+                    else 
+                    {
+                        //No RAT can accommodate the incoming call so drop call
+                        //Keep Track of the number of calls dropped in the hetnet
                     }
                 }
 
-
             }
-
-            //if history is empty and its a new call just find suitable RAT to admit call
-            //if (!mobileTerminal.CallHistoryLog.Any() && !mobileTerminal.IsOnActiveSession())
-            //{
-                //Find RAT in hetnet to admit service type of call not predicting yet
-                //var rat = this.HetNet.RATs
-                //    .FirstOrDefault(x => x.Services.Contains(call.Service));
-
-                //mobileTerminal.SetMobileTerminalCurrentState(call.Service);
-                //mobileTerminal.CurrentSession = CallSession.InitiateSession(mobileTerminal);
-                //rat.AdmitCallSession(mobileTerminal.CurrentSession);
-
-                //mobileTerminal.CurrentSession.ActiveCalls.Add(call);
-            //}
             return true;
         }
-
-        //Implement JCAC algorithm
-        /*
-            takes in a call => if call is on 
-         */
-
-
     }
 }
