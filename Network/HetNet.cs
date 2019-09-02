@@ -25,6 +25,11 @@ namespace VerticalHandoverPrediction
             return hetnet;
         }
 
+        public MobileTerminalState PredictNextState(ICall call)
+        {
+            throw new NotImplementedException();
+        }
+
         public bool InitiateHandoverProcess(ICall call)
         {
             var previousRAT = RATs
@@ -89,6 +94,16 @@ namespace VerticalHandoverPrediction
             targetRAT.AdmitIncomingCallToOngoingSession(call);
 
             return true;
+        }
+
+        public bool InitiateHandoverPrediction(ICall call)
+        {
+            var previousRAT = RATs
+                .FirstOrDefault(x => x.RATId == call.MobileTerminal.RATId);
+
+            var previousSession = call.MobileTerminal.SessionId;
+
+            
         }
     }
 }

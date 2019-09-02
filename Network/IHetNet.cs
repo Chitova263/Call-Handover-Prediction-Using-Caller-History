@@ -9,5 +9,6 @@ namespace VerticalHandoverPrediction
         IList<RAT> RATs { get; }
 
         bool InitiateHandoverProcess(ICall call);
+        bool InitiateHandoverPrediction(ICall call);
     }
 }
