@@ -103,7 +103,9 @@ namespace VerticalHandoverPrediction
 
             var previousSession = call.MobileTerminal.SessionId;
 
-            
+            var history =  call.MobileTerminal.CallHistoryLog
+                .Select(x => x.SessionSequence)
+                .T
         }
     }
 }
