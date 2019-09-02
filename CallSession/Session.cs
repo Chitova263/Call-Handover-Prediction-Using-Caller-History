@@ -4,7 +4,6 @@ using VerticalHandoverPrediction.Mobile;
 
 namespace VerticalHandoverPrediction.CallSession
 {
-
     public class Session : ISession
     {
         public Guid SessionId { get; private set; }
@@ -27,14 +26,11 @@ namespace VerticalHandoverPrediction.CallSession
         {
             var session = new Session(ratId);
             //Build Session Object
-           
-            
             return session;
         }
 
-        public void SetRatId(Guid ratId)
-        {
-            RatId = ratId;    
-        }
+        public void SetRatId(Guid ratId) => RatId = ratId;
+
+        public void SetEndTime(DateTime end) => End = end;
     }
 }

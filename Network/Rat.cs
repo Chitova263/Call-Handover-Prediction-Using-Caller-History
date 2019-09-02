@@ -72,6 +72,8 @@ namespace VerticalHandoverPrediction.Network
             //Session Successfuly transfered to this Rat
         }
 
+        public void SetUsedCapacity(int bbu) => UsedCapacity = bbu;
+
         //Admits incoming call on this ongoing session
         public void AdmitIncomingCallToOngoingSession(ICall call, ISession session, IMobileTerminal mobileTerminal)
         {
@@ -114,6 +116,6 @@ namespace VerticalHandoverPrediction.Network
              /* If supported check if the is enough capacity to accommodate session with new call */
             var requiredBbu = UsedCapacity + call.Service.ComputeRequiredCapacity();
             return requiredBbu <= Capacity;
-        }   
+        }
     }
 }

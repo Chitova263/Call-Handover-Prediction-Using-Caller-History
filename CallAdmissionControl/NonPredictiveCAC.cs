@@ -34,14 +34,6 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                 var currentSession = HetNet._HetNet.Rats
                     .SelectMany(x => x.OngoingSessions)
                     .FindSessionWithId(mobileTerminal.SessionId);
-
-
-
-                    //.SelectMany(x => x.OngoingSessions
-                        //how does the call have a sessionId here/Call is not yet admmited to a session
-                    //    .FindSessionWithId(mobileTerminal.SessionId)
-                    //)
-                    //.FirstOrDefault();
                 
                 currentRat = HetNet._HetNet.Rats
                     .FirstOrDefault(x => x.RatId == currentSession.RatId);
@@ -61,25 +53,31 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                 }
             } 
             //new call, no ongoing session
-            else 
+            else
             {
-                //Non Predictive algorithm : => Swap this with predictive code
-                var candidateRats = HetNet._HetNet.Rats
-                    .Where(x => x.Services.Contains(call.Service))
-                    .OrderBy(x => x.Services.Count)
-                    .ToList();
-                
-                foreach (var rat in candidateRats)
+                NonPredictiveAlgorithm(call, mobileTerminal);
+            }
+        }
+
+        private static void NonPredictiveAlgorithm(ICall call, MobileTerminal mobileTerminal)
+        {
+            //Non Predictive algorithm : => Swap this with predictive code
+            var candidateRats = HetNet._HetNet.Rats
+                .Where(x => x.Services.Contains(call.Service))
+                .OrderBy(x => x.Services.Count)
+                .ToList();
+
+            foreach (var rat in candidateRats)
+            {
+                if (rat.CanAccommodateCall(call))
                 {
-                    if(rat.CanAccommodateCall(call))
-                    {
-                        rat.AdmitIncomingCallToNewSession(call, mobileTerminal);
-                        break;
-                    } else 
-                    {
-                        //All the RATs cant accommodate new call
-                        HetNet._HetNet.BlockedCalls++;
-                    }
+                    rat.AdmitIncomingCallToNewSession(call, mobileTerminal);
+                    break;
+                }
+                else
+                {
+                    //All the RATs cant accommodate new call
+                    HetNet._HetNet.BlockedCalls++;
                 }
             }
         }

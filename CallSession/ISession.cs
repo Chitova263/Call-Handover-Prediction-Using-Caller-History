@@ -14,5 +14,6 @@ namespace VerticalHandoverPrediction.CallSession
         IList<ICall> ActiveCalls { get; }
 
         void SetRatId(Guid ratId);
+        void SetEndTime(DateTime now);
     }
 }

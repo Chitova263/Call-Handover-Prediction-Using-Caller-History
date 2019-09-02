@@ -24,7 +24,7 @@ namespace VerticalHandoverPrediction.CallSession
             var call = new Call(mobileTerminalId, service);
 
             //Perfom CAC Algorithm on call object
-            Log.Information("Calling...............");
+            
             
             NonPredictiveCAC.StartCACAlgorithm().AdmitCall(call);
 

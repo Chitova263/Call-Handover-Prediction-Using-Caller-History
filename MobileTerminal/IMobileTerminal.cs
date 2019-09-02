@@ -10,10 +10,12 @@ namespace VerticalHandoverPrediction.Mobile
         Guid SessionId { get; }
         Modality Modality { get; }
         MobileTerminalState State { get; }
-        IList<ISession> CallHistoryLogs { get; }
+        IList<CallLog> CallHistoryLogs { get; }
 
         MobileTerminalState ChangeStateTo(MobileTerminalState state);
-        void SetSessionId(Guid SessionId);
+        void SetSessionId(Guid sessionId);
+        void TerminateCall(Guid callId);
+        void TerminateSession();
         MobileTerminalState UpdateMobileTerminalState(Service service);
     }
 }

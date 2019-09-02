@@ -55,19 +55,21 @@ namespace VerticalHandoverPrediction
 
             //HetNet._HetNet.MobileTerminals.Dump();
 
-            //mt.Dump();
-
-            Call.StartCall(mt.MobileTerminalId, Service.Voice);
-            Call.StartCall(mt.MobileTerminalId, Service.Video);
-            Call.StartCall(mt3.MobileTerminalId, Service.Voice);
-            Call.StartCall(mt3.MobileTerminalId, Service.Video);
-            Call.StartCall(mt2.MobileTerminalId, Service.Data);
-            Call.StartCall(mt1.MobileTerminalId, Service.Voice);
-            
-        
             mt.Dump();
 
-            HetNet._HetNet.Dump();
+            var call = Call.StartCall(mt.MobileTerminalId, Service.Voice);
+            Call.StartCall(mt.MobileTerminalId, Service.Video);
+            
+            
+            mt.TerminateSession();
+
+            //Consider keeping a list of calls made by the mobile terminal
+
+            mt.TerminateCall(call.CallId);
+            
+            mt.Dump();
+
+            HetNet._HetNet.Rats.Dump();
         }
     }
 }
