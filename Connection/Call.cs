@@ -9,6 +9,8 @@ namespace VerticalHandoverPrediction
         public IMobileTerminal MobileTerminal { get; private set; }
         public Service Service { get; private set; }
 
+        //Consider moving sessionId to this object
+
         private Call(IMobileTerminal mobileTerminal, Service service)
         {
             CallId = Guid.NewGuid();

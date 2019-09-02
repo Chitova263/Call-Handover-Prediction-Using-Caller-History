@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static MoreLinq.Extensions.StartsWithExtension;
 
 namespace VerticalHandoverPrediction
 {
@@ -96,6 +97,7 @@ namespace VerticalHandoverPrediction
             return true;
         }
 
+        //??? Does handover happen at the mobile terminal level or network level
         public bool InitiateHandoverPrediction(ICall call)
         {
             var previousRAT = RATs
@@ -103,9 +105,35 @@ namespace VerticalHandoverPrediction
 
             var previousSession = call.MobileTerminal.SessionId;
 
-            var history =  call.MobileTerminal.CallHistoryLog
-                .Select(x => x.SessionSequence)
-                .T
+            //Obtain caller history from the mobile terminal?? Consider storing history at Network Level
+            var callerHistory =call.MobileTerminal.CallHistoryLog.Select(x => x.SessionSequence);
+
+            //Predict the next state,initial RAT selection Problem
+            var group = callerHistory
+                .Select(x => x.Skip(1).Take(2))
+                .Where(x => x.StartsWith(new List<MobileTerminalState>{call.Service.GetState()}))
+                .SelectMany(x => x.Skip(1))
+                .GroupBy(x => x);
+
+            IGrouping<MobileTerminalState, MobileTerminalState> prediction = default(IGrouping<MobileTerminalState, MobileTerminalState>);
+            int max = 0;
+            foreach(var grp in group )
+            {
+                if(grp.Count() > max) 
+                {
+                    prediction = grp;
+                    max = prediction.Count();
+                }
+               // Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+            }
+
+            foreach( var grp in group )
+            {
+                Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+            }
+
+           return true;
         }
     }
 }
+

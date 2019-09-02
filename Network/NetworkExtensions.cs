@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace  VerticalHandoverPrediction
 {
     public static class NetworkExtensions
@@ -58,7 +62,24 @@ namespace  VerticalHandoverPrediction
             }
             return utlizedCapacity;
         }
-        
 
+        public static MobileTerminalState GetState(this Service service)
+        {
+            MobileTerminalState state = default(MobileTerminalState);
+            switch (service)
+            {
+                case Service.Voice:
+                    state = MobileTerminalState.Voice;
+                    break;
+                case Service.Video:
+                    state = MobileTerminalState.Video;
+                    break;
+                case Service.Data:
+                    state = MobileTerminalState.Data;
+                    break;
+            }
+            return state;
+        }
+        
     }
 }
