@@ -65,10 +65,13 @@ namespace VerticalHandoverPrediction.Mobile
             var services = session.ActiveCalls
                 .Select(x => x.Service);
 
+            //set the end time of the session
+            session.SetEndTime(DateTime.Now);
+
             var bbuToRelease = 0;
             foreach (var service in services)
             {
-                bbuToRelease -= service.ComputeRequiredCapacity();
+                bbuToRelease += service.ComputeRequiredCapacity();
             }
             rat.SetUsedCapacity(rat.UsedCapacity - bbuToRelease);
 
@@ -98,8 +101,7 @@ namespace VerticalHandoverPrediction.Mobile
 
             Log.Information($"---- Terminating Session @{session.SessionId}");
 
-            //set the end time of the session
-            session.SetEndTime(DateTime.Now);
+           
 
             //Set refference to session object to null
             session = null;
@@ -130,12 +132,10 @@ namespace VerticalHandoverPrediction.Mobile
                 rat.UsedCapacity - call.Service.ComputeRequiredCapacity()
                 );
 
-            var services = session.ActiveCalls
-                .Select(x => x.Service)
-                .ToList();
+            
 
             //Update the mobile state based on remaining services
-            DeriveStateFromServices(services);
+            DeriveStateFromServices(call.Service);
 
             //update the session sequence
 
@@ -143,9 +143,9 @@ namespace VerticalHandoverPrediction.Mobile
             call = null;
         }
 
-        private MobileTerminalState DeriveStateFromServices(IList<Service> services)
+        private MobileTerminalState DeriveStateFromServices(Service service)
         {
-            throw new NotImplementedException();  //Edge cases
+            throw new NotImplementedException();
         }
 
         private MobileTerminalState SetState(MobileTerminalState state)

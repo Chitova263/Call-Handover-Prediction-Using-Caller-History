@@ -22,19 +22,19 @@ namespace VerticalHandoverPrediction
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Data, Service.Video
-                }, 3),
+                }, 10),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice
-                }, 3),
+                }, 10),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 3),
+                }, 10),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Video, Service.Voice,
-                }, 3),
+                }, 10),
             };
 
             foreach (var rat in rats)
@@ -57,17 +57,19 @@ namespace VerticalHandoverPrediction
 
             mt.Dump();
 
-            var call = Call.StartCall(mt.MobileTerminalId, Service.Voice);
+            Call.StartCall(mt.MobileTerminalId, Service.Voice);
             Call.StartCall(mt.MobileTerminalId, Service.Video);
+            Call.StartCall(mt.MobileTerminalId, Service.Data);
             
             
             mt.TerminateSession();
 
             //Consider keeping a list of calls made by the mobile terminal
-
-            mt.TerminateCall(call.CallId);
             
             mt.Dump();
+
+            //Prediction Happens Now
+            Call.StartCall(mt.MobileTerminalId, Service.Voice); 
 
             HetNet._HetNet.Rats.Dump();
         }

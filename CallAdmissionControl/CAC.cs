@@ -2,21 +2,25 @@ using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Network;
 using System.Linq;
 using VerticalHandoverPrediction.Mobile;
+using static MoreLinq.Extensions.StartsWithExtension;
+using System.Collections.Generic;
+using System;
+using Serilog;
 
 //Converted to a singleton
 namespace VerticalHandoverPrediction.CallAdmissionControl
 {
 
-    public class NonPredictiveCAC : ICAC
+    public class CAC : ICAC
     {
-        private NonPredictiveCAC()
+        private CAC()
         {
             
         }
 
         public static ICAC StartCACAlgorithm()
         {
-            return new NonPredictiveCAC();
+            return new CAC();
         }
         
         public void AdmitCall(ICall call)
@@ -55,7 +59,8 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             //new call, no ongoing session
             else
             {
-                NonPredictiveAlgorithm(call, mobileTerminal);
+                //NonPredictiveAlgorithm(call, mobileTerminal);
+                PredictiveAlgorithm(call, mobileTerminal);
             }
         }
 
@@ -133,5 +138,85 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             //Admit the call new call to 
             destinationRat.AdmitIncomingCallToOngoingSession(call, currentSession, mobileTerminal);
         }
+
+        public void PredictiveAlgorithm(ICall call, MobileTerminal mobileTerminal)
+        {
+            //obtain call history from mobile termina
+            var callHistory = mobileTerminal.CallHistoryLogs
+                .Select(x => x.SessionSequence)
+                .ToList();
+
+            var nextState = default(MobileTerminalState);
+            
+            if(callHistory.Count() == 0) nextState = call.Service.GetState();
+            else
+            {
+                //Predict the next state
+                var group = callHistory
+                    .Select(x => x.Skip(1).Take(2))
+                    .Where(x => x.StartsWith(new List<MobileTerminalState>{call.Service.GetState()}))
+                    .SelectMany(x => x.Skip(1))
+                    .GroupBy(x => x);
+
+                IGrouping<MobileTerminalState, MobileTerminalState> prediction = default(IGrouping<MobileTerminalState, MobileTerminalState>);
+                int max = 0;
+                foreach(var grp in group )
+                {
+                    if(grp.Count() > max) 
+                    {
+                        prediction = grp;
+                        max = prediction.Count();
+                    }
+                // Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+                }
+
+                foreach( var grp in group )
+                {
+                    Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+                }
+                nextState = prediction.Key;
+                Log.Information($"---- The predicted state is @{nextState.ToString()} @{nameof(nextState)}");
+            }
+
+            //Find the services required for the current call and predicted state
+            var services = new List<Service>{call.Service};
+            foreach (var service in nextState.SupportedServices())
+            {
+                if(!services.Contains(service)) services.Add(service);
+            }
+
+            //Find the candidate RATs From HetNet to accomodate only the predicted states
+            var candidateRats = HetNet._HetNet.Rats
+                .Where(x => x.Services.ToHashSet().IsSupersetOf(services))
+                .OrderBy(x => x.Services.Count)
+                .ToList();
+
+            //NB: There is no allocation of bandwidth in advance
+            foreach (var rat in candidateRats)
+            {
+                if(rat.CanAccommodateServices(services))   
+                {
+                    //Start new session
+                    rat.AdmitIncomingCallToNewSession(call, mobileTerminal);
+                    HetNet._HetNet.SuccessfulPredictions++;
+
+                    Log.Information($"----- VHO Prediction Successful Rat:  @{rat.RatId}, Total Successful Predictions : @{HetNet._HetNet.SuccessfulPredictions} ");
+
+                    break;
+                }
+                else 
+                {
+                    //Before dropping call attempt to admit call using the normal non predictive scheme
+                    HetNet._HetNet.FailedPredictions++;
+                    Log.Information($"---- VHO Prediction Failled, Total Failed Predictions : @{HetNet._HetNet.FailedPredictions} ");
+                    /* --------Missing Case ------ */
+                    //No RAT can accommodate the incoming call so drop call
+                    HetNet._HetNet.BlockedCalls++;
+                    Log.Information($"---- Incoming Call Blocked, Total Calls Blocked : @{HetNet._HetNet.BlockedCalls} ");
+                }
+            }
+        }
     }
 }
+
+//Look at success

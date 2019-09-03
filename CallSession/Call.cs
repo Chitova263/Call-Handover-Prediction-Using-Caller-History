@@ -26,7 +26,7 @@ namespace VerticalHandoverPrediction.CallSession
             //Perfom CAC Algorithm on call object
             
             
-            NonPredictiveCAC.StartCACAlgorithm().AdmitCall(call);
+            CAC.StartCACAlgorithm().AdmitCall(call);
 
             //if call is blocked return null object
             return call;

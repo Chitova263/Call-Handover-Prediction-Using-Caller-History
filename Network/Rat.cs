@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Mobile;
@@ -91,6 +92,8 @@ namespace VerticalHandoverPrediction.Network
 
         public void AdmitIncomingCallToNewSession(ICall call, IMobileTerminal mobileTerminal)
         {
+            Log.Information($"----Starting New Session at Rat@{RatId} Admitting call @{call.CallId}");
+
             //Start new session
             var session = Session.StartSession(RatId);
             //Add call & mobileTerminal to the new session
@@ -106,6 +109,8 @@ namespace VerticalHandoverPrediction.Network
             OngoingSessions.Add(session);
             //Update used resources extra call
             UsedCapacity += call.Service.ComputeRequiredCapacity();
+
+            Log.Information($"---- Session @{session.SessionId} Admission Successfull");
         }
 
         public bool CanAccommodateCall(ICall call)
@@ -115,7 +120,17 @@ namespace VerticalHandoverPrediction.Network
             if(!supported) return false;
              /* If supported check if the is enough capacity to accommodate session with new call */
             var requiredBbu = UsedCapacity + call.Service.ComputeRequiredCapacity();
-            return requiredBbu <= Capacity;
+            return requiredBbu <= AvailableCapacity(); 
+        }
+
+        public bool CanAccommodateServices(List<Service> services)
+        {
+            var requiredBbu = 0;
+            foreach (var service in services)
+            {
+                requiredBbu += service.ComputeRequiredCapacity();
+            }
+            return requiredBbu <= AvailableCapacity();
         }
     }
 }

@@ -15,6 +15,8 @@ namespace VerticalHandoverPrediction.Network
         public IList<MobileTerminal> MobileTerminals { get; private set; }
         public int VerticalHandovers { get; set; }
         public int BlockedCalls { get; set; }
+        public int FailedPredictions {get; set; }
+        public int SuccessfulPredictions { get; set; }
 
         private HetNet()
         {
