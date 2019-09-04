@@ -57,12 +57,14 @@ namespace VerticalHandoverPrediction
 
             mt.Dump();
 
-            var call= Call.StartCall(mt.MobileTerminalId, Service.Voice);
-            Call.StartCall(mt.MobileTerminalId, Service.Video);
-            Call.StartCall(mt.MobileTerminalId, Service.Data);
+            var call1 = Call.StartCall(mt.MobileTerminalId, Service.Voice);
+            var call2 = Call.StartCall(mt.MobileTerminalId, Service.Video);
+            var call3 = Call.StartCall(mt.MobileTerminalId, Service.Data);
             
             
-            mt.TerminateCall(call.CallId);
+            mt.TerminateCall(call1.CallId);
+            mt.TerminateCall(call3.CallId);
+            mt.TerminateCall(call2.CallId);
 
             //Consider keeping a list of calls made by the mobile terminal
             

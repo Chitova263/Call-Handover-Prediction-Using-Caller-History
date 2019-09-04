@@ -141,6 +141,7 @@ namespace VerticalHandoverPrediction.Mobile
             if (state == MobileTerminalState.Idle)
             {
                 this.TerminateSession();
+                return;
             }
 
             //Set the new Mobile Terminal State
