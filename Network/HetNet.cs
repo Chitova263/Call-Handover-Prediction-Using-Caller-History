@@ -21,9 +21,9 @@ namespace VerticalHandoverPrediction.Network
         private HetNet()
         {
             HetNetId = Guid.NewGuid();
-            //All the rats in the network
+           
             Rats = new List<Rat>();
-            //All the mobile terminals in the network
+           
             MobileTerminals = new List<MobileTerminal>();
         }
 
