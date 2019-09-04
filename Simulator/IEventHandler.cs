@@ -2,7 +2,9 @@ namespace VerticalHandoverPrediction.Simulator
 {
     public interface IEventHandler
     {
-        void DispatchEvent(IEvent @event);
+        //Purpose is to dispatch events waiting on the events priority queue or delay priority queue
+        void DispatchEvent(IEvent @event); 
+        void ScheduleEvent(IEvent @event);
     }
 }
 
