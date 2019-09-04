@@ -10,6 +10,5 @@ namespace VerticalHandoverPrediction.CallSession
         Service Service { get; }
 
         void SetSessionId(Guid sessionId);
-        void TerminateCall();
     }
 }

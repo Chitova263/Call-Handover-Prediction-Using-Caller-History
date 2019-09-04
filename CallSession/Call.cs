@@ -1,5 +1,4 @@
 using System;
-using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 
 namespace VerticalHandoverPrediction.CallSession
@@ -24,8 +23,8 @@ namespace VerticalHandoverPrediction.CallSession
             var call = new Call(mobileTerminalId, service);
 
             //Perfom CAC Algorithm on call object
-            
-            
+
+
             CAC.StartCACAlgorithm().AdmitCall(call);
 
             //if call is blocked return null object
@@ -35,11 +34,6 @@ namespace VerticalHandoverPrediction.CallSession
         public void SetSessionId(Guid sessionId)
         {
             SessionId = sessionId;
-        }
-
-        public void TerminateCall()
-        {
-
         }
     }
 }
