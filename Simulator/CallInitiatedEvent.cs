@@ -4,8 +4,13 @@ namespace VerticalHandoverPrediction.Simulator
 {
     public class CallInitiatedEvent : IEvent
     {
-        public Guid EventId => throw new NotImplementedException();
+        public Guid EventId { get; }
+        public DateTime Time { get; }
 
-        public DateTime Time => throw new NotImplementedException();
+        public CallInitiatedEvent(DateTime time)
+        {
+            EventId = Guid.NewGuid();
+            Time = time;
+        }
     }
 }

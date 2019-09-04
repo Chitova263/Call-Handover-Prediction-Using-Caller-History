@@ -1,12 +1,11 @@
 using System;
-using VerticalHandoverPrediction.CallSession;
 
 namespace VerticalHandoverPrediction.Simulator
 {
     public interface IEvent
     {
         public Guid EventId { get; }  
-        public DateTime Time { get; } //obtained from the call object injected via constructor
+        public DateTime Time { get; } 
     }
 }
 
