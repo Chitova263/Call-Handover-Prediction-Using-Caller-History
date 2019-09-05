@@ -39,6 +39,18 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                     .SelectMany(x => x.OngoingSessions)
                     .FindSessionWithId(mobileTerminal.SessionId);
                 
+                //--------------------------------------------------------------------
+                //Discard Call if there is already an active call of the type on mobile
+                var services = currentSession.ActiveCalls
+                    .Select(x => x.Service)
+                    .ToList();
+
+                if(services.Contains(call.Service)) return;
+                //---------------------------------------------------------------------
+
+                //call generation successful
+                HetNet._HetNet.CallsGenerated++;
+
                 currentRat = HetNet._HetNet.Rats
                     .FirstOrDefault(x => x.RatId == currentSession.RatId);
                 
@@ -59,12 +71,15 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             //new call, no ongoing session
             else
             {
+                //Update Calls Generated
+                HetNet._HetNet.CallsGenerated++;
+
                 //NonPredictiveAlgorithm(call, mobileTerminal);
                 PredictiveAlgorithm(call, mobileTerminal);
             }
         }
 
-        private static void NonPredictiveAlgorithm(ICall call, MobileTerminal mobileTerminal)
+        private static void NonPredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
         {
             //Non Predictive algorithm : => Swap this with predictive code
             var candidateRats = HetNet._HetNet.Rats
@@ -139,7 +154,7 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             destinationRat.AdmitIncomingCallToOngoingSession(call, currentSession, mobileTerminal);
         }
 
-        public void PredictiveAlgorithm(ICall call, MobileTerminal mobileTerminal)
+        public void PredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
         {
             //obtain call history from mobile termina
             var callHistory = mobileTerminal.CallHistoryLogs
@@ -198,18 +213,26 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                 {
                     //Start new session
                     rat.AdmitIncomingCallToNewSession(call, mobileTerminal);
-                    HetNet._HetNet.SuccessfulPredictions++;
-
-                    Log.Information($"----- VHO Prediction Successful Rat:  @{rat.RatId}, Total Successful Predictions : @{HetNet._HetNet.SuccessfulPredictions} ");
-
+                    
+                    //If Accommodated via a prediction
+                    if(callHistory.Count() != 0) {
+                        HetNet._HetNet.SuccessfulPredictions++;
+                        Log.Information($"----- VHO Prediction Successful Rat:  @{rat.RatId}, Total Successful Predictions : @{HetNet._HetNet.SuccessfulPredictions} ");
+                    }
+                      
                     break;
                 }
                 else 
                 {
-                    //Before dropping call attempt to admit call using the normal non predictive scheme
-                    HetNet._HetNet.FailedPredictions++;
-                    Log.Information($"---- VHO Prediction Failled, Total Failed Predictions : @{HetNet._HetNet.FailedPredictions} ");
-                    /* --------Missing Case ------ */
+                    //If prediction fails
+                    if(callHistory.Count() != 0) {
+                        HetNet._HetNet.FailedPredictions++;
+                        Log.Information($"---- VHO Prediction Failled, Total Failed Predictions : @{HetNet._HetNet.FailedPredictions} ");
+                    }
+
+                    //Try accommodating call using non predictive scheme
+                    NonPredictiveAlgorithm(call, mobileTerminal);
+                   
                     //No RAT can accommodate the incoming call so drop call
                     HetNet._HetNet.BlockedCalls++;
                     Log.Information($"---- Incoming Call Blocked, Total Calls Blocked : @{HetNet._HetNet.BlockedCalls} ");

@@ -13,11 +13,13 @@ namespace VerticalHandoverPrediction.Network
         IList<Service> Services { get; set; }
         IList<ISession> OngoingSessions { get; set; }
 
-        int AvailableCapacity();
-        void RemoveSessionFromRat(ISession currentSession);
-        void TransferSessionToRat(ISession currentSession);
         void AdmitIncomingCallToNewSession(ICall call, IMobileTerminal mobileTerminal);
         void AdmitIncomingCallToOngoingSession(ICall call, ISession session, IMobileTerminal mobileTerminal);
+        int AvailableCapacity();
         bool CanAccommodateCall(ICall call);
+        bool CanAccommodateServices(List<Service> services);
+        void RemoveSessionFromRat(ISession session);
+        void SetUsedCapacity(int bbu);
+        void TransferSessionToRat(ISession currentSession);
     }
 }

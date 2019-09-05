@@ -8,6 +8,7 @@ using VerticalHandoverPrediction.Mobile;
 
 namespace VerticalHandoverPrediction.Network
 {
+
     public class Rat : IRat
     {
         public Guid RatId { get; private set; }
@@ -45,7 +46,7 @@ namespace VerticalHandoverPrediction.Network
             var services = session.ActiveCalls
                 .Select(x => x.Service)
                 .ToList();
-            
+
             foreach (var service in services)
             {
                 UsedCapacity -= service.ComputeRequiredCapacity();
@@ -117,10 +118,10 @@ namespace VerticalHandoverPrediction.Network
         {
             //Can rat support the incoming call service
             var supported = Services.Contains(call.Service);
-            if(!supported) return false;
-             /* If supported check if the is enough capacity to accommodate session with new call */
+            if (!supported) return false;
+            /* If supported check if the is enough capacity to accommodate session with new call */
             var requiredBbu = UsedCapacity + call.Service.ComputeRequiredCapacity();
-            return requiredBbu <= AvailableCapacity(); 
+            return requiredBbu <= AvailableCapacity();
         }
 
         public bool CanAccommodateServices(List<Service> services)
