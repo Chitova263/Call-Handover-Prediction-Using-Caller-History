@@ -5,6 +5,7 @@ using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction
 {
+
     class Program
     {
         static void Main(string[] args)
@@ -31,5 +32,7 @@ namespace VerticalHandoverPrediction
 
             HetNet._HetNet.Dump();
         }
+
+
     }
 }

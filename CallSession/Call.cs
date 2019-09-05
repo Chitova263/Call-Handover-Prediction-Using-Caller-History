@@ -1,5 +1,8 @@
+using MediatR;
 using System;
 using VerticalHandoverPrediction.CallAdmissionControl;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace VerticalHandoverPrediction.CallSession
 {
@@ -21,9 +24,8 @@ namespace VerticalHandoverPrediction.CallSession
         public static Call StartCall(Guid mobileTerminalId, Service service)
         {
             var call = new Call(mobileTerminalId, service);
-
+           
             //Perfom CAC Algorithm on call object
-
 
             CAC.StartCACAlgorithm().AdmitCall(call);
 
