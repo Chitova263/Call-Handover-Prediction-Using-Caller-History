@@ -6,6 +6,10 @@ using static MoreLinq.Extensions.StartsWithExtension;
 using System.Collections.Generic;
 using System;
 using Serilog;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
+using MediatR;
+using VerticalHandoverPrediction.Simulator;
 
 //Converted to a singleton
 namespace VerticalHandoverPrediction.CallAdmissionControl
@@ -59,8 +63,14 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                 {
                     //Accommodate incoming call to the currentSession
                     currentRat.AdmitIncomingCallToOngoingSession(call,currentSession,mobileTerminal);
+                    
                     //Call Admission Successful End CAC
-                    return;
+                    //Publish event
+                    var mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
+                    var @event = new CallStartedEvent(DateTime.Now.AddMinutes(1), call.CallId, call.MobileTerminalId, call.SessionId);
+                    mediator.Publish(@event).Wait();
+
+                    return; //return true here
                 }
                 //If current Rat cannot accomodate the call we need to handover the session to another RAT
                 else
@@ -77,6 +87,7 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                 //NonPredictiveAlgorithm(call, mobileTerminal);
                 PredictiveAlgorithm(call, mobileTerminal);
             }
+            
         }
 
         private static void NonPredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
@@ -136,12 +147,14 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                     InitiateHandover(call, sourceRat, destinationRat, currentSession, mobileTerminal);
                     //Handover is successfull
                     HetNet._HetNet.VerticalHandovers++;
-                    return;
+
+                    
+                    return;  //return true and publish event to queue
                 }
             }
             //If you reach here block the incoming call
             HetNet._HetNet.BlockedCalls++;
-            return;
+            return; //return false dont publish to queue 
         }
 
         private void InitiateHandover(ICall call, IRat sourceRat, IRat destinationRat, ISession currentSession, IMobileTerminal mobileTerminal)
@@ -241,5 +254,3 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
         }
     }
 }
-
-//Look at success
