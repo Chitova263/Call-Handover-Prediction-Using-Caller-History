@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Medallion.Collections;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ using VerticalHandoverPrediction.Network;
 
 namespace VerticalHandoverPrediction.Simulator
 {
-    public class EventQueueComparer : IComparer<IEvent>
+    public class DateTimeComparer : IComparer<IEvent>
     {
         public int Compare(IEvent x, IEvent y)
         {
@@ -30,7 +31,7 @@ namespace VerticalHandoverPrediction.Simulator
         public PriorityQueue<IEvent> EventQueue { get; set; }
         private NetworkSimulator()
         {
-            EventQueue = new PriorityQueue<IEvent>(new EventQueueComparer());
+            EventQueue = new PriorityQueue<IEvent>(new DateTimeComparer());
         }
 
         public static NetworkSimulator _NetworkSimulator
@@ -60,16 +61,19 @@ namespace VerticalHandoverPrediction.Simulator
 
                 Log.Information($"---- Publishing event name: @{nameof(callStartedEvent)}");
 
-                _mediator.Publish(callStartedEvent);
+                _mediator.Publish(callStartedEvent).Wait();
                 
                 var callEndedEvent = new CallEndedEvent(call.CallId, call.MobileTerminalId, DateTime.Now.AddMinutes(10));
                 
                 Log.Information($"---- Publishing event name: @{nameof(callEndedEvent)}");
                 
-                _mediator.Publish(callEndedEvent);
+                _mediator.Publish(callEndedEvent).Wait();
             }
 
-            //Start Serving the Queue
+            while (EventQueue.Any())
+            {
+                System.Console.WriteLine(EventQueue.Dequeue().Time);
+            }
 
         }
     }
