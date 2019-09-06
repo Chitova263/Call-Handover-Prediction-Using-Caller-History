@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Mobile;
 
@@ -67,7 +69,7 @@ namespace VerticalHandoverPrediction.Network
 
         public void GenerateUsers(int users)
         {
-            if(users <= 0) throw new VerticalHandoverPredictionException();
+            if (users <= 0) throw new VerticalHandoverPredictionException();
 
             for (int i = 0; i < users; i++)
             {
@@ -77,27 +79,77 @@ namespace VerticalHandoverPrediction.Network
 
         public void GenerateRats()
         {
-           var rats = new List<Rat>
+            var rats = new List<Rat>
             {
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice
-                }, 10),
+                }, 100),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Data
-                }, 10),
+                }, 100),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 10),
+                }, 100),
                 Rat.CreateRat(new List<Service>
                 {
-                    Service.Video, Service.Voice, Service.Data
-                }, 10),
+                    Service.Voice, Service.Video, Service.Data
+                }, 100),
             };
-            
+
             AddRats(rats);
+        }
+
+        public void HandoverSessionToNewRat(ICall call, ISession session, IRat srcRat, IRat destRat, IMobileTerminal mobileTerminal)
+        {
+            if (call is null)
+            {
+                throw new ArgumentNullException(nameof(call));
+            }
+
+            if (session is null)
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
+
+            if (srcRat is null)
+            {
+                throw new ArgumentNullException(nameof(srcRat));
+            }
+
+            if (destRat is null)
+            {
+                throw new ArgumentNullException(nameof(destRat));
+            }
+
+            if (mobileTerminal is null)
+            {
+                throw new ArgumentNullException(nameof(mobileTerminal));
+            }
+
+            srcRat.RemoveSession(session);
+
+            var services = session.ActiveCalls
+                .Select(x => x.Service);
+
+            var networkResources = 0;
+
+            foreach (var service in services)
+            {
+                networkResources += service.ComputeRequiredCapacity();
+            }
+
+            srcRat.SetUsedResources(srcRat.UsedResources - networkResources);
+
+            session.SetRatId(destRat.RatId);
+
+            destRat.SetUsedResources(destRat.UsedResources + networkResources);
+
+            destRat.AddSession(session);
+
+            destRat.AdmitIncomingCallToOngoingSession(call, session, mobileTerminal);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace VerticalHandoverPrediction.Mobile
 {
     public static class MobileTerminalExtensions
     {
-        public static MobileTerminalState UpdateStateExtension(this MobileTerminal mt, Service service)
+        public static MobileTerminalState UpdateStateExtension(this IMobileTerminal mt, Service service)
         {
             switch (mt.State)
             {

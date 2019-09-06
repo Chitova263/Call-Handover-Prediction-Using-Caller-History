@@ -9,12 +9,11 @@ namespace VerticalHandoverPrediction.Events
     {
         public Task Handle(CallStartedEvent notification, CancellationToken cancellationToken)
         {
-            //Update the Priority Queue
             Simulator.NetworkSimulator._NetworkSimulator
                 .EventQueue
                 .Enqueue(notification);
                 
-            return Task.FromResult<int>(1);
+            return Task.FromResult<Unit>(Unit.Value);
         }
     }
 }

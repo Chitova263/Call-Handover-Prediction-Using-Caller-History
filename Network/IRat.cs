@@ -9,17 +9,18 @@ namespace VerticalHandoverPrediction.Network
     {
         Guid RatId { get; }
         int Capacity { get; }
-        int UsedCapacity { get; }
+        int UsedResources { get; }
+        IReadOnlyCollection<ISession> OngoingSessions { get; }
         IList<Service> Services { get; set; }
-        IList<ISession> OngoingSessions { get; set; }
 
+        void AddSession(ISession session);
         void AdmitIncomingCallToNewSession(ICall call, IMobileTerminal mobileTerminal);
         void AdmitIncomingCallToOngoingSession(ICall call, ISession session, IMobileTerminal mobileTerminal);
         int AvailableCapacity();
         bool CanAccommodateCall(ICall call);
         bool CanAccommodateServices(List<Service> services);
-        void RemoveSessionFromRat(ISession session);
-        void SetUsedCapacity(int bbu);
-        void TransferSessionToRat(ISession currentSession);
+        void RemoveSession(ISession session);
+        void SetRatId(Guid id);
+        void SetUsedResources(int bbu);
     }
 }

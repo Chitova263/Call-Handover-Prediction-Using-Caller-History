@@ -6,6 +6,7 @@ using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
+using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Mobile
 {
@@ -49,77 +50,23 @@ namespace VerticalHandoverPrediction.Mobile
             return this.UpdateStateExtension(service);
         }
 
-        public void TerminateSession()
-        {
-
-            //Find the current session and obtain the RatId
-            var session = HetNet._HetNet.Rats
-                .SelectMany(x => x.OngoingSessions)
-                .FindSessionWithId(SessionId);
-
-            //Find the Rat handling session
-            var rat = HetNet._HetNet.Rats
-                .FirstOrDefault(x => x.RatId == session.RatId);
-
-            Log.Information($"---- Session Termination Started @{session.SessionId}");
-            //Free up the resources used by session
-            var services = session.ActiveCalls
-                .Select(x => x.Service);
-
-            //set the end time of the session
-            session.SetEndTime(DateTime.Now);
-
-            var bbuToRelease = 0;
-            foreach (var service in services)
-            {
-                bbuToRelease += service.ComputeRequiredCapacity();
-            }
-            rat.SetUsedCapacity(rat.UsedCapacity - bbuToRelease);
-
-            //Remove Session from list of ongoing sessions on rat
-            rat.OngoingSessions.Remove(session);
-
-            //update mobile terminal
-            SetSessionId(Guid.Empty);
-            var state = SetState(MobileTerminalState.Idle);
-
-            //Update session sequence
-            session.SessionSequence.Add(state);
-
-            //save session to callLogHistory : Consider changing this to a hashmap
-            var callHistory = new CallLog
-            {
-                SessionId = session.SessionId,
-                Start = session.Start,
-                RatId = session.RatId,
-                End = session.End,
-                SessionSequence = session.SessionSequence
-                //No need to save the list of active calls on the history data store
-            };
-
-            Log.Information($"---- Saving Session @{session.SessionId}");
-            CallHistoryLogs.Add(callHistory);
-
-            Log.Information($"---- Terminating Session @{session.SessionId}");
-
-            //Set refference to session object to null
-            session = null;
-
-            Log.Information($"----Session Termination Successful");
-        }
-
         public void TerminateCall(CallEndedEvent evt)
         {
-            Log.Information($"Terminating Call id: @{evt.CallId}; terminal: @{MobileTerminalId}; session: @{this.SessionId}");
-
             //Find the current session and obtain the RatId
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
                 .FindSessionWithId(SessionId);
 
-            if (session is null) return; //Call never existed
+            System.Console.WriteLine("------------ Session ------------");
+            session.Dump();
 
-            //Find the Rat handling session
+            //Call never existed
+            if (session is null)
+            {
+                evt = null;
+                return; 
+            }
+
             var rat = HetNet._HetNet.Rats
                 .FirstOrDefault(x => x.RatId == session.RatId);
 
@@ -127,35 +74,60 @@ namespace VerticalHandoverPrediction.Mobile
             var call = session.ActiveCalls
                 .FirstOrDefault(x => x.CallId == evt.CallId);
 
-            if (call is null) return; //There is an existing session but call never existed
+            System.Console.WriteLine("------------ Call ------------");
+            session.Dump();
 
-            //Remove call from the list of Active calls
+            //There is an existing session but call never existed
+            if (call is null)
+            {
+                evt = null;
+                return; 
+            } 
+
+            Log.Information($"Terminating call service: @{call.Service}; session: @{this.SessionId}");
+            
             session.ActiveCalls.Remove(call);
 
-            //Free up resources in Rat used by the service of call
-            rat.SetUsedCapacity(
-                rat.UsedCapacity - call.Service.ComputeRequiredCapacity()
-                );
-
-            //Update the mobile state based on the remaining active calls
+            //Must be called after removing the call from active calls
             var state = GetStateFromCurrentSession(session.ActiveCalls);
 
-            //If state is idle terminate session
-            if (state == MobileTerminalState.Idle)
+            SetState(state);
+
+            rat.SetUsedResources(rat.UsedResources - call.Service.ComputeRequiredCapacity());
+
+            if(state == MobileTerminalState.Idle)
             {
-                this.TerminateSession();
+                //Remove the session from the Rat 
+                rat.RemoveSession(session);
+                session.SetEndTime(evt.Time);
+                session.SessionSequence.Add(State);
+                this.SetSessionId(Guid.Empty);
+                var callHistory = new CallLog
+                {
+                    SessionId = session.SessionId,
+                    Start = session.Start,
+                    RatId = session.RatId,
+                    End = session.End,
+                    SessionSequence = session.SessionSequence
+                };
+
+                Log.Information($"---- Saving history");
+
+                CallHistoryLogs.Add(callHistory);
+
+                Log.Information($"---- Session ended @{session.SessionId}");
+
+                session = null;
+
                 return;
             }
 
-            //Set the new Mobile Terminal State
-            this.SetState(state);
-
-            //Update the session sequence
             session.SessionSequence.Add(state);
 
-            Log.Information($"Call Terminated service: @{call.Service}; session: @{call.SessionId}; rat: @{session.RatId}");
+            Log.Information($"Call terminated service: @{call.Service}; session: @{this.SessionId}");
 
-            //Delete call
+            session.Dump();
+
             call = null;
         }
 

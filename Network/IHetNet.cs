@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Mobile;
 
 namespace VerticalHandoverPrediction.Network
@@ -17,8 +18,9 @@ namespace VerticalHandoverPrediction.Network
 
         void AddMobileTerminals(IEnumerable<IMobileTerminal> mobileTerminals);
         void AddRats(IEnumerable<IRat> rats);
-        void GenerateUsers(int users);
         void GenerateRats();
+        void GenerateUsers(int users);
+        void HandoverSessionToNewRat(ICall call, ISession session, IRat srcRat, IRat destRat, IMobileTerminal mobileTerminal);
     }
 }
 
