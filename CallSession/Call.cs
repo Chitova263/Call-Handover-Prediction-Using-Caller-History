@@ -3,6 +3,7 @@ using System;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
+using VerticalHandoverPrediction.Simulator;
 
 namespace VerticalHandoverPrediction.CallSession
 {
@@ -25,12 +26,22 @@ namespace VerticalHandoverPrediction.CallSession
         {
             var call = new Call(mobileTerminalId, service);
            
-            //Perfom CAC Algorithm on call object
+            var isCallAdmitted = CAC.StartCACAlgorithm().AdmitCall(call);
 
-            CAC.StartCACAlgorithm().AdmitCall(call);
-
-            //if call is blocked return null object
-            return call;
+            //Publish event
+            if(isCallAdmitted)
+            {
+                var mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
+                var @event = new CallStartedEvent(DateTime.Now.AddMinutes(1),
+                                                  call.CallId,
+                                                  call.MobileTerminalId,
+                                                  call.SessionId);
+                mediator.Publish(@event).Wait();
+                return call;
+            }
+            
+            //Call is blocked
+            return null;
         }
 
         public void SetSessionId(Guid sessionId)

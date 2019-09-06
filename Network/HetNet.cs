@@ -82,19 +82,19 @@ namespace VerticalHandoverPrediction.Network
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice
-                }, 50),
+                }, 10),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Data
-                }, 50),
+                }, 10),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 50),
+                }, 10),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Video, Service.Voice, Service.Data
-                }, 50),
+                }, 10),
             };
             
             AddRats(rats);

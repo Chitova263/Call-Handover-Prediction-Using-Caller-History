@@ -1,9 +1,10 @@
 using VerticalHandoverPrediction.CallSession;
 
+//Converted to a singleton
 namespace VerticalHandoverPrediction.CallAdmissionControl
 {
     public interface ICAC
     {
-        void AdmitCall(ICall call);
+        bool AdmitCall(ICall call);
     }
 }

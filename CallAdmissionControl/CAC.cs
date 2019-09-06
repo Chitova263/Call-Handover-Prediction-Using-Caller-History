@@ -6,16 +6,11 @@ using static MoreLinq.Extensions.StartsWithExtension;
 using System.Collections.Generic;
 using System;
 using Serilog;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
-using MediatR;
-using VerticalHandoverPrediction.Simulator;
 
 //Converted to a singleton
 namespace VerticalHandoverPrediction.CallAdmissionControl
 {
-
-    public class CAC : ICAC
+    public class CAC: ICAC
     {
         private CAC()
         {
@@ -27,7 +22,8 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             return new CAC();
         }
         
-        public void AdmitCall(ICall call)
+        //returns true if call is successfully generated
+        public bool AdmitCall(ICall call)
         {
             //Find the mobile terminal involved in call [From The HetNet]
             var mobileTerminal = HetNet._HetNet.MobileTerminals
@@ -49,7 +45,7 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                     .Select(x => x.Service)
                     .ToList();
 
-                if(services.Contains(call.Service)) return;
+                if(services.Contains(call.Service)) return false;
                 //---------------------------------------------------------------------
 
                 //call generation successful
@@ -65,32 +61,27 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                     currentRat.AdmitIncomingCallToOngoingSession(call,currentSession,mobileTerminal);
                     
                     //Call Admission Successful End CAC
-                    //Publish event
-                    var mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
-                    var @event = new CallStartedEvent(DateTime.Now.AddMinutes(1), call.CallId, call.MobileTerminalId, call.SessionId);
-                    mediator.Publish(@event).Wait();
-
-                    return; //return true here
+                    
+                    return true;
                 }
                 //If current Rat cannot accomodate the call we need to handover the session to another RAT
                 else
                 {
-                    StartHandoverProcess(call, currentSession, currentRat, mobileTerminal);
+                    var isHandoverSuccessful = StartHandoverProcess(call, currentSession, currentRat, mobileTerminal);
+                    return isHandoverSuccessful;
                 }
             } 
             //new call, no ongoing session
-            else
-            {
-                //Update Calls Generated
-                HetNet._HetNet.CallsGenerated++;
+          
+            //Update Calls Generated
+            HetNet._HetNet.CallsGenerated++;
 
-                //NonPredictiveAlgorithm(call, mobileTerminal);
-                PredictiveAlgorithm(call, mobileTerminal);
-            }
-            
+            //NonPredictiveAlgorithm(call, mobileTerminal);
+            var isCallAdmitted = PredictiveAlgorithm(call, mobileTerminal);
+            return isCallAdmitted; 
         }
 
-        private static void NonPredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
+        private static bool NonPredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
         {
             //Non Predictive algorithm : => Swap this with predictive code
             var candidateRats = HetNet._HetNet.Rats
@@ -103,17 +94,16 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                 if (rat.CanAccommodateCall(call))
                 {
                     rat.AdmitIncomingCallToNewSession(call, mobileTerminal);
-                    break;
-                }
-                else
-                {
-                    //All the RATs cant accommodate new call
-                    HetNet._HetNet.BlockedCalls++;
+                    return true;
                 }
             }
+            //All the RATs cant accommodate new call
+            HetNet._HetNet.BlockedCalls++;
+            return false;
         }
 
-        public void StartHandoverProcess(ICall call, ISession currentSession, IRat sourceRat, IMobileTerminal mobileTerminal)
+        //returns true if handover is successful, false if call is blocked
+        public bool StartHandoverProcess(ICall call, ISession currentSession, IRat sourceRat, IMobileTerminal mobileTerminal)
         {
             //Find services in ongoing session
             var services = currentSession.ActiveCalls
@@ -148,13 +138,15 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                     //Handover is successfull
                     HetNet._HetNet.VerticalHandovers++;
 
-                    
-                    return;  //return true and publish event to queue
+                    //Add the call to the queue
+                    return true; 
                 }
             }
             //If you reach here block the incoming call
             HetNet._HetNet.BlockedCalls++;
-            return; //return false dont publish to queue 
+            
+            //No need to add terminate call to the queue
+            return false;  
         }
 
         private void InitiateHandover(ICall call, IRat sourceRat, IRat destinationRat, ISession currentSession, IMobileTerminal mobileTerminal)
@@ -167,7 +159,7 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             destinationRat.AdmitIncomingCallToOngoingSession(call, currentSession, mobileTerminal);
         }
 
-        public void PredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
+        public bool PredictiveAlgorithm(ICall call, IMobileTerminal mobileTerminal)
         {
             //obtain call history from mobile termina
             var callHistory = mobileTerminal.CallHistoryLogs
@@ -195,7 +187,6 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                         prediction = grp;
                         max = prediction.Count();
                     }
-                // Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
                 }
 
                 foreach( var grp in group )
@@ -233,24 +224,24 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
                         Log.Information($"----- VHO Prediction Successful Rat:  @{rat.RatId}, Total Successful Predictions : @{HetNet._HetNet.SuccessfulPredictions} ");
                     }
                       
-                    break;
-                }
-                else 
-                {
-                    //If prediction fails
-                    if(callHistory.Count() != 0) {
-                        HetNet._HetNet.FailedPredictions++;
-                        Log.Information($"---- VHO Prediction Failled, Total Failed Predictions : @{HetNet._HetNet.FailedPredictions} ");
-                    }
-
-                    //Try accommodating call using non predictive scheme
-                    NonPredictiveAlgorithm(call, mobileTerminal);
-                   
-                    //No RAT can accommodate the incoming call so drop call
-                    HetNet._HetNet.BlockedCalls++;
-                    Log.Information($"---- Incoming Call Blocked, Total Calls Blocked : @{HetNet._HetNet.BlockedCalls} ");
+                    return true;
                 }
             }
+              
+            //If prediction fails
+            if(callHistory.Count() != 0) {
+                HetNet._HetNet.FailedPredictions++;
+                Log.Information($"---- VHO Prediction Failled, Total Failed Predictions : @{HetNet._HetNet.FailedPredictions} ");
+            }
+
+            //Try accommodating call using non predictive scheme
+            var isCallAdmitted = NonPredictiveAlgorithm(call, mobileTerminal);
+            if(isCallAdmitted) return true;
+            
+            //No RAT can accommodate the incoming call so drop call
+            HetNet._HetNet.BlockedCalls++;
+            Log.Information($"---- Incoming Call Blocked, Total Calls Blocked : @{HetNet._HetNet.BlockedCalls} ");
+            return false;  
         }
     }
 }

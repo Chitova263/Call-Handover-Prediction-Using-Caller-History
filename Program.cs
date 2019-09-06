@@ -20,7 +20,7 @@ namespace VerticalHandoverPrediction
             HetNet._HetNet.GenerateRats();
 
             //Generate users
-            HetNet._HetNet.GenerateUsers(12);
+            HetNet._HetNet.GenerateUsers(10);
 
             //Generate Calls
             //Use Simulator Instance to generate calls
@@ -28,7 +28,7 @@ namespace VerticalHandoverPrediction
                 check list of active calls => if call service already exists just reject or discard the call object
             */
             
-            NetworkSimulator._NetworkSimulator.Run(100);
+            NetworkSimulator._NetworkSimulator.Run(30);
 
             HetNet._HetNet.Dump();
         }

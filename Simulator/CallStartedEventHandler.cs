@@ -9,7 +9,11 @@ namespace VerticalHandoverPrediction.Simulator
         public Task Handle(CallStartedEvent notification, CancellationToken cancellationToken)
         {
             //Update the Priority Queue
-            throw new System.NotImplementedException();
+            Simulator.NetworkSimulator._NetworkSimulator
+                .EventQueue
+                .Enqueue(notification);
+                
+            return Task.FromResult<int>(1);
         }
     }
 }
