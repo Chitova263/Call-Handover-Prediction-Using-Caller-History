@@ -1,31 +1,32 @@
-using System.Collections;
 using System.Collections.Generic;
 using Medallion.Collections;
 using VerticalHandoverPrediction.CallSession;
+using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
 
 namespace VerticalHandoverPrediction.Simulator
 {
-    public class EventQueueComparer : IComparer<CallStartedEvent>
+    public class EventQueueComparer : IComparer<IEvent>
     {
-        public int Compare(CallStartedEvent x, CallStartedEvent y)
+        public int Compare(IEvent x, IEvent y)
         {
-            if (x.EndTime > y.EndTime)
+            if (x.Time > y.Time)
                 return 1;
-            if (x.EndTime < y.EndTime)
+            if (x.Time < y.Time)
                 return -1;
             else
                 return 0;
         }
     }
+
     public sealed class NetworkSimulator 
     {
         private static NetworkSimulator instance = null;
         private static readonly object padlock = new object();
-        public PriorityQueue<CallStartedEvent> EventQueue { get; set; }
+        public PriorityQueue<IEvent> EventQueue { get; set; }
         private NetworkSimulator()
         {
-            EventQueue = new PriorityQueue<CallStartedEvent>(new EventQueueComparer());
+            EventQueue = new PriorityQueue<IEvent>(new EventQueueComparer());
         }
 
         public static NetworkSimulator _NetworkSimulator

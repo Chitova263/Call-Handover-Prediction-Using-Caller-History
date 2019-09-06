@@ -1,14 +1,12 @@
 using MediatR;
 using System;
-using VerticalHandoverPrediction.CallAdmissionControl;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Tasks;
 using VerticalHandoverPrediction.Simulator;
 
 namespace VerticalHandoverPrediction.CallSession
 {
 
-    public class Call : ICall
+    public class Call : ICall, INotification
     {
         public Guid CallId { get; private set; }
         public Guid SessionId { get; private set; } //set after call is admitted
@@ -26,22 +24,18 @@ namespace VerticalHandoverPrediction.CallSession
         {
             var call = new Call(mobileTerminalId, service);
            
-            var isCallAdmitted = CAC.StartCACAlgorithm().AdmitCall(call);
+            //var isCallAdmitted = CAC.StartCACAlgorithm().AdmitCall(call);
 
             //Publish event
-            if(isCallAdmitted)
-            {
-                var mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
-                var @event = new CallStartedEvent(DateTime.Now.AddMinutes(1),
-                                                  call.CallId,
-                                                  call.MobileTerminalId,
-                                                  call.SessionId);
-                mediator.Publish(@event).Wait();
-                return call;
-            }
             
-            //Call is blocked
-            return null;
+            //var mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
+            //var @event = new CallStartedEvent(DateTime.Now.AddMinutes(1),
+                                                call.CallId,
+                                                call.MobileTerminalId,
+                                                call.SessionId);
+            //mediator.Publish(@event).Wait();
+            
+            return call;  
         }
 
         public void SetSessionId(Guid sessionId)

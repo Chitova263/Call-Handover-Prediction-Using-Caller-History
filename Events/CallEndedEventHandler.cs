@@ -2,11 +2,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 
-namespace VerticalHandoverPrediction.Simulator
+namespace VerticalHandoverPrediction.Events
 {
-    public class CallStartedEventHandler : INotificationHandler<CallStartedEvent>
+    public class CallEndedEventHandler : INotificationHandler<CallEndedEvent>
     {
-        public Task Handle(CallStartedEvent notification, CancellationToken cancellationToken)
+        public Task Handle(CallEndedEvent notification, CancellationToken cancellationToken)
         {
             //Update the Priority Queue
             Simulator.NetworkSimulator._NetworkSimulator
