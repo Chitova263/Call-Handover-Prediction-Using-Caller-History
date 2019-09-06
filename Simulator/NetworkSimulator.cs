@@ -1,5 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Medallion.Collections;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
@@ -46,12 +50,27 @@ namespace VerticalHandoverPrediction.Simulator
 
         public void Run(int n)
         {
+            var _mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
             var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
             //Run Simulation
             for (int i = 0; i < n; i++)
             {
-                Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
+                var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
+                var callStartedEvent = new CallStartedEvent(DateTime.Now, call);
+
+                Log.Information($"---- Publishing event name: @{nameof(callStartedEvent)}");
+
+                _mediator.Publish(callStartedEvent);
+                
+                var callEndedEvent = new CallEndedEvent(call.CallId, call.MobileTerminalId, DateTime.Now.AddMinutes(10));
+                
+                Log.Information($"---- Publishing event name: @{nameof(callEndedEvent)}");
+                
+                _mediator.Publish(callEndedEvent);
             }
+
+            //Start Serving the Queue
+
         }
     }
 }

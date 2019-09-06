@@ -30,9 +30,9 @@ namespace VerticalHandoverPrediction.CallSession
             
             //var mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
             //var @event = new CallStartedEvent(DateTime.Now.AddMinutes(1),
-                                                call.CallId,
-                                                call.MobileTerminalId,
-                                                call.SessionId);
+            //                                    call.CallId,
+            //                                    call.MobileTerminalId,
+            //                                    call.SessionId);
             //mediator.Publish(@event).Wait();
             
             return call;  

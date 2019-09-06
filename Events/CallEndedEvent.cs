@@ -10,11 +10,12 @@ namespace VerticalHandoverPrediction.Events
         public Guid MobileTerminalId { get;  }
         public DateTime Time { get;  }
 
-        public CallEndedEvent(Guid callId, Guid mobileTerminalId)
+        public CallEndedEvent(Guid callId, Guid mobileTerminalId, DateTime time)
         {
             EventId = Guid.NewGuid();
             CallId = callId;
             MobileTerminalId = mobileTerminalId;
+            Time = time;
         }
     }
 }
