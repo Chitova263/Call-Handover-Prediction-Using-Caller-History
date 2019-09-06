@@ -4,6 +4,7 @@ using System.Linq;
 using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
+using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
 
 namespace VerticalHandoverPrediction.Mobile
@@ -101,22 +102,22 @@ namespace VerticalHandoverPrediction.Mobile
 
             Log.Information($"---- Terminating Session @{session.SessionId}");
 
-
-
             //Set refference to session object to null
             session = null;
 
             Log.Information($"----Session Termination Successful");
         }
 
-        public void TerminateCall(Guid callId)
+        public void TerminateCall(CallEndedEvent evt)
         {
-            Log.Information($"Terminating call id: @{callId}; terminal: @{this.MobileTerminalId}; session: @{this.SessionId}");
+            Log.Information($"Terminating Call id: @{evt.CallId}; terminal: @{MobileTerminalId}; session: @{this.SessionId}");
 
             //Find the current session and obtain the RatId
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
                 .FindSessionWithId(SessionId);
+
+            if (session is null) return; //Call never existed
 
             //Find the Rat handling session
             var rat = HetNet._HetNet.Rats
@@ -124,7 +125,9 @@ namespace VerticalHandoverPrediction.Mobile
 
             //Find the call in the list of active calls
             var call = session.ActiveCalls
-                .FirstOrDefault(x => x.CallId == callId);
+                .FirstOrDefault(x => x.CallId == evt.CallId);
+
+            if (call is null) return; //There is an existing session but call never existed
 
             //Remove call from the list of Active calls
             session.ActiveCalls.Remove(call);
@@ -150,10 +153,10 @@ namespace VerticalHandoverPrediction.Mobile
             //Update the session sequence
             session.SessionSequence.Add(state);
 
+            Log.Information($"Call Terminated service: @{call.Service}; session: @{call.SessionId}; rat: @{session.RatId}");
+
             //Delete call
             call = null;
-
-            Log.Information($"Call Ended Successfully call id: @{callId}; terminal: @{this.MobileTerminalId}; session: @{this.SessionId}");
         }
 
         private MobileTerminalState GetStateFromCurrentSession(IList<ICall> activeCalls)

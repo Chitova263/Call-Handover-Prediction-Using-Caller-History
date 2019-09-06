@@ -20,7 +20,7 @@ namespace VerticalHandoverPrediction
             HetNet._HetNet.GenerateRats();
 
             //Generate users
-            HetNet._HetNet.GenerateUsers(10);
+            HetNet._HetNet.GenerateUsers(2);
             
             NetworkSimulator._NetworkSimulator.Run(5);
 

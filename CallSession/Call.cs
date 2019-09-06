@@ -6,7 +6,7 @@ namespace VerticalHandoverPrediction.CallSession
     public class Call : ICall
     {
         public Guid CallId { get; private set; }
-        public Guid SessionId { get; private set; } //set after call is admitted
+        public Guid SessionId { get; private set; } //set after call is admitted  ????
         public Guid MobileTerminalId { get; private set; }
         public Service Service { get; private set; }
 

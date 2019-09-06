@@ -5,6 +5,7 @@ using Medallion.Collections;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
@@ -51,30 +52,51 @@ namespace VerticalHandoverPrediction.Simulator
 
         public void Run(int n)
         {
+            Random rnd = new Random();
             var _mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
             var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
-            //Run Simulation
+           
             for (int i = 0; i < n; i++)
             {
                 var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
-                var callStartedEvent = new CallStartedEvent(DateTime.Now, call);
+                var callStartedEvent = new CallStartedEvent(DateTime.Now.AddMinutes(rnd.NextDouble() * 48), call);
 
-                Log.Information($"---- Publishing event name: @{nameof(callStartedEvent)}");
+                Log.Information($"---- Publishing event name: @{nameof(callStartedEvent)}; service: @{call.Service}; user: @{call.MobileTerminalId}");
 
                 _mediator.Publish(callStartedEvent).Wait();
                 
-                var callEndedEvent = new CallEndedEvent(call.CallId, call.MobileTerminalId, DateTime.Now.AddMinutes(10));
+                var callEndedEvent = new CallEndedEvent(call.CallId, call.MobileTerminalId, callStartedEvent.Time.AddMinutes(rnd.NextDouble() * 48));
                 
-                Log.Information($"---- Publishing event name: @{nameof(callEndedEvent)}");
+                Log.Information($"---- Publishing event name: @{nameof(callEndedEvent)}; service: @{call.Service}; user: @{call.MobileTerminalId}");
                 
                 _mediator.Publish(callEndedEvent).Wait();
             }
 
-            while (EventQueue.Any())
-            {
-                System.Console.WriteLine(EventQueue.Dequeue().Time);
-            }
+            Log.Information($"---- Serving Jobs In Queue");
 
+            ServeQueue();
+        }
+
+        private void ServeQueue()
+        {   
+            var cac = CAC.StartCACAlgorithm();
+            while(EventQueue.Any())
+            {
+                var @event = EventQueue.Dequeue();
+                if(@event.GetType() == typeof(CallStartedEvent))
+                {
+                    var evt = (CallStartedEvent)@event;
+                    var result = cac.AdmitCall(evt.Call);
+                }
+                else 
+                {
+                    var evt = (CallEndedEvent)@event;
+                    var mobileTerminal = HetNet._HetNet.MobileTerminals
+                        .FirstOrDefault(x => x.MobileTerminalId == evt.MobileTerminalId);
+                    mobileTerminal.TerminateCall(evt);
+                }
+                System.Console.WriteLine($"{@event.GetType()}   {@event.Time}");
+            }
         }
     }
 }
