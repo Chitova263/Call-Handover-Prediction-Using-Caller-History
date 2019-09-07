@@ -53,7 +53,7 @@ namespace VerticalHandoverPrediction.Simulator
         public void Run(int n)
         {
             Random rnd = new Random();
-            var _mediator = DIContainer._Container.Container.GetRequiredService<IMediator>();
+           
             var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
            
             for (int i = 0; i < n; i++)
@@ -63,19 +63,14 @@ namespace VerticalHandoverPrediction.Simulator
 
                 Log.Information($"---- Publishing event name: @{nameof(callStartedEvent)}; service: @{call.Service}; user: @{call.MobileTerminalId}");
 
-                _mediator.Publish(callStartedEvent);
-                //EventQueue.Enqueue(callStartedEvent);
+                EventQueue.Enqueue(callStartedEvent);
                 
                 var callEndedEvent = new CallEndedEvent(call.CallId, call.MobileTerminalId, callStartedEvent.Time.AddMinutes(rnd.NextDouble() * 100));
                 
                 Log.Information($"---- Publishing event name: @{nameof(callEndedEvent)}; service: @{call.Service}; user: @{call.MobileTerminalId}");
                 
-               _mediator.Publish(callEndedEvent);
-
-               //EventQueue.Enqueue(callEndedEvent);
+                EventQueue.Enqueue(callEndedEvent);
             }
-
-            Log.Information($"---- Serving Jobs In Queue");
 
             ServeQueue();
         }

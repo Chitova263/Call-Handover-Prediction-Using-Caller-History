@@ -3,7 +3,7 @@ using MediatR;
 
 namespace VerticalHandoverPrediction.Events
 {
-    public class CallEndedEvent: INotification, IEvent
+    public class CallEndedEvent: IEvent
     {
         public Guid EventId { get;  }
         public Guid CallId { get;  }

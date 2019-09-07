@@ -4,7 +4,7 @@ using VerticalHandoverPrediction.CallSession;
 
 namespace VerticalHandoverPrediction.Events
 {
-    public class CallStartedEvent : INotification, IEvent
+    public class CallStartedEvent : IEvent
     {
         public Guid EventId { get;  }
         public DateTime Time { get;  }
