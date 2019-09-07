@@ -2,12 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Medallion.Collections;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
-using Serilog;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Commands;
-using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
 
 namespace VerticalHandoverPrediction.Simulator
@@ -59,16 +55,20 @@ namespace VerticalHandoverPrediction.Simulator
             for (int i = 0; i < n; i++)
             {
                 var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
-                var callStartedEvent = new CallStartedEvent(DateTime.Now.AddMinutes(rnd.NextDouble() * 100), call);
-
-                Log.Information($"---- Publishing event name: @{nameof(callStartedEvent)}; service: @{call.Service}; user: @{call.MobileTerminalId}");
+                
+                var callStartedEvent = new CallStartedEvent(
+                    DateTime.Now.AddMinutes(rnd.NextDouble() * 100),
+                    call
+                );
 
                 EventQueue.Enqueue(callStartedEvent);
                 
-                var callEndedEvent = new CallEndedEvent(call.CallId, call.MobileTerminalId, callStartedEvent.Time.AddMinutes(rnd.NextDouble() * 100));
-                
-                Log.Information($"---- Publishing event name: @{nameof(callEndedEvent)}; service: @{call.Service}; user: @{call.MobileTerminalId}");
-                
+                var callEndedEvent = new CallEndedEvent(
+                    call.CallId,
+                    call.MobileTerminalId,
+                    callStartedEvent.Time.AddMinutes(rnd.NextDouble() * 100)
+                );
+
                 EventQueue.Enqueue(callEndedEvent);
             }
 
@@ -81,18 +81,30 @@ namespace VerticalHandoverPrediction.Simulator
             while(EventQueue.Any())
             {
                 var @event = EventQueue.Dequeue();
+                System.Console.WriteLine(@event.Time);
                 if(@event.GetType() == typeof(CallStartedEvent))
                 {
                     var evt = (CallStartedEvent)@event;
-                    cac.AdmitCall(evt.Call);
+                    //cac.AdmitCall(evt.Call);
                 }
                 else 
                 {
                     var evt = (CallEndedEvent)@event;
+
                     var mobileTerminal = HetNet._HetNet.MobileTerminals
                         .FirstOrDefault(x => x.MobileTerminalId == evt.MobileTerminalId);
-                
-                    mobileTerminal.TerminateCall(evt);
+                    
+                    //Find if call was considered
+                    var call = HetNet._HetNet.Rats
+                        .SelectMany(x => x.OngoingSessions)
+                        .SelectMany(x => x.ActiveCalls)
+                        .FirstOrDefault(x => x.CallId == evt.CallId);
+                    
+                    //if no session contains this call then it was never considered
+                    if(call is null) continue;
+                    
+                    //End the call
+                    mobileTerminal.EndCall(evt);
                 }
             }
         }

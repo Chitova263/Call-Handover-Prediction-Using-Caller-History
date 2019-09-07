@@ -1,6 +1,6 @@
 using System;
 
-namespace VerticalHandoverPrediction.Events
+namespace VerticalHandoverPrediction.Simulator
 {
     public interface IEvent
     {

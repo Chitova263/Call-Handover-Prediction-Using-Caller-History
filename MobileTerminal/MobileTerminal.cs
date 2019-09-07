@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Events;
 using VerticalHandoverPrediction.Network;
-using VerticalHandoverPrediction.Utils;
+using VerticalHandoverPrediction.Simulator;
 
 namespace VerticalHandoverPrediction.Mobile
 {
-
     public class MobileTerminal : IMobileTerminal
     {
         public Guid MobileTerminalId { get; private set; }
@@ -27,153 +24,91 @@ namespace VerticalHandoverPrediction.Mobile
             State = MobileTerminalState.Idle;
         }
 
-        public static MobileTerminal CreateMobileTerminal(Modality modality)
-        {
-            return new MobileTerminal(modality);
-        }
+        public static MobileTerminal CreateMobileTerminal(Modality modality) => new MobileTerminal(modality);
 
-        public MobileTerminalState ChangeStateTo(MobileTerminalState state)
-        {
-            State = state;
-            //Return the updated state
-            return State;
-        }
+        public void SetState(MobileTerminalState state) => State = state;
 
-        public void SetSessionId(Guid sessionId)
-        {
-            SessionId = sessionId;//set when we initiate new session
-        }
+        public void SetSessionId(Guid sessionId) => SessionId = sessionId;
 
-
-        public MobileTerminalState UpdateMobileTerminalState(Service service)
+        public void EndCall(CallEndedEvent evt)
         {
-            return this.UpdateStateExtension(service);
-        }
-
-        public void TerminateCall(CallEndedEvent evt)
-        {
-            //Find the current session and obtain the RatId
+            //Find the current session
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
-                .FindSessionWithId(SessionId);
-
-            System.Console.WriteLine("------------ Session ------------");
-            session.Dump();
-
-            //Call never existed
-            if (session is null)
-            {
-                evt = null;
-                return; 
-            }
+                .FirstOrDefault(x => x.SessionId == this.SessionId);
 
             var rat = HetNet._HetNet.Rats
                 .FirstOrDefault(x => x.RatId == session.RatId);
 
-            //Find the call in the list of active calls
-            var call = session.ActiveCalls
-                .FirstOrDefault(x => x.CallId == evt.CallId);
+            var call = session.ActiveCalls.FirstOrDefault(x => x.CallId == evt.CallId);
 
-            System.Console.WriteLine("------------ Call ------------");
-            session.Dump();
+            rat.RealeaseNetworkResources(call.Service.ComputeRequiredCapacity());
 
-            //There is an existing session but call never existed
-            if (call is null)
-            {
-                evt = null;
-                return; 
-            } 
-
-            Log.Information($"Terminating call service: @{call.Service}; session: @{this.SessionId}");
-            
             session.ActiveCalls.Remove(call);
 
-            //Must be called after removing the call from active calls
-            var state = GetStateFromCurrentSession(session.ActiveCalls);
-
-            SetState(state);
-
-            rat.SetUsedResources(rat.UsedResources - call.Service.ComputeRequiredCapacity());
-
-            if(state == MobileTerminalState.Idle)
-            {
-                //Remove the session from the Rat 
-                rat.RemoveSession(session);
-                session.SetEndTime(evt.Time);
-                session.SessionSequence.Add(State);
-                this.SetSessionId(Guid.Empty);
-                var callHistory = new CallLog
-                {
-                    SessionId = session.SessionId,
-                    Start = session.Start,
-                    RatId = session.RatId,
-                    End = session.End,
-                    SessionSequence = session.SessionSequence
-                };
-
-                Log.Information($"---- Saving history");
-
-                CallHistoryLogs.Add(callHistory);
-
-                Log.Information($"---- Session ended @{session.SessionId}");
-
-                session = null;
-
-                return;
-            }
+            var state = UpdateMobileTerminalState(session);
 
             session.SessionSequence.Add(state);
 
-            Log.Information($"Call terminated service: @{call.Service}; session: @{this.SessionId}");
-
-            session.Dump();
+            if (state == MobileTerminalState.Idle)
+            {
+                EndSession(session, evt.Time, rat);
+                return;
+            }
 
             call = null;
+            session = null;
         }
 
-        private MobileTerminalState GetStateFromCurrentSession(IList<ICall> activeCalls)
+        private MobileTerminalState UpdateMobileTerminalState(ISession session)
         {
             var state = MobileTerminalState.Idle;
-            if (activeCalls.Count == 3) return MobileTerminalState.VoiceDataVideo;
-            if (activeCalls.Count == 1)
+            var ongoingServices = session.ActiveCalls.Select(x => x.Service);
+            if (ongoingServices.Count() == 3)
             {
-                switch (activeCalls.ElementAt(0).Service)
-                {
-                    case Service.Voice:
-                        return MobileTerminalState.Voice;
-                    case Service.Data:
-                        return MobileTerminalState.Data;
-                    case Service.Video:
-                        return MobileTerminalState.Video;
-                }
+                state = MobileTerminalState.VoiceDataVideo;
+                SetState(state);
+                return state;
             }
-            if (activeCalls.Count == 2)
+            if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
             {
-                var services = new List<Service>();
-                foreach (var call in activeCalls)
-                {
-                    services.Add(call.Service);
-                }
-                if (services.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == services.Count())
-                {
-                    return MobileTerminalState.VoiceData;
-                }
-                if (services.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == services.Count())
-                {
-                    return MobileTerminalState.VoiceData;
-                }
-                if (services.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == services.Count())
-                {
-                    return MobileTerminalState.VideoData;
-                }
+                state = MobileTerminalState.VoiceData;
+                SetState(state);
+                return state;
             }
-            return state; //If state is idle go on to terminate the session
+            if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == ongoingServices.Count())
+            {
+                state = MobileTerminalState.VoiceVideo;
+                SetState(state);
+                return state;
+            }
+            if (ongoingServices.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == ongoingServices.Count())
+            {
+                state = MobileTerminalState.VideoData;
+                SetState(state);
+                return state;
+            }
+            SetState(state);
+            return state;
         }
 
-        private MobileTerminalState SetState(MobileTerminalState state)
+        private void EndSession(ISession session, DateTime end, IRat rat)
         {
-            State = state;
-            return state;
+            rat.RemoveSession(session);
+            session.SetEndTime(end);
+
+            this.SessionId = Guid.Empty;
+
+            var callHistory = new CallLog
+            {
+                SessionId = session.SessionId,
+                Start = session.Start,
+                RatId = session.RatId,
+                End = session.End,
+                SessionSequence = session.SessionSequence
+            };
+
+            this.CallHistoryLogs.Add(callHistory);
         }
     }
 }

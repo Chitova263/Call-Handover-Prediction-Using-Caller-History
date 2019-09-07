@@ -13,21 +13,16 @@ namespace VerticalHandoverPrediction.CallSession
         public IList<MobileTerminalState> SessionSequence { get; set; }
         public IList<ICall> ActiveCalls { get; private set; }
 
-        private Session(Guid ratId)
+        private Session(Guid ratId, DateTime start)
         {
             SessionId = Guid.NewGuid();
             RatId = ratId;
-            Start = DateTime.Now;
+            Start = start;
             SessionSequence = new List<MobileTerminalState> { MobileTerminalState.Idle };
             ActiveCalls = new List<ICall>();
         }
 
-        public static Session StartSession(Guid ratId)
-        {
-            var session = new Session(ratId);
-            //Build Session Object
-            return session;
-        }
+        public static Session StartSession(Guid ratId, DateTime start) => new Session(ratId, start);
 
         public void SetRatId(Guid ratId) => RatId = ratId;
 

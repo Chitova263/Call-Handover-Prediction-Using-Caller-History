@@ -1,7 +1,6 @@
 using System;
-using MediatR;
 
-namespace VerticalHandoverPrediction.Events
+namespace VerticalHandoverPrediction.Simulator
 {
     public class CallEndedEvent: IEvent
     {

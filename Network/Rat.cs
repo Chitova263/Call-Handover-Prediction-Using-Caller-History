@@ -4,7 +4,6 @@ using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Mobile;
-using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Network
 {
@@ -13,7 +12,7 @@ namespace VerticalHandoverPrediction.Network
     {
         public Guid RatId { get; private set; }
         public int Capacity { get; private set; }
-        public int UsedResources { get; private set; }
+        public int UsedNetworkResources { get; private set; }
         private readonly List<ISession> _ongoingSessions;
         public IReadOnlyCollection<ISession> OngoingSessions => _ongoingSessions;
         public IList<Service> Services { get; set; }
@@ -57,18 +56,11 @@ namespace VerticalHandoverPrediction.Network
             this._ongoingSessions.Add(session);
         }
 
-        public void SetRatId(Guid id)
-        {
-            RatId = id;
-        }
+        public void RealeaseNetworkResources(int resources) => UsedNetworkResources = UsedNetworkResources - resources;
 
-        public void SetUsedResources(int bbu)
-        {
-            UsedResources = bbu;
-        }
+        public void SetRatId(Guid id) => RatId = id;
 
-
-        public int AvailableCapacity() => Capacity - UsedResources;
+        public int AvailableNetworkResources() => Capacity - UsedNetworkResources;
 
 
         //Admits incoming call on this ongoing session
@@ -83,7 +75,7 @@ namespace VerticalHandoverPrediction.Network
         {
             Log.Information($"----Starting new session rat: @{RatId}; service: @{call.Service}");
 
-            var session = Session.StartSession(RatId);
+            var session = Session.StartSession(RatId, DateTime.Now);
             mobileTerminal.SetSessionId(session.SessionId);
             session.ActiveCalls.Add(call);
             mobileTerminal.UpdateMobileTerminalState(call.Service);
