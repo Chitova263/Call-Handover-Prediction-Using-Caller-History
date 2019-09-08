@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using VerticalHandoverPrediction.CallSession;
+using VerticalHandoverPrediction.Simulator;
 
 namespace VerticalHandoverPrediction.Mobile
 {
@@ -11,11 +12,12 @@ namespace VerticalHandoverPrediction.Mobile
         Modality Modality { get; }
         MobileTerminalState State { get; }
         IList<CallLog> CallHistoryLogs { get; }
+        bool Activated { get; set; }
 
-        MobileTerminalState ChangeStateTo(MobileTerminalState state);
+        void EndCall(CallEndedEvent evt);
         void SetSessionId(Guid sessionId);
-        void TerminateCall(Guid callId);
-        void TerminateSession();
-        MobileTerminalState UpdateMobileTerminalState(Service service);
+        void SetState(MobileTerminalState state);
+        MobileTerminalState UpdateMobileTerminalState(ISession session);
+        MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls);
     }
 }

@@ -14,7 +14,7 @@ namespace VerticalHandoverPrediction.CallAdmissionControl
             return session;
         }
 
-        public static int ComputeRequiredCapacity(this Service service)
+        public static int ComputeRequiredNetworkResources(this Service service)
         {
             var utlizedCapacity = 0;
             switch (service)

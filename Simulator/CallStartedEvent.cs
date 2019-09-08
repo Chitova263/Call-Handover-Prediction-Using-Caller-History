@@ -1,23 +1,19 @@
 using System;
-using MediatR;
+using VerticalHandoverPrediction.CallSession;
 
 namespace VerticalHandoverPrediction.Simulator
 {
-    public class CallStartedEvent: INotification
+    public class CallStartedEvent : IEvent
     {
-        public Guid EventId { get; }
-        public DateTime EndTime { get; }   
-        public Guid CallId { get; }
-        public Guid MobileTerminalId { get; }
-        public Guid SessionId { get; }
+        public Guid EventId { get;  }
+        public DateTime Time { get;  }
+        public ICall Call { get; }
 
-        public CallStartedEvent(DateTime endTime, Guid callId, Guid mobileTerminalId, Guid sessionId)
+        public CallStartedEvent(DateTime startTime,  ICall call)
         {
             EventId = Guid.NewGuid();
-            EndTime = endTime;
-            CallId = callId;
-            MobileTerminalId = mobileTerminalId;
-            SessionId = sessionId;
+            Time = startTime;
+            Call = call;
         }
     }
 }

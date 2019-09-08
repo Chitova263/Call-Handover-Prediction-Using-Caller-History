@@ -8,18 +8,18 @@ namespace VerticalHandoverPrediction.Network
     public interface IRat
     {
         Guid RatId { get; }
+        string Name { get; }
         int Capacity { get; }
-        int UsedCapacity { get; }
+        int UsedNetworkResources { get; }
+        IReadOnlyCollection<ISession> OngoingSessions { get; }
         IList<Service> Services { get; set; }
-        IList<ISession> OngoingSessions { get; set; }
 
-        void AdmitIncomingCallToNewSession(ICall call, IMobileTerminal mobileTerminal);
-        void AdmitIncomingCallToOngoingSession(ICall call, ISession session, IMobileTerminal mobileTerminal);
-        int AvailableCapacity();
-        bool CanAccommodateCall(ICall call);
-        bool CanAccommodateServices(List<Service> services);
-        void RemoveSessionFromRat(ISession session);
-        void SetUsedCapacity(int bbu);
-        void TransferSessionToRat(ISession currentSession);
+        void AddSession(ISession session);
+        void AdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal);
+        int AvailableNetworkResources();
+        bool CanAdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal);
+        void RealeaseNetworkResources(int resources);
+        void RemoveSession(ISession session);
+        void TakeNetworkResources(int resources);
     }
 }

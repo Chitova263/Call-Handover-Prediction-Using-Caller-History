@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Network;
+using VerticalHandoverPrediction.Simulator;
 
 namespace VerticalHandoverPrediction.Mobile
 {
-
     public class MobileTerminal : IMobileTerminal
     {
         public Guid MobileTerminalId { get; private set; }
@@ -16,6 +15,7 @@ namespace VerticalHandoverPrediction.Mobile
         public Modality Modality { get; private set; }
         public MobileTerminalState State { get; private set; }
         public IList<CallLog> CallHistoryLogs { get; private set; }
+        public bool Activated { get; set; } = false;
 
         private MobileTerminal(Modality modality)
         {
@@ -25,179 +25,155 @@ namespace VerticalHandoverPrediction.Mobile
             State = MobileTerminalState.Idle;
         }
 
-        public static MobileTerminal CreateMobileTerminal(Modality modality)
+        public static MobileTerminal CreateMobileTerminal(Modality modality) => new MobileTerminal(modality);
+
+        public void SetState(MobileTerminalState state) => State = state;
+
+        public void SetSessionId(Guid sessionId) => SessionId = sessionId;
+
+        public void EndCall(CallEndedEvent evt)
         {
-            return new MobileTerminal(modality);
-        }
-
-        public MobileTerminalState ChangeStateTo(MobileTerminalState state)
-        {
-            State = state;
-            //Return the updated state
-            return State;
-        }
-
-        public void SetSessionId(Guid sessionId)
-        {
-            SessionId = sessionId;//set when we initiate new session
-        }
-
-
-        public MobileTerminalState UpdateMobileTerminalState(Service service)
-        {
-            return this.UpdateStateExtension(service);
-        }
-
-        public void TerminateSession()
-        {
-
-            //Find the current session and obtain the RatId
+           
+            //Find the current session
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
-                .FindSessionWithId(SessionId);
+                .FirstOrDefault(x => x.SessionId == this.SessionId);
 
-            //Find the Rat handling session
             var rat = HetNet._HetNet.Rats
                 .FirstOrDefault(x => x.RatId == session.RatId);
 
-            Log.Information($"---- Session Termination Started @{session.SessionId}");
-            //Free up the resources used by session
-            var services = session.ActiveCalls
-                .Select(x => x.Service);
+            var call = session.ActiveCalls.FirstOrDefault(x => x.CallId == evt.CallId);
 
-            //set the end time of the session
-            session.SetEndTime(DateTime.Now);
-
-            var bbuToRelease = 0;
-            foreach (var service in services)
-            {
-                bbuToRelease += service.ComputeRequiredCapacity();
+            if(call is null) {
+                throw new VerticalHandoverPredictionException("EEEEEEEEEEEEEEEE");
             }
-            rat.SetUsedCapacity(rat.UsedCapacity - bbuToRelease);
 
-            //Remove Session from list of ongoing sessions on rat
-            rat.OngoingSessions.Remove(session);
+            rat.RealeaseNetworkResources(call.Service.ComputeRequiredNetworkResources());
 
-            //update mobile terminal
-            SetSessionId(Guid.Empty);
-            var state = SetState(MobileTerminalState.Idle);
+            session.ActiveCalls.Remove(call);
 
-            //Update session sequence
+            var state = UpdateMobileTerminalState(session);
+
             session.SessionSequence.Add(state);
 
-            //save session to callLogHistory : Consider changing this to a hashmap
+            if (state == MobileTerminalState.Idle)
+            {
+                EndSession(session, evt.Time, rat);
+                return;
+            }
+
+            call = null;
+            session = null;
+        }
+
+        public MobileTerminalState UpdateMobileTerminalState(ISession session)
+        {
+            var state = MobileTerminalState.Idle;
+            var ongoingServices = session.ActiveCalls.Select(x => x.Service);
+            if (ongoingServices.Count() == 1)
+            {
+                switch (ongoingServices.ElementAt(0))
+                {
+                    case Service.Voice:
+                        state = MobileTerminalState.Voice;
+                        SetState(state);
+                        return state;
+                    case Service.Data:
+                        state = MobileTerminalState.Data;
+                        SetState(state);
+                        return state;
+                    case Service.Video:
+                        state = MobileTerminalState.Video;
+                        SetState(state);
+                        return state;
+                }
+            }
+
+            if (ongoingServices.Count() == 3)
+            {
+                state = MobileTerminalState.VoiceDataVideo;
+                SetState(state);
+                return state;
+            }
+
+            if (ongoingServices.Count() == 2)
+            {
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceData;
+                    SetState(state);
+                    return state;
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceVideo;
+                    SetState(state);
+                    return state;
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VideoData;
+                    SetState(state);
+                    return state;
+                }
+            }
+
+            SetState(state);
+            return state;
+        }
+
+        private void EndSession(ISession session, DateTime end, IRat rat)
+        {
+            rat.RemoveSession(session);
+            session.SetEndTime(end);
+
+            this.SessionId = Guid.Empty;
+
             var callHistory = new CallLog
             {
                 SessionId = session.SessionId,
                 Start = session.Start,
                 RatId = session.RatId,
                 End = session.End,
-                SessionSequence = session.SessionSequence
-                //No need to save the list of active calls on the history data store
+                SessionSequence = session.SessionSequence,
             };
 
-            Log.Information($"---- Saving Session @{session.SessionId}");
-            CallHistoryLogs.Add(callHistory);
-
-            Log.Information($"---- Terminating Session @{session.SessionId}");
-
-
-
-            //Set refference to session object to null
-            session = null;
-
-            Log.Information($"----Session Termination Successful");
+            this.CallHistoryLogs.Add(callHistory);
         }
 
-        public void TerminateCall(Guid callId)
+        public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)
         {
-            Log.Information($"Terminating call id: @{callId}; terminal: @{this.MobileTerminalId}; session: @{this.SessionId}");
-
-            //Find the current session and obtain the RatId
-            var session = HetNet._HetNet.Rats
-                .SelectMany(x => x.OngoingSessions)
-                .FindSessionWithId(SessionId);
-
-            //Find the Rat handling session
-            var rat = HetNet._HetNet.Rats
-                .FirstOrDefault(x => x.RatId == session.RatId);
-
-            //Find the call in the list of active calls
-            var call = session.ActiveCalls
-                .FirstOrDefault(x => x.CallId == callId);
-
-            //Remove call from the list of Active calls
-            session.ActiveCalls.Remove(call);
-
-            //Free up resources in Rat used by the service of call
-            rat.SetUsedCapacity(
-                rat.UsedCapacity - call.Service.ComputeRequiredCapacity()
-                );
-
-            //Update the mobile state based on the remaining active calls
-            var state = GetStateFromCurrentSession(session.ActiveCalls);
-
-            //If state is idle terminate session
-            if (state == MobileTerminalState.Idle)
+            
+            if(activeCalls.Count() == 1 || activeCalls.Count() == 0 || activeCalls.Count() > 3)
             {
-                this.TerminateSession();
-                return;
+                throw new VerticalHandoverPredictionException($"{nameof(activeCalls)} can not have {activeCalls.Count()} calls");
             }
 
-            //Set the new Mobile Terminal State
-            this.SetState(state);
+            var ongoingServices = activeCalls.Select(x => x.Service);
 
-            //Update the session sequence
-            session.SessionSequence.Add(state);
-
-            //Delete call
-            call = null;
-
-            Log.Information($"Call Ended Successfully call id: @{callId}; terminal: @{this.MobileTerminalId}; session: @{this.SessionId}");
-        }
-
-        private MobileTerminalState GetStateFromCurrentSession(IList<ICall> activeCalls)
-        {
-            var state = MobileTerminalState.Idle;
-            if (activeCalls.Count == 3) return MobileTerminalState.VoiceDataVideo;
-            if (activeCalls.Count == 1)
+            MobileTerminalState state = MobileTerminalState.VoiceDataVideo;
+            if(activeCalls.Count() == 2)
             {
-                switch (activeCalls.ElementAt(0).Service)
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
                 {
-                    case Service.Voice:
-                        return MobileTerminalState.Voice;
-                    case Service.Data:
-                        return MobileTerminalState.Data;
-                    case Service.Video:
-                        return MobileTerminalState.Video;
+                    state = MobileTerminalState.VoiceData;
+                    SetState(state);
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceVideo;
+                    SetState(state);
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VideoData;
+                    SetState(MobileTerminalState.VideoData);
                 }
             }
-            if (activeCalls.Count == 2)
+            else
             {
-                var services = new List<Service>();
-                foreach (var call in activeCalls)
-                {
-                    services.Add(call.Service);
-                }
-                if (services.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == services.Count())
-                {
-                    return MobileTerminalState.VoiceData;
-                }
-                if (services.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == services.Count())
-                {
-                    return MobileTerminalState.VoiceData;
-                }
-                if (services.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == services.Count())
-                {
-                    return MobileTerminalState.VideoData;
-                }
+                SetState(MobileTerminalState.VoiceDataVideo);
             }
-            return state; //If state is idle go on to terminate the session
-        }
-
-        private MobileTerminalState SetState(MobileTerminalState state)
-        {
-            State = state;
             return state;
         }
     }

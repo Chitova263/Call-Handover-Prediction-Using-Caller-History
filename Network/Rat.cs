@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Serilog;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Mobile;
@@ -12,126 +10,73 @@ namespace VerticalHandoverPrediction.Network
     public class Rat : IRat
     {
         public Guid RatId { get; private set; }
+        public string Name { get; private set; }
         public int Capacity { get; private set; }
-        public int UsedCapacity { get; private set; }
+        public int UsedNetworkResources { get; private set; }
+        private readonly List<ISession> _ongoingSessions;
+        public IReadOnlyCollection<ISession> OngoingSessions => _ongoingSessions;
         public IList<Service> Services { get; set; }
-        public IList<ISession> OngoingSessions { get; set; }
 
-        private Rat(IList<Service> services, int capacity)
+        private Rat(IList<Service> services, int capacity, string name)
         {
             RatId = Guid.NewGuid();
             Services = services;
             Capacity = capacity;
-            OngoingSessions = new List<ISession>();
+            Name = name;
+            _ongoingSessions = new List<ISession>();
         }
 
-        public static Rat CreateRat(IList<Service> services, int capacity)
+        public static Rat CreateRat(IList<Service> services, int capacity, string name)
         {
             if (services is null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            return new Rat(services, capacity);
+            return new Rat(services, capacity, name);
         }
 
-        public int AvailableCapacity() => Capacity - UsedCapacity;
-
-        public void RemoveSessionFromRat(ISession session)
+        public void RemoveSession(ISession session)
         {
-            //Remove the session from Rat's ongoing sessions
-            OngoingSessions.Remove(session);
-
-            //Free up resources
-            var services = session.ActiveCalls
-                .Select(x => x.Service)
-                .ToList();
-
-            foreach (var service in services)
+            if (session is null)
             {
-                UsedCapacity -= service.ComputeRequiredCapacity();
+                throw new ArgumentNullException(nameof(session));
             }
-            //Session Removed this Rat
+
+            this._ongoingSessions.Remove(session);
         }
 
-        public void TransferSessionToRat(ISession currentSession)
+        public void AddSession(ISession session)
         {
-            //Change the RatId of the session to identify its new Rat
-            currentSession.SetRatId(RatId);
-
-            //Add session to list of ongoing sessions
-            OngoingSessions.Add(currentSession);
-
-            //Take up the used capacity by the session
-            var services = currentSession.ActiveCalls
-                .Select(x => x.Service)
-                .ToList();
-
-            foreach (var service in services)
+            if (session is null)
             {
-                UsedCapacity += service.ComputeRequiredCapacity();
+                throw new ArgumentNullException(nameof(session));
             }
-            //Session Successfuly transfered to this Rat
+
+            this._ongoingSessions.Add(session);
+        }
+        public void TakeNetworkResources(int resources) => UsedNetworkResources = UsedNetworkResources + resources;
+
+        public void RealeaseNetworkResources(int resources) => UsedNetworkResources = UsedNetworkResources - resources;
+
+        public int AvailableNetworkResources() => Capacity - UsedNetworkResources;
+
+        public bool CanAdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal)
+        {
+            if (!this.Services.Contains(call.Service)) return false;
+            var requiredNetworkResources = call.Service.ComputeRequiredNetworkResources();
+            return requiredNetworkResources <= AvailableNetworkResources();
         }
 
-        public void SetUsedCapacity(int bbu) => UsedCapacity = bbu;
-
-        //Admits incoming call on this ongoing session
-        public void AdmitIncomingCallToOngoingSession(ICall call, ISession session, IMobileTerminal mobileTerminal)
+        public void AdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal)
         {
-            //Update the state of the mobile terminal involved
-            var state = mobileTerminal.UpdateMobileTerminalState(call.Service);
-            //Update session sequence with new state
-            session.SessionSequence.Add(state);
-            //Update call sessionId property
-            call.SetSessionId(session.SessionId);
-            //Add call to list of active calls
+            this.TakeNetworkResources(call.Service.ComputeRequiredNetworkResources());
             session.ActiveCalls.Add(call);
-            //Update the used resources
-            UsedCapacity += call.Service.ComputeRequiredCapacity();
-        }
 
-        public void AdmitIncomingCallToNewSession(ICall call, IMobileTerminal mobileTerminal)
-        {
-            Log.Information($"----Starting New Session at Rat@{RatId} Admitting call @{call.CallId}");
+            var state = mobileTerminal.
+                UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(session.ActiveCalls);
 
-            //Start new session
-            var session = Session.StartSession(RatId);
-            //Add call & mobileTerminal to the new session
-            mobileTerminal.SetSessionId(session.SessionId);
-            call.SetSessionId(session.SessionId);
-            //Add call to list of active calls in session
-            session.ActiveCalls.Add(call);
-            //Update the mobile terminal state
-            var state = mobileTerminal.UpdateMobileTerminalState(call.Service);
-            //Update the session sequence
             session.SessionSequence.Add(state);
-            //Add session to list of ongoing sessions
-            OngoingSessions.Add(session);
-            //Update used resources extra call
-            UsedCapacity += call.Service.ComputeRequiredCapacity();
-
-            Log.Information($"---- Session @{session.SessionId} Admission Successfull");
-        }
-
-        public bool CanAccommodateCall(ICall call)
-        {
-            //Can rat support the incoming call service
-            var supported = Services.Contains(call.Service);
-            if (!supported) return false;
-            /* If supported check if the is enough capacity to accommodate session with new call */
-            var requiredBbu = UsedCapacity + call.Service.ComputeRequiredCapacity();
-            return requiredBbu <= AvailableCapacity();
-        }
-
-        public bool CanAccommodateServices(List<Service> services)
-        {
-            var requiredBbu = 0;
-            foreach (var service in services)
-            {
-                requiredBbu += service.ComputeRequiredCapacity();
-            }
-            return requiredBbu <= AvailableCapacity();
         }
     }
 }
