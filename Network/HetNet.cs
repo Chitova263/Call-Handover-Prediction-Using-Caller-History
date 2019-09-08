@@ -20,7 +20,9 @@ namespace VerticalHandoverPrediction.Network
         public int VerticalHandovers { get; set; }
         public int BlockedCalls { get; set; }
         public int FailedPredictions { get; set; }
+        public int CallsToBePredictedInitialRatSelection { get; set; }
         public int SuccessfulPredictions { get; set; }
+        public int BlockedUsingPredictiveScheme { get; set; }
         public int RandomCallsGenerated { get; set; }
         public int CallsGenerated { get; set; }
         public int CallStartedEventsRejectedWhenIdle { get; set; }
