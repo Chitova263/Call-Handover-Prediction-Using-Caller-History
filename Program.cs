@@ -26,7 +26,7 @@ namespace VerticalHandoverPrediction
             NetworkSimulator._NetworkSimulator.Run(100);
             NetworkSimulator._NetworkSimulator.Run(100);
             NetworkSimulator._NetworkSimulator.Run(100);
-            NetworkSimulator._NetworkSimulator.Run(100);
+            //NetworkSimulator._NetworkSimulator.Run(100);
            
             HetNet._HetNet.Dump();
         }
