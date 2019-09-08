@@ -5,12 +5,13 @@ using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Network;
 using VerticalHandoverPrediction.Simulator;
+using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Mobile
 {
     public class MobileTerminal : IMobileTerminal
     {
-        public Guid MobileTerminalId { get; private set; }
+        public Guid MobileTerminalId { get; set; }
         public Guid SessionId { get; private set; }
         public Modality Modality { get; private set; }
         public MobileTerminalState State { get; private set; }
@@ -131,12 +132,14 @@ namespace VerticalHandoverPrediction.Mobile
 
             var callHistory = new CallLog
             {
+                UserId = MobileTerminalId,
                 SessionId = session.SessionId,
-                Start = session.Start,
+                Duration =  session.End.Subtract(session.Start),  
                 RatId = session.RatId,
-                End = session.End,
-                SessionSequence = session.SessionSequence,
+                SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };
+
+            //Writer._Writer.CsvWriter.WriteRecord(callHistory);
 
             this.CallHistoryLogs.Add(callHistory);
         }

@@ -9,6 +9,8 @@ using System;
 using static MoreLinq.Extensions.StartsWithExtension;
 using System.Collections.Generic;
 using VerticalHandoverPrediction.Utils;
+using System.IO;
+using CsvHelper;
 
 namespace VerticalHandoverPrediction.Cac
 {
@@ -78,8 +80,8 @@ namespace VerticalHandoverPrediction.Cac
                 HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
                 
                 //---------------- Refactor to choose scheme to use when simulator is started
-                RunNonPredictiveAlgorithm(evt, mobileTerminal);
-                //RunPredictiveAlgorithm(evt, mobileTerminal);
+                //RunNonPredictiveAlgorithm(evt, mobileTerminal);
+                RunPredictiveAlgorithm(evt, mobileTerminal);
                 //---------------- 
                 
                 return;
@@ -99,8 +101,22 @@ namespace VerticalHandoverPrediction.Cac
             }
             else
             {
+                var x = new List<CallLog>();
+                var str = @"/Users/DjMadd/Documents/Thesis/VerticalHandoverPrediction";
+                using (var reader = new StreamReader($"{str}/jkby.csv"))
+                using (var csv = new CsvReader(reader))
+                {
+                    var records = csv.GetRecords<CallLog>();
+                    x = records.ToList();
+                }
+               
+
                 //Algorithm to predict next state
-                var group = callHistory
+                //var group = callHistory
+                var group = x
+                    .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
+                    .Select(x => x.SessionSequence)
+                    .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))
                     .Select(x => x.Skip(1).Take(2))
                     .Where(x => x.StartsWith(new List<MobileTerminalState>{evt.Call.Service.GetState()}))
                     .SelectMany(x => x.Skip(1))

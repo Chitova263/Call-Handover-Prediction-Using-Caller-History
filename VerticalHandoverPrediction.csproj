@@ -5,6 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.8.1" />
+    <PackageReference Include="ClosedXML" Version="0.94.2" />
+    <PackageReference Include="CsvHelper" Version="12.1.2" />
     <PackageReference Include="MedallionPriorityQueue" Version="1.1.0" />
     <PackageReference Include="MediatR" Version="7.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
