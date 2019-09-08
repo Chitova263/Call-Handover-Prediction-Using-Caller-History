@@ -5,7 +5,6 @@ using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction
 {
-
     class Program
     {
         static void Main(string[] args)
@@ -20,12 +19,12 @@ namespace VerticalHandoverPrediction
             HetNet._HetNet.GenerateRats();
 
             //Generate users
-            HetNet._HetNet.GenerateUsers(10);
+            HetNet._HetNet.GenerateUsers(5);
             
-            NetworkSimulator._NetworkSimulator.Run(50);
-            NetworkSimulator._NetworkSimulator.Run(50);
-            NetworkSimulator._NetworkSimulator.Run(50);
-            NetworkSimulator._NetworkSimulator.Run(50);
+            NetworkSimulator._NetworkSimulator.Run(100);
+            NetworkSimulator._NetworkSimulator.Run(100);
+            NetworkSimulator._NetworkSimulator.Run(100);
+            NetworkSimulator._NetworkSimulator.Run(100);
            
             HetNet._HetNet.Dump();
         }

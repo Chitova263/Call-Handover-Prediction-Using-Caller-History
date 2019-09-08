@@ -8,9 +8,9 @@ using VerticalHandoverPrediction.Mobile;
 namespace VerticalHandoverPrediction.Network
 {
 
-    public sealed class HetNet : IHetNet
+    public sealed class HetNet 
     {
-        private static IHetNet instance = null;
+        private static HetNet instance = null;
         private static readonly object padlock = new object();
         public Guid HetNetId { get; private set; }
         private readonly List<IRat> _rats;
@@ -21,7 +21,13 @@ namespace VerticalHandoverPrediction.Network
         public int BlockedCalls { get; set; }
         public int FailedPredictions { get; set; }
         public int SuccessfulPredictions { get; set; }
+        public int RandomCallsGenerated { get; set; }
         public int CallsGenerated { get; set; }
+        public int CallStartedEventsRejectedWhenIdle { get; set; }
+        public int CallStartedEventsRejectedWhenNotIdle { get; set; }
+        public int CallStartedEventsRejected => CallStartedEventsRejectedWhenIdle + CallStartedEventsRejectedWhenNotIdle + BlockedCalls;
+        public int CallEndedEventsRejected { get; set; }
+       
 
         private HetNet()
         {
@@ -32,7 +38,7 @@ namespace VerticalHandoverPrediction.Network
             _mobileTerminals = new List<IMobileTerminal>();
         }
 
-        public static IHetNet _HetNet
+        public static HetNet _HetNet
         {
             get
             {
@@ -55,6 +61,52 @@ namespace VerticalHandoverPrediction.Network
             }
 
             _rats.AddRange(rats);
+        }
+
+        public void Handover(ICall call, ISession session, IMobileTerminal mobileTerminal, IRat source)
+        {
+            var callsToHandedOverToTargetRat = session.ActiveCalls.Select(x => x.Service).ToList();
+            
+            callsToHandedOverToTargetRat.Add(call.Service);
+
+            var rats = Rats
+                .Where(x => x.RatId != session.RatId
+                    && x.Services.ToHashSet().IsSupersetOf(callsToHandedOverToTargetRat))
+                .OrderBy(x => x.Services.Count())
+                .ToList();
+            
+            var requiredNetworkResouces = 0;
+            foreach (var service in callsToHandedOverToTargetRat)
+            {
+                requiredNetworkResouces += service.ComputeRequiredNetworkResources();
+            }
+
+            foreach (var target in rats)
+            {
+                if(requiredNetworkResouces <= target.AvailableNetworkResources())
+                {
+                    HetNet._HetNet.VerticalHandovers++;
+
+                    source.RealeaseNetworkResources(requiredNetworkResouces - call.Service.ComputeRequiredNetworkResources());
+                    source.RemoveSession(session);
+
+                    session.SetRatId(target.RatId);
+
+                    target.TakeNetworkResources(requiredNetworkResouces);
+
+                    session.ActiveCalls.Add(call);
+
+                    var state = mobileTerminal.UpdateMobileTerminalState(session);
+            
+                    session.SessionSequence.Add(state);
+
+                    target.AddSession(session);
+
+                    return;
+                }
+            }
+            HetNet._HetNet.BlockedCalls++;
+            return;
         }
 
         public void AddMobileTerminals(IEnumerable<IMobileTerminal> mobileTerminals)
@@ -84,19 +136,19 @@ namespace VerticalHandoverPrediction.Network
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice
-                }, 100),
+                }, 20,  "RAT 1 (Voice)"),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Data
-                }, 100),
+                }, 20, "RAT 2 (Data)"),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 100),
+                }, 20,  "RAT 3 (Voice - Data)"),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Video, Service.Data
-                }, 100),
+                }, 20,  "RAT 4 (Voice - Data - Video)"),
             };
 
             AddRats(rats);
@@ -138,18 +190,18 @@ namespace VerticalHandoverPrediction.Network
 
             foreach (var service in services)
             {
-                networkResources += service.ComputeRequiredCapacity();
+                networkResources += service.ComputeRequiredNetworkResources();
             }
 
-            srcRat.SetUsedResources(srcRat.UsedResources - networkResources);
+            //srcRat.SetUsedResources(srcRat.UsedNetworkResources - networkResources);
 
-            session.SetRatId(destRat.RatId);
+            //session.SetRatId(destRat.RatId);
 
-            destRat.SetUsedResources(destRat.UsedResources + networkResources);
+            //destRat.SetUsedResources(destRat.UsedNetworkResources + networkResources);
 
-            destRat.AddSession(session);
+            //destRat.AddSession(session);
 
-            destRat.AdmitIncomingCallToOngoingSession(call, session, mobileTerminal);
+            //destRat.AdmitIncomingCallToOngoingSession(call, session, mobileTerminal);
         }
     }
 }

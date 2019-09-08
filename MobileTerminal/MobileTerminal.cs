@@ -15,6 +15,7 @@ namespace VerticalHandoverPrediction.Mobile
         public Modality Modality { get; private set; }
         public MobileTerminalState State { get; private set; }
         public IList<CallLog> CallHistoryLogs { get; private set; }
+        public bool Activated { get; set; } = false;
 
         private MobileTerminal(Modality modality)
         {
@@ -32,6 +33,7 @@ namespace VerticalHandoverPrediction.Mobile
 
         public void EndCall(CallEndedEvent evt)
         {
+           
             //Find the current session
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
@@ -42,7 +44,11 @@ namespace VerticalHandoverPrediction.Mobile
 
             var call = session.ActiveCalls.FirstOrDefault(x => x.CallId == evt.CallId);
 
-            rat.RealeaseNetworkResources(call.Service.ComputeRequiredCapacity());
+            if(call is null) {
+                throw new VerticalHandoverPredictionException("EEEEEEEEEEEEEEEE");
+            }
+
+            rat.RealeaseNetworkResources(call.Service.ComputeRequiredNetworkResources());
 
             session.ActiveCalls.Remove(call);
 
@@ -60,34 +66,58 @@ namespace VerticalHandoverPrediction.Mobile
             session = null;
         }
 
-        private MobileTerminalState UpdateMobileTerminalState(ISession session)
+        public MobileTerminalState UpdateMobileTerminalState(ISession session)
         {
             var state = MobileTerminalState.Idle;
             var ongoingServices = session.ActiveCalls.Select(x => x.Service);
+            if (ongoingServices.Count() == 1)
+            {
+                switch (ongoingServices.ElementAt(0))
+                {
+                    case Service.Voice:
+                        state = MobileTerminalState.Voice;
+                        SetState(state);
+                        return state;
+                    case Service.Data:
+                        state = MobileTerminalState.Data;
+                        SetState(state);
+                        return state;
+                    case Service.Video:
+                        state = MobileTerminalState.Video;
+                        SetState(state);
+                        return state;
+                }
+            }
+
             if (ongoingServices.Count() == 3)
             {
                 state = MobileTerminalState.VoiceDataVideo;
                 SetState(state);
                 return state;
             }
-            if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
+
+            if (ongoingServices.Count() == 2)
             {
-                state = MobileTerminalState.VoiceData;
-                SetState(state);
-                return state;
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceData;
+                    SetState(state);
+                    return state;
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceVideo;
+                    SetState(state);
+                    return state;
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VideoData;
+                    SetState(state);
+                    return state;
+                }
             }
-            if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == ongoingServices.Count())
-            {
-                state = MobileTerminalState.VoiceVideo;
-                SetState(state);
-                return state;
-            }
-            if (ongoingServices.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == ongoingServices.Count())
-            {
-                state = MobileTerminalState.VideoData;
-                SetState(state);
-                return state;
-            }
+
             SetState(state);
             return state;
         }
@@ -105,10 +135,46 @@ namespace VerticalHandoverPrediction.Mobile
                 Start = session.Start,
                 RatId = session.RatId,
                 End = session.End,
-                SessionSequence = session.SessionSequence
+                SessionSequence = session.SessionSequence,
             };
 
             this.CallHistoryLogs.Add(callHistory);
+        }
+
+        public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)
+        {
+            
+            if(activeCalls.Count() == 1 || activeCalls.Count() == 0 || activeCalls.Count() > 3)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(activeCalls)} can not have {activeCalls.Count()} calls");
+            }
+
+            var ongoingServices = activeCalls.Select(x => x.Service);
+
+            MobileTerminalState state = MobileTerminalState.VoiceDataVideo;
+            if(activeCalls.Count() == 2)
+            {
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceData;
+                    SetState(state);
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Video }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VoiceVideo;
+                    SetState(state);
+                }
+                if (ongoingServices.Intersect(new List<Service> { Service.Video, Service.Data }).Count() == ongoingServices.Count())
+                {
+                    state = MobileTerminalState.VideoData;
+                    SetState(MobileTerminalState.VideoData);
+                }
+            }
+            else
+            {
+                SetState(MobileTerminalState.VoiceDataVideo);
+            }
+            return state;
         }
     }
 }

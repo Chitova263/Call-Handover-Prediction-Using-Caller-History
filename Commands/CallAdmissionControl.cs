@@ -10,6 +10,7 @@ using Serilog;
 
 namespace VerticalHandoverPrediction.Commands
 {
+    /*
     public class JCallAdmissionControl
     {
         private JCallAdmissionControl()
@@ -213,4 +214,5 @@ namespace VerticalHandoverPrediction.Commands
                 HetNet._HetNet.BlockedCalls++;
         }
     }
+     */
 }

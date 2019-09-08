@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Medallion.Collections;
+using Serilog;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Commands;
 using VerticalHandoverPrediction.Network;
@@ -48,6 +49,13 @@ namespace VerticalHandoverPrediction.Simulator
 
         public void Run(int n)
         {
+            HetNet._HetNet.RandomCallsGenerated += n;
+            
+            foreach (var mt in HetNet._HetNet.MobileTerminals)
+            {
+                mt.Activated = false;
+            }
+
             Random rnd = new Random();
            
             var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
@@ -77,15 +85,14 @@ namespace VerticalHandoverPrediction.Simulator
 
         private void ServeQueue()
         {   
-            var cac = JCallAdmissionControl.StartCAC();
+            var cac = new Cac.Cac();
             while(EventQueue.Any())
             {
                 var @event = EventQueue.Dequeue();
-                System.Console.WriteLine(@event.Time);
                 if(@event.GetType() == typeof(CallStartedEvent))
                 {
                     var evt = (CallStartedEvent)@event;
-                    //cac.AdmitCall(evt.Call);
+                    cac.AdmitCall(evt);
                 }
                 else 
                 {
@@ -101,10 +108,15 @@ namespace VerticalHandoverPrediction.Simulator
                         .FirstOrDefault(x => x.CallId == evt.CallId);
                     
                     //if no session contains this call then it was never considered
-                    if(call is null) continue;
-                    
-                    //End the call
-                    mobileTerminal.EndCall(evt);
+                    if(call is null) 
+                    {
+                        HetNet._HetNet.CallEndedEventsRejected++;
+                        Log.Warning($"CallStartedEventCorresponding o this {nameof(CallEndedEvent)} was rejected");
+                    } 
+                    else
+                    {
+                        mobileTerminal.EndCall(evt);
+                    }
                 }
             }
         }

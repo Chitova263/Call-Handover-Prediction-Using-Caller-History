@@ -22,7 +22,7 @@ namespace VerticalHandoverPrediction.CallSession
             ActiveCalls = new List<ICall>();
         }
 
-        public static Session StartSession(Guid ratId, DateTime start) => new Session(ratId, start);
+        public static ISession StartSession(Guid ratId, DateTime start) => new Session(ratId, start);
 
         public void SetRatId(Guid ratId) => RatId = ratId;
 
