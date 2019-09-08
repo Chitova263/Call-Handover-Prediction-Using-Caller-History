@@ -75,6 +75,7 @@ namespace VerticalHandoverPrediction.Cac
                 mobileTerminal.Activated = true;
 
                 HetNet._HetNet.CallsGenerated++;
+                HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
                 
                 //---------------- Refactor to choose scheme to use when simulator is started
                 RunNonPredictiveAlgorithm(evt, mobileTerminal);
