@@ -5,6 +5,10 @@ using VerticalHandoverPrediction.Simulator;
 using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using Serilog;
+using System;
+using static MoreLinq.Extensions.StartsWithExtension;
+using System.Collections.Generic;
+using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Cac
 {
@@ -67,16 +71,124 @@ namespace VerticalHandoverPrediction.Cac
                     //throw new VerticalHandoverPredictionException(" Wrong state");
                 }
                 //----------------
+
                 mobileTerminal.Activated = true;
+
+                HetNet._HetNet.CallsGenerated++;
+                HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
+                
+                //---------------- Refactor to choose scheme to use when simulator is started
                 RunNonPredictiveAlgorithm(evt, mobileTerminal);
+                //RunPredictiveAlgorithm(evt, mobileTerminal);
+                //---------------- 
+                
                 return;
             }
         }
 
+        private void RunPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
+        {
+            var callHistory = mobileTerminal.CallHistoryLogs
+                .Select(x => x.SessionSequence)
+                .ToList();
+            
+            var nextState =  default(MobileTerminalState);
+            if(callHistory.Any()) 
+            {
+                nextState = evt.Call.Service.GetState();
+            }
+            else
+            {
+                //Algorithm to predict next state
+                var group = callHistory
+                    .Select(x => x.Skip(1).Take(2))
+                    .Where(x => x.StartsWith(new List<MobileTerminalState>{evt.Call.Service.GetState()}))
+                    .SelectMany(x => x.Skip(1))
+                    .GroupBy(x => x);
+                
+                //If group is empty it means prediction has failed
+                if(!group.Any()) 
+                {
+                    HetNet._HetNet.FailedPredictions++;
+                    nextState = evt.Call.Service.GetState();
+                }
+                else
+                {
+                    var prediction = default(IGrouping<MobileTerminalState, MobileTerminalState>);
+                    var max = 0;
+
+                    //If There are ties it takes the last item in the history : Fix this, what decision is made in that case
+                    
+                    group.Dump();
+
+                    foreach(var grp in group )
+                    {
+                        if(grp.Count() > max) 
+                        {
+                            prediction = grp;
+                            max = prediction.Count();
+                        }
+                        Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+                    }
+
+                    foreach( var grp in group )
+                    {
+                        //Generate Excell File With Frequency Table
+                        Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+                    }
+
+                    nextState = prediction.Key;
+                }
+            
+                //What happens if nextState is Idle
+                if(nextState == MobileTerminalState.Idle)
+                {
+                    //Fix program goes into an unstable state
+                    throw new VerticalHandoverPredictionException("Next state predicted is idle");
+                }
+            }
+
+            var services = new List<Service>{evt.Call.Service};
+            foreach (var service in nextState.SupportedServices())
+            {
+                if(!services.Contains(service)) services.Add(service);
+            }
+
+            var rats = HetNet._HetNet.Rats
+                .Where(x => x.Services.ToHashSet().IsSupersetOf(services))
+                .OrderBy(x => x.Services.Count)
+                .ToList();
+            
+            //This scheme reserves bandwidth in advance, I considered all the services
+            var requiredNetworkResources = 0;
+            foreach (var service in services)
+            {
+                requiredNetworkResources += service.ComputeRequiredNetworkResources();
+            }
+
+            foreach (var rat in rats)
+            {
+                if(requiredNetworkResources <= rat.AvailableNetworkResources())
+                {
+                    StartNewSessionAndAdmitCall(evt, mobileTerminal, rat);
+                    if(!callHistory.Any()) 
+                    {
+                        HetNet._HetNet.SuccessfulPredictions++;
+                        Log.Information("----- Successful prediction");
+                    } 
+                    return;
+                }
+            }
+            //All Possible Rats Cannot Admit Call i.e [call in its predicted state]
+            HetNet._HetNet.BlockedUsingPredictiveScheme++;
+
+            //Try just accommodating the incoming call without predicting before blocking it
+            RunNonPredictiveAlgorithm(evt, mobileTerminal);
+            return;
+        }
+
         private void RunNonPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            HetNet._HetNet.CallsGenerated++;
-
             var rats = HetNet._HetNet.Rats
                 .Where(x => x.Services.Contains(evt.Call.Service))
                 .OrderBy(x => x.Services.Count)
