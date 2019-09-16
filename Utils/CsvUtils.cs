@@ -80,6 +80,8 @@ namespace VerticalHandoverPrediction.Utils
             using (var csvWriter = new CsvWriter(writer))
             {
                 csvWriter.WriteField(String.Empty);
+                //work around
+                Header.Clear();
             }
         }
 

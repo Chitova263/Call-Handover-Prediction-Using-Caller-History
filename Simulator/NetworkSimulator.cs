@@ -51,7 +51,7 @@ namespace VerticalHandoverPrediction.Simulator
         public void Run(int n, bool test)
         {
             if(test){
-                HetNet._HetNet.RandomCallsGenerated += n;
+                //HetNet._HetNet.RandomCallsGenerated += n;
             
                 foreach (var mt in HetNet._HetNet.MobileTerminals)
                 {

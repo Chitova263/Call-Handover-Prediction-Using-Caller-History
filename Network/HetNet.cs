@@ -181,56 +181,6 @@ namespace VerticalHandoverPrediction.Network
 
             AddRats(rats);
         }
-
-        public void HandoverSessionToNewRat(ICall call, ISession session, IRat srcRat, IRat destRat, IMobileTerminal mobileTerminal)
-        {
-            if (call is null)
-            {
-                throw new ArgumentNullException(nameof(call));
-            }
-
-            if (session is null)
-            {
-                throw new ArgumentNullException(nameof(session));
-            }
-
-            if (srcRat is null)
-            {
-                throw new ArgumentNullException(nameof(srcRat));
-            }
-
-            if (destRat is null)
-            {
-                throw new ArgumentNullException(nameof(destRat));
-            }
-
-            if (mobileTerminal is null)
-            {
-                throw new ArgumentNullException(nameof(mobileTerminal));
-            }
-
-            srcRat.RemoveSession(session);
-
-            var services = session.ActiveCalls
-                .Select(x => x.Service);
-
-            var networkResources = 0;
-
-            foreach (var service in services)
-            {
-                networkResources += service.ComputeRequiredNetworkResources();
-            }
-
-            //srcRat.SetUsedResources(srcRat.UsedNetworkResources - networkResources);
-
-            //session.SetRatId(destRat.RatId);
-
-            //destRat.SetUsedResources(destRat.UsedNetworkResources + networkResources);
-
-            //destRat.AddSession(session);
-
-            //destRat.AdmitIncomingCallToOngoingSession(call, session, mobileTerminal);
-        }
     }
 }
 

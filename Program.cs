@@ -22,11 +22,12 @@ namespace VerticalHandoverPrediction
             HetNet._HetNet.GenerateUsers(10);
             
            
-            NetworkSimulator._NetworkSimulator.Run(5, true);
-            
+            NetworkSimulator._NetworkSimulator.Run(10, true);
+           
+        
             HetNet._HetNet.Dump();
 
-            NetworkSimulator._NetworkSimulator.Run(5, false);
+            NetworkSimulator._NetworkSimulator.Run(10, false);
 
             HetNet._HetNet.Dump();
         }

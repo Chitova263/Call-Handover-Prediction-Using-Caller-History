@@ -139,8 +139,7 @@ namespace VerticalHandoverPrediction.Mobile
 
             this.CallHistoryLogs.Add(callHistory);
 
-            //Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
-            //Utils.CsvUtils._Instance.Write(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
+            Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
 
             HetNet._HetNet.TotalSessions++;
         }
