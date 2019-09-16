@@ -14,9 +14,10 @@ namespace VerticalHandoverPrediction.Cac
 {
     public class Cac
     {
-        public Cac()
+        public bool Predictive { get; set; }
+        public Cac(bool predictive)
         {
-            
+            Predictive = predictive;
         }
 
         public void AdmitCall(CallStartedEvent evt)
@@ -76,7 +77,6 @@ namespace VerticalHandoverPrediction.Cac
                     Log.Warning("Session Already Terminated");
                     HetNet._HetNet.CallStartedEventsRejectedWhenIdle++;
                     return;
-                    //throw new VerticalHandoverPredictionException(" Wrong state");
                 }
                 //----------------
 
@@ -88,11 +88,14 @@ namespace VerticalHandoverPrediction.Cac
 
                 HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
                 
-                //---------------- Refactor to choose scheme to use when simulator is started
-                //RunNonPredictiveAlgorithm(evt, mobileTerminal);
-                RunPredictiveAlgorithm(evt, mobileTerminal);
-                //---------------- 
-                
+                if(Predictive){
+                    RunPredictiveAlgorithm(evt, mobileTerminal); 
+                }
+                else
+                {
+                    RunNonPredictiveAlgorithm(evt, mobileTerminal);
+                }
+               
                 return;
             }
         }
@@ -105,20 +108,21 @@ namespace VerticalHandoverPrediction.Cac
             
             var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
             
-            //default is the current state
             var nextState =  evt.Call.Service.GetState();
 
-            if(history.Any()) //to avoid throwing an exception
+            if(history.Any())
             {
-                //find the history of the user and compute frequency table
+                
                 var group = history
                     .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
                     .Select(x => x.SessionSequence)
                     .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))
                     .Select(x => x.Skip(1).Take(2))
-                    .Where(x => x.StartsWith(new List<MobileTerminalState>{evt.Call.Service.GetState()}))
+                    .Where(x => x.StartsWith(new List<MobileTerminalState>{evt.Call.Service.GetState()})                  )
                     .SelectMany(x => x.Skip(1))
+                    .Where(x => x != MobileTerminalState.Idle)
                     .GroupBy(x => x);
+                   
                 
                 //If group is empty it means prediction has failed
                 if(!group.Any()) 
@@ -144,12 +148,7 @@ namespace VerticalHandoverPrediction.Cac
                         }
                         Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
                     }
-
-                    //if the nextstate predicted was not idle state
-                    if(prediction.Key != MobileTerminalState.Idle)
-                    {
-                        nextState = prediction.Key;
-                    } 
+                    nextState = prediction.Key;
                 }
             }
 

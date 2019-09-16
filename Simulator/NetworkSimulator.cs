@@ -28,6 +28,7 @@ namespace VerticalHandoverPrediction.Simulator
         private static NetworkSimulator instance = null;
         private static readonly object padlock = new object();
         public PriorityQueue<IEvent> EventQueue { get; set; }
+        public bool UseCallLogs { get; set; } = true;
         private NetworkSimulator()
         {
             EventQueue = new PriorityQueue<IEvent>(new DateTimeComparer());
@@ -48,7 +49,7 @@ namespace VerticalHandoverPrediction.Simulator
             }
         }
 
-        public void Run(int n, bool test)
+        public void Run(int n, bool test, bool predictive)
         {
             if(test){
                 //HetNet._HetNet.RandomCallsGenerated += n;
@@ -101,12 +102,12 @@ namespace VerticalHandoverPrediction.Simulator
                 HetNet._HetNet.Reset();
             }
             
-            ServeQueue();
+            ServeQueue(predictive);
         }
 
-        private void ServeQueue()
+        private void ServeQueue(bool predictive)
         {   
-            var cac = new Cac.Cac();
+            var cac = new Cac.Cac(predictive);
             while(EventQueue.Any())
             {
                 var @event = EventQueue.Dequeue();
