@@ -4,7 +4,7 @@ using System.Linq;
 using System;
 using VerticalHandoverPrediction.Mobile;
 
-namespace VerticalHandoverPrediction.CallAdmissionControl
+namespace VerticalHandoverPrediction.Cac
 {
     public static class LinqExtensions
     {

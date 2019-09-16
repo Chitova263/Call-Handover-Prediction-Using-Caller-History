@@ -2,9 +2,7 @@ using System.Linq;
 using VerticalHandoverPrediction.Mobile;
 using VerticalHandoverPrediction.Network;
 using VerticalHandoverPrediction.Simulator;
-using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
-using Serilog;
 using System;
 using static MoreLinq.Extensions.StartsWithExtension;
 using System.Collections.Generic;
@@ -42,7 +40,7 @@ namespace VerticalHandoverPrediction.Cac
                 if(services.Contains(evt.Call.Service))
                 {
                     HetNet._HetNet.CallStartedEventsRejectedWhenNotIdle++;
-                    Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
+                    //Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
                     return;
                 }
 
@@ -74,7 +72,7 @@ namespace VerticalHandoverPrediction.Cac
                 //----------------
                 if(mobileTerminal.Activated)
                 {
-                    Log.Warning("Session Already Terminated");
+                    //Log.Warning("Session Already Terminated");
                     HetNet._HetNet.CallStartedEventsRejectedWhenIdle++;
                     return;
                 }
@@ -137,7 +135,7 @@ namespace VerticalHandoverPrediction.Cac
 
                     //If There are ties it takes the last item in the history : Fix this, what decision is made in that case
                     
-                    group.Dump();
+                    //group.Dump();
 
                     foreach(var grp in group )
                     {
@@ -146,7 +144,7 @@ namespace VerticalHandoverPrediction.Cac
                             prediction = grp;
                             max = prediction.Count();
                         }
-                        Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+                        //Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
                     }
                     nextState = prediction.Key;
                 }
@@ -179,7 +177,7 @@ namespace VerticalHandoverPrediction.Cac
                     {
                         //Successful Prediction means 1. predicted state was not idle 2. call ends up being admited as predicted
                         HetNet._HetNet.SuccessfulPredictions++;
-                        Log.Information("----- Successful prediction");
+                        //Log.Information("----- Successful prediction");
                     } 
                     return;
                 }

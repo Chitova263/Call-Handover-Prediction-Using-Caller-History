@@ -134,7 +134,7 @@ namespace VerticalHandoverPrediction.Simulator
                     if(call is null) 
                     {
                         HetNet._HetNet.CallEndedEventsRejected++;
-                        Log.Warning($"CallStartedEventCorresponding o this {nameof(CallEndedEvent)} was rejected");
+                        //Log.Warning($"CallStartedEventCorresponding o this {nameof(CallEndedEvent)} was rejected");
                     } 
                     else
                     {
