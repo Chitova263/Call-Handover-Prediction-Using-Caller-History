@@ -1,21 +1,22 @@
 using System;
+using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
 
 namespace VerticalHandoverPrediction.Simulator
 {
-    public class CallEndedEvent: IEvent
+    public class EndEvent: IEvent
     {
         public Guid EventId { get;  set;}
         public Guid CallId { get;  set; }
         public Guid MobileTerminalId { get; set; }
         public DateTime Time { get; set; }
+    }
 
-        public CallEndedEvent(Guid callId, Guid mobileTerminalId, DateTime time)
+    public class EndEventMap : ClassMap<EndEvent>
+    {
+        public EndEventMap()
         {
-            EventId = Guid.NewGuid();
-            CallId = callId;
-            MobileTerminalId = mobileTerminalId;
-            Time = time;
+            AutoMap();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using CsvHelper.Configuration.Attributes;
 using VerticalHandoverPrediction.CallSession;
 
 namespace VerticalHandoverPrediction.Simulator
@@ -6,13 +7,13 @@ namespace VerticalHandoverPrediction.Simulator
     public class CallStartedEvent : IEvent
     {
         public Guid EventId { get;  }
-        public DateTime Time { get;  }
+        public DateTime Time { get; set; }
         public ICall Call { get; }
 
-        public CallStartedEvent(DateTime startTime,  ICall call)
+        public CallStartedEvent(DateTime time,  ICall call)
         {
             EventId = Guid.NewGuid();
-            Time = startTime;
+            Time = time;
             Call = call;
         }
     }

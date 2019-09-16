@@ -5,12 +5,13 @@ using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Network;
 using VerticalHandoverPrediction.Simulator;
+using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Mobile
 {
     public class MobileTerminal : IMobileTerminal
     {
-        public Guid MobileTerminalId { get; private set; }
+        public Guid MobileTerminalId { get; set; }
         public Guid SessionId { get; private set; }
         public Modality Modality { get; private set; }
         public MobileTerminalState State { get; private set; }
@@ -43,10 +44,6 @@ namespace VerticalHandoverPrediction.Mobile
                 .FirstOrDefault(x => x.RatId == session.RatId);
 
             var call = session.ActiveCalls.FirstOrDefault(x => x.CallId == evt.CallId);
-
-            if(call is null) {
-                throw new VerticalHandoverPredictionException("EEEEEEEEEEEEEEEE");
-            }
 
             rat.RealeaseNetworkResources(call.Service.ComputeRequiredNetworkResources());
 
@@ -131,14 +128,20 @@ namespace VerticalHandoverPrediction.Mobile
 
             var callHistory = new CallLog
             {
+                UserId = MobileTerminalId,
                 SessionId = session.SessionId,
-                Start = session.Start,
-                RatId = session.RatId,
-                End = session.End,
-                SessionSequence = session.SessionSequence,
+                Duration =  session.End.Subtract(session.Start),  
+                //RatId = session.RatId,
+                SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };
 
+            this.Activated = false;
+
             this.CallHistoryLogs.Add(callHistory);
+
+            Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
+
+            HetNet._HetNet.TotalSessions++;
         }
 
         public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)

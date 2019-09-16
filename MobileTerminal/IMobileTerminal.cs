@@ -7,7 +7,7 @@ namespace VerticalHandoverPrediction.Mobile
 {
     public interface IMobileTerminal
     {
-        Guid MobileTerminalId { get; }
+        Guid MobileTerminalId { get; set; }
         Guid SessionId { get; }
         Modality Modality { get; }
         MobileTerminalState State { get; }

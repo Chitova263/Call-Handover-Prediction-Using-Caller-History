@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MathNet.Numerics.Distributions;
 using Medallion.Collections;
 using Serilog;
 using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Commands;
 using VerticalHandoverPrediction.Network;
+using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Simulator
 {
@@ -47,39 +48,59 @@ namespace VerticalHandoverPrediction.Simulator
             }
         }
 
-        public void Run(int n)
+        public void Run(int n, bool test)
         {
-            HetNet._HetNet.RandomCallsGenerated += n;
+            if(test){
+                //HetNet._HetNet.RandomCallsGenerated += n;
             
-            foreach (var mt in HetNet._HetNet.MobileTerminals)
-            {
-                mt.Activated = false;
+                foreach (var mt in HetNet._HetNet.MobileTerminals)
+                {
+                    mt.Activated = false;
+                }
+
+                //Random rnd = new Random();
+                var poisson = new Poisson(12); 
+                var exponential = new Exponential(0.01);
+
+                var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
+            
+                for (int i = 0; i < n; i++)
+                {
+                    var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
+                    
+                    var callStartedEvent = new CallStartedEvent(
+                        DateTime.Now.AddMinutes(poisson.Sample()*120), //0.1 calls per unit time
+                        call
+                    );
+
+                    EventQueue.Enqueue(callStartedEvent);
+                    
+                    var callEndedEvent = new CallEndedEvent(
+                        call.CallId,
+                        call.MobileTerminalId,
+                        callStartedEvent.Time.AddMinutes(exponential.Sample())
+                    );
+
+                    EventQueue.Enqueue(callEndedEvent);
+                }
             }
-
-            Random rnd = new Random();
-           
-            var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
-           
-            for (int i = 0; i < n; i++)
+            else
             {
-                var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
-                
-                var callStartedEvent = new CallStartedEvent(
-                    DateTime.Now.AddMinutes(rnd.NextDouble() * 100),
-                    call
-                );
-
-                EventQueue.Enqueue(callStartedEvent);
-                
-                var callEndedEvent = new CallEndedEvent(
-                    call.CallId,
-                    call.MobileTerminalId,
-                    callStartedEvent.Time.AddMinutes(rnd.NextDouble() * 100)
-                );
-
-                EventQueue.Enqueue(callEndedEvent);
+                var startEvents = Utils.CsvUtils._Instance.Read<StartEventMap ,StartEvent>($"{Environment.CurrentDirectory}/start.csv");
+                var endEvents = Utils.CsvUtils._Instance.Read<EndEventMap ,EndEvent>($"{Environment.CurrentDirectory}/end.csv");
+                foreach (var evt in startEvents)
+                {
+                    EventQueue.Enqueue(new CallStartedEvent(evt.Time, new Call(evt.MobileTerminalId, evt.Service, evt.CallId)));
+                }
+                foreach (var evt in endEvents)
+                {
+                   EventQueue.Enqueue(new CallEndedEvent(evt.CallId, evt.MobileTerminalId, evt.Time));
+                }
+                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
+                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
+                HetNet._HetNet.Reset();
             }
-
+            
             ServeQueue();
         }
 
@@ -89,6 +110,7 @@ namespace VerticalHandoverPrediction.Simulator
             while(EventQueue.Any())
             {
                 var @event = EventQueue.Dequeue();
+              
                 if(@event.GetType() == typeof(CallStartedEvent))
                 {
                     var evt = (CallStartedEvent)@event;
@@ -115,6 +137,7 @@ namespace VerticalHandoverPrediction.Simulator
                     } 
                     else
                     {
+                        Utils.CsvUtils._Instance.Write<CallEndedEventMap, CallEndedEvent>(evt, $"{Environment.CurrentDirectory}/end.csv");
                         mobileTerminal.EndCall(evt);
                     }
                 }

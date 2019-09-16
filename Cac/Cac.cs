@@ -21,6 +21,11 @@ namespace VerticalHandoverPrediction.Cac
 
         public void AdmitCall(CallStartedEvent evt)
         {
+            if (evt is null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
+            }
+
             var mobileTerminal = HetNet._HetNet.MobileTerminals
                 .FirstOrDefault(x => x.MobileTerminalId == evt.Call.MobileTerminalId);
             
@@ -39,6 +44,9 @@ namespace VerticalHandoverPrediction.Cac
                     Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
                     return;
                 }
+
+                //Log to csv
+                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
 
                 //------------------------------------------------------------------------------------------------
 
@@ -75,11 +83,14 @@ namespace VerticalHandoverPrediction.Cac
                 mobileTerminal.Activated = true;
 
                 HetNet._HetNet.CallsGenerated++;
+
+                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
+
                 HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
                 
                 //---------------- Refactor to choose scheme to use when simulator is started
-                RunNonPredictiveAlgorithm(evt, mobileTerminal);
-                //RunPredictiveAlgorithm(evt, mobileTerminal);
+                //RunNonPredictiveAlgorithm(evt, mobileTerminal);
+                RunPredictiveAlgorithm(evt, mobileTerminal);
                 //---------------- 
                 
                 return;
@@ -88,19 +99,22 @@ namespace VerticalHandoverPrediction.Cac
 
         private void RunPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            var callHistory = mobileTerminal.CallHistoryLogs
-                .Select(x => x.SessionSequence)
-                .ToList();
+            //var callHistory = mobileTerminal.CallHistoryLogs
+            //    .Select(x => x.SessionSequence)
+            //    .ToList();
             
-            var nextState =  default(MobileTerminalState);
-            if(callHistory.Any()) 
+            var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
+            
+            //default is the current state
+            var nextState =  evt.Call.Service.GetState();
+
+            if(history.Any()) //to avoid throwing an exception
             {
-                nextState = evt.Call.Service.GetState();
-            }
-            else
-            {
-                //Algorithm to predict next state
-                var group = callHistory
+                //find the history of the user and compute frequency table
+                var group = history
+                    .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
+                    .Select(x => x.SessionSequence)
+                    .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))
                     .Select(x => x.Skip(1).Take(2))
                     .Where(x => x.StartsWith(new List<MobileTerminalState>{evt.Call.Service.GetState()}))
                     .SelectMany(x => x.Skip(1))
@@ -110,10 +124,10 @@ namespace VerticalHandoverPrediction.Cac
                 if(!group.Any()) 
                 {
                     HetNet._HetNet.FailedPredictions++;
-                    nextState = evt.Call.Service.GetState();
                 }
                 else
                 {
+                    //continue to compute frequency table
                     var prediction = default(IGrouping<MobileTerminalState, MobileTerminalState>);
                     var max = 0;
 
@@ -131,20 +145,11 @@ namespace VerticalHandoverPrediction.Cac
                         Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
                     }
 
-                    foreach( var grp in group )
+                    //if the nextstate predicted was not idle state
+                    if(prediction.Key != MobileTerminalState.Idle)
                     {
-                        //Generate Excell File With Frequency Table
-                        Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
-                    }
-
-                    nextState = prediction.Key;
-                }
-            
-                //What happens if nextState is Idle
-                if(nextState == MobileTerminalState.Idle)
-                {
-                    //Fix program goes into an unstable state
-                    throw new VerticalHandoverPredictionException("Next state predicted is idle");
+                        nextState = prediction.Key;
+                    } 
                 }
             }
 
@@ -171,8 +176,9 @@ namespace VerticalHandoverPrediction.Cac
                 if(requiredNetworkResources <= rat.AvailableNetworkResources())
                 {
                     StartNewSessionAndAdmitCall(evt, mobileTerminal, rat);
-                    if(!callHistory.Any()) 
+                    if(evt.Call.Service.GetState() != nextState) 
                     {
+                        //Successful Prediction means 1. predicted state was not idle 2. call ends up being admited as predicted
                         HetNet._HetNet.SuccessfulPredictions++;
                         Log.Information("----- Successful prediction");
                     } 

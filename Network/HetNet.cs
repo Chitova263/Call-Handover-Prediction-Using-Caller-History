@@ -27,8 +27,17 @@ namespace VerticalHandoverPrediction.Network
         public int CallsGenerated { get; set; }
         public int CallStartedEventsRejectedWhenIdle { get; set; }
         public int CallStartedEventsRejectedWhenNotIdle { get; set; }
-        public int CallStartedEventsRejected => CallStartedEventsRejectedWhenIdle + CallStartedEventsRejectedWhenNotIdle + BlockedCalls;
+        public int CallStartedEventsRejected
+        {
+            get
+            {
+                return CallStartedEventsRejectedWhenIdle + CallStartedEventsRejectedWhenNotIdle + BlockedCalls;
+            }
+            set{}
+        }
+
         public int CallEndedEventsRejected { get; set; }
+        public int TotalSessions { get; set; }
        
 
         private HetNet()
@@ -54,6 +63,23 @@ namespace VerticalHandoverPrediction.Network
                 }
             }
         }
+
+        public void Reset() 
+        {
+            BlockedUsingPredictiveScheme =0;
+            BlockedCalls = 0;
+            CallEndedEventsRejected = 0;
+            CallStartedEventsRejectedWhenIdle =0;
+            CallStartedEventsRejectedWhenNotIdle =0;
+            CallsGenerated =0;
+            CallsToBePredictedInitialRatSelection = 0;
+            FailedPredictions = 0;
+            RandomCallsGenerated = 0;
+            SuccessfulPredictions = 0;
+            TotalSessions = 0;
+            VerticalHandovers = 0;
+            CallStartedEventsRejected = 0;
+        } 
 
         public void AddRats(IEnumerable<IRat> rats)
         {
@@ -138,72 +164,22 @@ namespace VerticalHandoverPrediction.Network
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice
-                }, 20,  "RAT 1 (Voice)"),
+                }, 100,  "RAT 1 (Voice)"),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Data
-                }, 20, "RAT 2 (Data)"),
+                }, 100, "RAT 2 (Data)"),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 20,  "RAT 3 (Voice - Data)"),
+                }, 100,  "RAT 3 (Voice - Data)"),
                 Rat.CreateRat(new List<Service>
                 {
                     Service.Voice, Service.Video, Service.Data
-                }, 20,  "RAT 4 (Voice - Data - Video)"),
+                }, 100,  "RAT 4 (Voice - Data - Video)"),
             };
 
             AddRats(rats);
-        }
-
-        public void HandoverSessionToNewRat(ICall call, ISession session, IRat srcRat, IRat destRat, IMobileTerminal mobileTerminal)
-        {
-            if (call is null)
-            {
-                throw new ArgumentNullException(nameof(call));
-            }
-
-            if (session is null)
-            {
-                throw new ArgumentNullException(nameof(session));
-            }
-
-            if (srcRat is null)
-            {
-                throw new ArgumentNullException(nameof(srcRat));
-            }
-
-            if (destRat is null)
-            {
-                throw new ArgumentNullException(nameof(destRat));
-            }
-
-            if (mobileTerminal is null)
-            {
-                throw new ArgumentNullException(nameof(mobileTerminal));
-            }
-
-            srcRat.RemoveSession(session);
-
-            var services = session.ActiveCalls
-                .Select(x => x.Service);
-
-            var networkResources = 0;
-
-            foreach (var service in services)
-            {
-                networkResources += service.ComputeRequiredNetworkResources();
-            }
-
-            //srcRat.SetUsedResources(srcRat.UsedNetworkResources - networkResources);
-
-            //session.SetRatId(destRat.RatId);
-
-            //destRat.SetUsedResources(destRat.UsedNetworkResources + networkResources);
-
-            //destRat.AddSession(session);
-
-            //destRat.AdmitIncomingCallToOngoingSession(call, session, mobileTerminal);
         }
     }
 }
