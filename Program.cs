@@ -2,6 +2,7 @@
 using Serilog;
 using VerticalHandoverPrediction.Simulator;
 using VerticalHandoverPrediction.Utils;
+using System;
 
 namespace VerticalHandoverPrediction
 {
@@ -9,26 +10,29 @@ namespace VerticalHandoverPrediction
     {
         static void Main(string[] args)
         {
-            //Setup Logger
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-
-            //Generate Rats    
+  
             HetNet._HetNet.GenerateRats();
 
-            //Generate users
             HetNet._HetNet.GenerateUsers(10);
             
-           
-            NetworkSimulator._NetworkSimulator.Run(10, true);
-           
-        
+            Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
+            Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
+            
+            for (int i = 0; i < 10; i++)
+            {
+                NetworkSimulator._NetworkSimulator.Run(200, true, false);
+            }
+            NetworkSimulator._NetworkSimulator.UseCallLogs = false;
+            
+            NetworkSimulator._NetworkSimulator.Run(10, false, false);
             HetNet._HetNet.Dump();
+            NetworkSimulator._NetworkSimulator.UseCallLogs = false;
 
-            NetworkSimulator._NetworkSimulator.Run(10, false);
-
+            NetworkSimulator._NetworkSimulator.Run(10, false, true);
             HetNet._HetNet.Dump();
         }
     }

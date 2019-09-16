@@ -5,7 +5,6 @@ using VerticalHandoverPrediction.CallAdmissionControl;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Network;
 using VerticalHandoverPrediction.Simulator;
-using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Mobile
 {
@@ -131,7 +130,7 @@ namespace VerticalHandoverPrediction.Mobile
                 UserId = MobileTerminalId,
                 SessionId = session.SessionId,
                 Duration =  session.End.Subtract(session.Start),  
-                //RatId = session.RatId,
+            
                 SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };
 
@@ -139,8 +138,10 @@ namespace VerticalHandoverPrediction.Mobile
 
             this.CallHistoryLogs.Add(callHistory);
 
-            Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
-
+            if(Simulator.NetworkSimulator._NetworkSimulator.UseCallLogs){
+                 Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
+            }
+           
             HetNet._HetNet.TotalSessions++;
         }
 
