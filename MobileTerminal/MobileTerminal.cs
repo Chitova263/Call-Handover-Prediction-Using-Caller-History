@@ -45,10 +45,6 @@ namespace VerticalHandoverPrediction.Mobile
 
             var call = session.ActiveCalls.FirstOrDefault(x => x.CallId == evt.CallId);
 
-            if(call is null) {
-                throw new VerticalHandoverPredictionException("EEEEEEEEEEEEEEEE");
-            }
-
             rat.RealeaseNetworkResources(call.Service.ComputeRequiredNetworkResources());
 
             session.ActiveCalls.Remove(call);
@@ -135,13 +131,18 @@ namespace VerticalHandoverPrediction.Mobile
                 UserId = MobileTerminalId,
                 SessionId = session.SessionId,
                 Duration =  session.End.Subtract(session.Start),  
-                RatId = session.RatId,
+                //RatId = session.RatId,
                 SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };
 
-            //Writer._Writer.CsvWriter.WriteRecord(callHistory);
+            this.Activated = false;
 
             this.CallHistoryLogs.Add(callHistory);
+
+            //Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
+            //Utils.CsvUtils._Instance.Write(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
+
+            HetNet._HetNet.TotalSessions++;
         }
 
         public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)

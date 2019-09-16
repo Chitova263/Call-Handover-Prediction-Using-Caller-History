@@ -9,8 +9,6 @@ using System;
 using static MoreLinq.Extensions.StartsWithExtension;
 using System.Collections.Generic;
 using VerticalHandoverPrediction.Utils;
-using System.IO;
-using CsvHelper;
 
 namespace VerticalHandoverPrediction.Cac
 {
@@ -23,6 +21,11 @@ namespace VerticalHandoverPrediction.Cac
 
         public void AdmitCall(CallStartedEvent evt)
         {
+            if (evt is null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
+            }
+
             var mobileTerminal = HetNet._HetNet.MobileTerminals
                 .FirstOrDefault(x => x.MobileTerminalId == evt.Call.MobileTerminalId);
             
@@ -41,6 +44,9 @@ namespace VerticalHandoverPrediction.Cac
                     Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
                     return;
                 }
+
+                //Log to csv
+                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
 
                 //------------------------------------------------------------------------------------------------
 
@@ -77,11 +83,14 @@ namespace VerticalHandoverPrediction.Cac
                 mobileTerminal.Activated = true;
 
                 HetNet._HetNet.CallsGenerated++;
+
+                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
+
                 HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
                 
                 //---------------- Refactor to choose scheme to use when simulator is started
-                //RunNonPredictiveAlgorithm(evt, mobileTerminal);
-                RunPredictiveAlgorithm(evt, mobileTerminal);
+                RunNonPredictiveAlgorithm(evt, mobileTerminal);
+                //RunPredictiveAlgorithm(evt, mobileTerminal);
                 //---------------- 
                 
                 return;
@@ -101,19 +110,9 @@ namespace VerticalHandoverPrediction.Cac
             }
             else
             {
-                var x = new List<CallLog>();
-                var str = @"/Users/DjMadd/Documents/Thesis/VerticalHandoverPrediction";
-                using (var reader = new StreamReader($"{str}/jkby.csv"))
-                using (var csv = new CsvReader(reader))
-                {
-                    var records = csv.GetRecords<CallLog>();
-                    x = records.ToList();
-                }
-               
-
                 //Algorithm to predict next state
-                //var group = callHistory
-                var group = x
+                var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
+                var group = history
                     .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
                     .Select(x => x.SessionSequence)
                     .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))

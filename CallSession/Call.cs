@@ -16,6 +16,13 @@ namespace VerticalHandoverPrediction.CallSession
             Service = service;
         }
 
+        public Call(Guid mobileTerminalId, Service service, Guid callId)
+        {
+            MobileTerminalId = mobileTerminalId;
+            Service = service;
+            CallId = callId;
+        }
+
         public static Call StartCall(Guid mobileTerminalId, Service service)
         {
             return new Call(mobileTerminalId, service);
