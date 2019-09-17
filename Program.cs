@@ -27,18 +27,32 @@ namespace VerticalHandoverPrediction
                 NetworkSimulator._NetworkSimulator.Run(500, true, false);
             }
 
-            NetworkSimulator._NetworkSimulator.UseCallLogs = false;
+           
             
-            NetworkSimulator._NetworkSimulator.Run(10, false, false);
+            while(true)
+            {
+                var input = int.Parse(Console.ReadLine());
+                if(input == -1) break;
 
-            System.Console.WriteLine(HetNet._HetNet.CallsGenerated);
-            System.Console.WriteLine("NonPredictive      Predictive");
-            System.Console.Write(HetNet._HetNet.VerticalHandovers + "         ");
-            
-            NetworkSimulator._NetworkSimulator.Run(10, false, true);
-            System.Console.Write(HetNet._HetNet.VerticalHandovers);
+                for (int i = 0; i < 10; i++)
+                {
+                    NetworkSimulator._NetworkSimulator.Run(input, true, false);
+                }
 
-            System.Console.WriteLine();
+                NetworkSimulator._NetworkSimulator.UseCallLogs = false;
+              
+                //None Predictive Scheme
+                NetworkSimulator._NetworkSimulator.Run(10, false, false);
+                var calls = HetNet._HetNet.CallsGenerated;
+                var nonPredictive = HetNet._HetNet.VerticalHandovers;
+                //PredictiveScheme
+                NetworkSimulator._NetworkSimulator.Run(10, false, true);
+                var predictive = HetNet._HetNet.VerticalHandovers;
+                System.Console.WriteLine(calls + "   " + nonPredictive + "   "+ predictive);
+
+                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
+                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
+            }
         }
     }
 }
