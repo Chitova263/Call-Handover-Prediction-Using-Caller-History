@@ -1,19 +1,11 @@
-using System.Collections.Generic;
-using VerticalHandoverPrediction.CallSession;
-using System.Linq;
-using System;
-using VerticalHandoverPrediction.Mobile;
-
 namespace VerticalHandoverPrediction.Cac
 {
+    using System.Collections.Generic;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Mobile;
+
     public static class LinqExtensions
     {
-        public static ISession FindSessionWithId(this IEnumerable<ISession> sessions, Guid id)
-        {
-            var session = sessions.FirstOrDefault(x => x.SessionId == id );
-            return session;
-        }
-
         public static int ComputeRequiredNetworkResources(this Service service)
         {
             var utlizedCapacity = 0;

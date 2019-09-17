@@ -28,7 +28,6 @@ namespace VerticalHandoverPrediction.Cac
             var mobileTerminal = HetNet.Instance.MobileTerminals
                 .FirstOrDefault(x => x.MobileTerminalId == evt.Call.MobileTerminalId);
             
-            //IF mobile terminal is not idle
             if(mobileTerminal.State != MobileTerminalState.Idle)
             {
                 var session = HetNet.Instance.Rats

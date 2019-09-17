@@ -1,34 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MathNet.Numerics.Distributions;
-using Medallion.Collections;
-using Serilog;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Network;
-using VerticalHandoverPrediction.Simulator.Events;
-using VerticalHandoverPrediction.Utils;
-
 namespace VerticalHandoverPrediction.Simulator
 {
-    public class DateTimeComparer : IComparer<IEvent>
-    {
-        public int Compare(IEvent x, IEvent y)
-        {
-            if (x.Time > y.Time)
-                return 1;
-            if (x.Time < y.Time)
-                return -1;
-            else
-                return 0;
-        }
-    }
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using MathNet.Numerics.Distributions;
+    using Medallion.Collections;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Network;
+    using VerticalHandoverPrediction.Simulator.Events;
+    using VerticalHandoverPrediction.Simulator.Extensions;
 
     public sealed class NetworkSimulator 
     {
         private static NetworkSimulator instance = null;
         private static readonly object padlock = new object();
-        public PriorityQueue<IEvent> EventQueue { get; set; }
+        public PriorityQueue<IEvent> EventQueue { get; }
         public bool UseCallLogs { get; set; } = true;
         private NetworkSimulator()
         {
@@ -53,8 +39,7 @@ namespace VerticalHandoverPrediction.Simulator
         public void Run(int n, bool test, bool predictive)
         {
             if(test){
-                //HetNet._HetNet.RandomCallsGenerated += n;
-            
+                
                 foreach (var mobileTerminal in HetNet.Instance.MobileTerminals)
                 {
                     mobileTerminal.SetActive(false);
