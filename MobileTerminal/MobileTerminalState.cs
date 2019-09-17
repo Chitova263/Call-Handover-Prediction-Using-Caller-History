@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
 namespace VerticalHandoverPrediction.Mobile
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+
     [JsonConverter(typeof(StringEnumConverter))]
     public enum MobileTerminalState
     {

@@ -70,7 +70,7 @@ namespace VerticalHandoverPrediction.Cac
             else
             {
                 //----------------
-                if(mobileTerminal.Activated)
+                if(mobileTerminal.IsActive)
                 {
                     //Log.Warning("Session Already Terminated");
                     HetNet._HetNet.CallStartedEventsRejectedWhenIdle++;
@@ -78,7 +78,7 @@ namespace VerticalHandoverPrediction.Cac
                 }
                 //----------------
 
-                mobileTerminal.Activated = true;
+                mobileTerminal.SetActive(true);
 
                 HetNet._HetNet.CallsGenerated++;
 
