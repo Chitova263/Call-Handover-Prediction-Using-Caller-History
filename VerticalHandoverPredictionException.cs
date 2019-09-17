@@ -1,8 +1,7 @@
-using System;
-using System.Runtime.Serialization;
-
 namespace VerticalHandoverPrediction
 {
+    using System;
+
     [Serializable]
     internal class VerticalHandoverPredictionException : Exception
     {
@@ -11,14 +10,6 @@ namespace VerticalHandoverPrediction
         }
 
         public VerticalHandoverPredictionException(string message) : base(message)
-        {
-        }
-
-        public VerticalHandoverPredictionException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-
-        protected VerticalHandoverPredictionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
