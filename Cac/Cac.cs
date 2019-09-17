@@ -211,17 +211,17 @@ namespace VerticalHandoverPrediction.Cac
 
         private void StartNewSessionAndAdmitCall(CallStartedEvent evt, IMobileTerminal mobileTerminal, IRat rat)
         {
-            var session = Session.StartSession(rat.RatId, evt.Time);
+            var session = new Session(rat.RatId, evt.Time);
 
             mobileTerminal.SetSessionId(session.SessionId);
 
             rat.TakeNetworkResources(evt.Call.Service.ComputeRequiredNetworkResources());
 
-            session.ActiveCalls.Add(evt.Call);
+            session.AddToActiveCalls(evt.Call);
 
             var state = mobileTerminal.UpdateMobileTerminalState(session);
 
-            session.SessionSequence.Add(state);
+            session.AddToSessionSequence(state);
 
             rat.AddSession(session);
         }

@@ -59,11 +59,11 @@ namespace VerticalHandoverPrediction.Mobile
 
             rat.RealeaseNetworkResources(call.Service.ComputeRequiredNetworkResources());
 
-            session.ActiveCalls.Remove(call);
+            session.RemoveFromActiveCalls(call);
 
             var state = UpdateMobileTerminalState(session);
 
-            session.SessionSequence.Add(state);
+            session.AddToSessionSequence(state);
 
             if (state == MobileTerminalState.Idle)
             {

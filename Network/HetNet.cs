@@ -122,11 +122,11 @@ namespace VerticalHandoverPrediction.Network
 
                     target.TakeNetworkResources(requiredNetworkResouces);
 
-                    session.ActiveCalls.Add(call);
+                    session.AddToActiveCalls(call);
 
                     var state = mobileTerminal.UpdateMobileTerminalState(session);
             
-                    session.SessionSequence.Add(state);
+                    session.AddToSessionSequence(state);
 
                     target.AddSession(session);
 
