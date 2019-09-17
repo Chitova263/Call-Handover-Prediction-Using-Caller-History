@@ -1,7 +1,6 @@
-using System;
-
 namespace VerticalHandoverPrediction.CallSession
 {
+    using System;
     public interface ICall
     {
         Guid CallId { get; }

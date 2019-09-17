@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace VerticalHandoverPrediction.Network
+namespace VerticalHandoverPrediction
 {
     [Serializable]
     internal class VerticalHandoverPredictionException : Exception

@@ -67,7 +67,7 @@ namespace VerticalHandoverPrediction.Simulator
             
                 for (int i = 0; i < n; i++)
                 {
-                    var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
+                    var call = new Call(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
                     
                     var callStartedEvent = new CallStartedEvent(
                         DateTime.Now.AddMinutes(poisson.Sample()*120), //0.1 calls per unit time

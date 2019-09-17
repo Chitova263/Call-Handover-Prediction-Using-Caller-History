@@ -29,11 +29,11 @@ namespace VerticalHandoverPrediction.Mobile
 
         public void AddCallLog(CallLog log)
         {
-            if (log is null)
+            if (log == null)
             {
                 throw new VerticalHandoverPredictionException($"{nameof(log)} is invalid");
             }
-
+                
             _callLogs.Add(log);
         }
 
@@ -43,6 +43,11 @@ namespace VerticalHandoverPrediction.Mobile
 
         public void EndCall(CallEndedEvent evt)
         {
+            if (evt == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
+            }
+
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
                 .FirstOrDefault(x => x.SessionId == this.SessionId);
@@ -63,15 +68,16 @@ namespace VerticalHandoverPrediction.Mobile
             if (state == MobileTerminalState.Idle)
             {
                 EndSession(session, evt.Time, rat);
-                return;
             }
-
-            call = null;
-            session = null;
         }
 
         public MobileTerminalState UpdateMobileTerminalState(ISession session)
         {
+            if (session == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(session)} is null");
+            }
+                
             var state = MobileTerminalState.Idle;
             var ongoingServices = session.ActiveCalls.Select(x => x.Service);
             if (ongoingServices.Count() == 1)
@@ -128,6 +134,16 @@ namespace VerticalHandoverPrediction.Mobile
 
         private void EndSession(ISession session, DateTime end, IRat rat)
         {
+            if (session == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(session)} is null");
+            }
+
+            if (rat == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(rat)} is null");
+            }
+
             rat.RemoveSession(session);
             session.SetEndTime(end);
 
@@ -138,7 +154,6 @@ namespace VerticalHandoverPrediction.Mobile
                 UserId = MobileTerminalId,
                 SessionId = session.SessionId,
                 Duration = session.End.Subtract(session.Start),
-
                 SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };
 
@@ -156,6 +171,10 @@ namespace VerticalHandoverPrediction.Mobile
 
         public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)
         {
+            if (activeCalls == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(activeCalls)} is null");
+            }
 
             if (activeCalls.Count() == 1 || activeCalls.Count() == 0 || activeCalls.Count() > 3)
             {

@@ -1,7 +1,6 @@
-using System;
-
 namespace VerticalHandoverPrediction.CallSession
 {
+    using System;
 
     public class Call : ICall
     {
@@ -9,23 +8,24 @@ namespace VerticalHandoverPrediction.CallSession
         public Guid MobileTerminalId { get; private set; }
         public Service Service { get; private set; }
 
-        private Call(Guid mobileTerminalId, Service service)
+        public Call(Guid mobileTerminalId, Service service)
         {
+            if(mobileTerminalId == Guid.Empty)
+                throw new VerticalHandoverPredictionException($"{nameof(mobileTerminalId)} is empty");
+
             CallId = Guid.NewGuid();
             MobileTerminalId = mobileTerminalId;
             Service = service;
         }
 
-        public Call(Guid mobileTerminalId, Service service, Guid callId)
+        public Call(Guid mobileTerminalId, Service service, Guid callId) : this(mobileTerminalId, service)
         {
-            MobileTerminalId = mobileTerminalId;
-            Service = service;
-            CallId = callId;
-        }
+            if(callId == Guid.Empty)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(callId)} is invalid");
+            }
 
-        public static Call StartCall(Guid mobileTerminalId, Service service)
-        {
-            return new Call(mobileTerminalId, service);
+            CallId = callId;
         }
     }
 }
