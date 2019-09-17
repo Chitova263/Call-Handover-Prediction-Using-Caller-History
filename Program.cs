@@ -1,7 +1,6 @@
 ﻿using VerticalHandoverPrediction.Network;
 using Serilog;
 using VerticalHandoverPrediction.Simulator;
-using VerticalHandoverPrediction.Utils;
 using System;
 
 namespace VerticalHandoverPrediction
