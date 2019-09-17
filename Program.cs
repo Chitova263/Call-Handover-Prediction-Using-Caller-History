@@ -14,9 +14,9 @@ namespace VerticalHandoverPrediction
                 .WriteTo.Console()
                 .CreateLogger();
   
-            HetNet._HetNet.GenerateRats();
+            HetNet.Instance.GenerateRats();
 
-            HetNet._HetNet.GenerateUsers(20);
+            HetNet.Instance.GenerateUsers(20);
             
             Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
             Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
@@ -42,11 +42,11 @@ namespace VerticalHandoverPrediction
               
                 //None Predictive Scheme
                 NetworkSimulator._NetworkSimulator.Run(10, false, false);
-                var calls = HetNet._HetNet.CallsGenerated;
-                var nonPredictive = HetNet._HetNet.VerticalHandovers;
+                var calls = HetNet.Instance.CallsGenerated;
+                var nonPredictive = HetNet.Instance.VerticalHandovers;
                 //PredictiveScheme
                 NetworkSimulator._NetworkSimulator.Run(10, false, true);
-                var predictive = HetNet._HetNet.VerticalHandovers;
+                var predictive = HetNet.Instance.VerticalHandovers;
                 System.Console.WriteLine(calls + "   " + nonPredictive + "   "+ predictive);
 
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");

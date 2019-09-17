@@ -54,7 +54,7 @@ namespace VerticalHandoverPrediction.Simulator
             if(test){
                 //HetNet._HetNet.RandomCallsGenerated += n;
             
-                foreach (var mobileTerminal in HetNet._HetNet.MobileTerminals)
+                foreach (var mobileTerminal in HetNet.Instance.MobileTerminals)
                 {
                     mobileTerminal.SetActive(false);
                 }
@@ -67,7 +67,7 @@ namespace VerticalHandoverPrediction.Simulator
             
                 for (int i = 0; i < n; i++)
                 {
-                    var call = new Call(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
+                    var call = new Call(HetNet.Instance.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
                     
                     var callStartedEvent = new CallStartedEvent(
                         DateTime.Now.AddMinutes(poisson.Sample()*120), //0.1 calls per unit time
@@ -99,7 +99,7 @@ namespace VerticalHandoverPrediction.Simulator
                 }
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
-                HetNet._HetNet.Reset();
+                HetNet.Instance.Reset();
             }
             
             ServeQueue(predictive);
@@ -121,11 +121,11 @@ namespace VerticalHandoverPrediction.Simulator
                 {
                     var evt = (CallEndedEvent)@event;
 
-                    var mobileTerminal = HetNet._HetNet.MobileTerminals
+                    var mobileTerminal = HetNet.Instance.MobileTerminals
                         .FirstOrDefault(x => x.MobileTerminalId == evt.MobileTerminalId);
                     
                     //Find if call was considered
-                    var call = HetNet._HetNet.Rats
+                    var call = HetNet.Instance.Rats
                         .SelectMany(x => x.OngoingSessions)
                         .SelectMany(x => x.ActiveCalls)
                         .FirstOrDefault(x => x.CallId == evt.CallId);
@@ -133,7 +133,7 @@ namespace VerticalHandoverPrediction.Simulator
                     //if no session contains this call then it was never considered
                     if(call is null) 
                     {
-                        HetNet._HetNet.CallEndedEventsRejected++;
+                        HetNet.Instance.CallEndedEventsRejected++;
                         //Log.Warning($"CallStartedEventCorresponding o this {nameof(CallEndedEvent)} was rejected");
                     } 
                     else

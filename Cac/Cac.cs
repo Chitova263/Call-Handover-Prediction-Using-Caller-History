@@ -1,15 +1,14 @@
-using System.Linq;
-using VerticalHandoverPrediction.Mobile;
-using VerticalHandoverPrediction.Network;
-using VerticalHandoverPrediction.Simulator;
-using VerticalHandoverPrediction.CallSession;
-using System;
-using static MoreLinq.Extensions.StartsWithExtension;
-using System.Collections.Generic;
-using VerticalHandoverPrediction.Utils;
-
 namespace VerticalHandoverPrediction.Cac
 {
+    using System.Linq;
+    using VerticalHandoverPrediction.Mobile;
+    using VerticalHandoverPrediction.Network;
+    using VerticalHandoverPrediction.Simulator;
+    using VerticalHandoverPrediction.CallSession;
+    using System;
+    using static MoreLinq.Extensions.StartsWithExtension;
+    using System.Collections.Generic;
+    using VerticalHandoverPrediction.Utils;
     public class Cac
     {
         public bool Predictive { get; set; }
@@ -25,13 +24,13 @@ namespace VerticalHandoverPrediction.Cac
                 throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
             }
 
-            var mobileTerminal = HetNet._HetNet.MobileTerminals
+            var mobileTerminal = HetNet.Instance.MobileTerminals
                 .FirstOrDefault(x => x.MobileTerminalId == evt.Call.MobileTerminalId);
             
             //IF mobile terminal is not idle
             if(mobileTerminal.State != MobileTerminalState.Idle)
             {
-                var session = HetNet._HetNet.Rats
+                var session = HetNet.Instance.Rats
                     .SelectMany(x => x.OngoingSessions)
                     .FirstOrDefault(x => x.SessionId == mobileTerminal.SessionId);
                 
@@ -39,7 +38,7 @@ namespace VerticalHandoverPrediction.Cac
                 var services = session.ActiveCalls.Select(x => x.Service);
                 if(services.Contains(evt.Call.Service))
                 {
-                    HetNet._HetNet.CallStartedEventsRejectedWhenNotIdle++;
+                    HetNet.Instance.CallStartedEventsRejectedWhenNotIdle++;
                     //Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
                     return;
                 }
@@ -50,9 +49,9 @@ namespace VerticalHandoverPrediction.Cac
                 //------------------------------------------------------------------------------------------------
 
 
-                HetNet._HetNet.CallsGenerated++;
+                HetNet.Instance.CallsGenerated++;
 
-                var rat = HetNet._HetNet.Rats
+                var rat = HetNet.Instance.Rats
                     .FirstOrDefault(x => x.RatId == session.RatId);
 
                 if(rat.CanAdmitNewCallToOngoingSession(session, evt.Call, mobileTerminal))
@@ -62,7 +61,7 @@ namespace VerticalHandoverPrediction.Cac
                     return;
                 }
 
-                HetNet._HetNet.Handover(evt.Call, session, mobileTerminal, rat);
+                HetNet.Instance.Handover(evt.Call, session, mobileTerminal, rat);
 
                 return;
             }
@@ -73,18 +72,18 @@ namespace VerticalHandoverPrediction.Cac
                 if(mobileTerminal.IsActive)
                 {
                     //Log.Warning("Session Already Terminated");
-                    HetNet._HetNet.CallStartedEventsRejectedWhenIdle++;
+                    HetNet.Instance.CallStartedEventsRejectedWhenIdle++;
                     return;
                 }
                 //----------------
 
                 mobileTerminal.SetActive(true);
 
-                HetNet._HetNet.CallsGenerated++;
+                HetNet.Instance.CallsGenerated++;
 
                 Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
 
-                HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
+                HetNet.Instance.CallsToBePredictedInitialRatSelection++;
                 
                 if(Predictive){
                     RunPredictiveAlgorithm(evt, mobileTerminal); 
@@ -125,7 +124,7 @@ namespace VerticalHandoverPrediction.Cac
                 //If group is empty it means prediction has failed
                 if(!group.Any()) 
                 {
-                    HetNet._HetNet.FailedPredictions++;
+                    HetNet.Instance.FailedPredictions++;
                 }
                 else
                 {
@@ -156,7 +155,7 @@ namespace VerticalHandoverPrediction.Cac
                 if(!services.Contains(service)) services.Add(service);
             }
 
-            var rats = HetNet._HetNet.Rats
+            var rats = HetNet.Instance.Rats
                 .Where(x => x.Services.ToHashSet().IsSupersetOf(services))
                 .OrderBy(x => x.Services.Count)
                 .ToList();
@@ -176,14 +175,14 @@ namespace VerticalHandoverPrediction.Cac
                     if(evt.Call.Service.GetState() != nextState) 
                     {
                         //Successful Prediction means 1. predicted state was not idle 2. call ends up being admited as predicted
-                        HetNet._HetNet.SuccessfulPredictions++;
+                        HetNet.Instance.SuccessfulPredictions++;
                         //Log.Information("----- Successful prediction");
                     } 
                     return;
                 }
             }
             //All Possible Rats Cannot Admit Call i.e [call in its predicted state]
-            HetNet._HetNet.BlockedUsingPredictiveScheme++;
+            HetNet.Instance.BlockedUsingPredictiveScheme++;
 
             //Try just accommodating the incoming call without predicting before blocking it
             RunNonPredictiveAlgorithm(evt, mobileTerminal);
@@ -192,7 +191,7 @@ namespace VerticalHandoverPrediction.Cac
 
         private void RunNonPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            var rats = HetNet._HetNet.Rats
+            var rats = HetNet.Instance.Rats
                 .Where(x => x.Services.Contains(evt.Call.Service))
                 .OrderBy(x => x.Services.Count)
                 .ToList();
@@ -205,7 +204,7 @@ namespace VerticalHandoverPrediction.Cac
                     return;
                 }
             }
-            HetNet._HetNet.BlockedCalls++;
+            HetNet.Instance.BlockedCalls++;
             return;
         }
 
