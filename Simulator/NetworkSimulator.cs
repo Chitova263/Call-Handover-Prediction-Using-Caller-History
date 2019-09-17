@@ -6,6 +6,7 @@ using Medallion.Collections;
 using Serilog;
 using VerticalHandoverPrediction.CallSession;
 using VerticalHandoverPrediction.Network;
+using VerticalHandoverPrediction.Simulator.Events;
 using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction.Simulator

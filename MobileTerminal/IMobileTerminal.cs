@@ -3,7 +3,7 @@ namespace VerticalHandoverPrediction.Mobile
     using System;
     using System.Collections.Generic;
     using VerticalHandoverPrediction.CallSession;
-    using VerticalHandoverPrediction.Simulator;
+    using VerticalHandoverPrediction.Simulator.Events;
 
     public interface IMobileTerminal
     {

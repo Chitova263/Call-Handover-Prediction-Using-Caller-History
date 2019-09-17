@@ -7,6 +7,7 @@ namespace VerticalHandoverPrediction.Mobile
     using VerticalHandoverPrediction.CallSession;
     using VerticalHandoverPrediction.Network;
     using VerticalHandoverPrediction.Simulator;
+    using VerticalHandoverPrediction.Simulator.Events;
 
     public class MobileTerminal : IMobileTerminal
     {
@@ -48,11 +49,11 @@ namespace VerticalHandoverPrediction.Mobile
                 throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
             }
 
-            var session = HetNet._HetNet.Rats
+            var session = HetNet.Instance.Rats
                 .SelectMany(x => x.OngoingSessions)
                 .FirstOrDefault(x => x.SessionId == this.SessionId);
 
-            var rat = HetNet._HetNet.Rats
+            var rat = HetNet.Instance.Rats
                 .FirstOrDefault(x => x.RatId == session.RatId);
 
             var call = session.ActiveCalls.FirstOrDefault(x => x.CallId == evt.CallId);
@@ -166,7 +167,7 @@ namespace VerticalHandoverPrediction.Mobile
                 Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callLog, $"{Environment.CurrentDirectory}/calllogs.csv");
             }
 
-            HetNet._HetNet.TotalSessions++;
+            HetNet.Instance.TotalSessions++;
         }
 
         public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IEnumerable<ICall> activeCalls)
