@@ -3,12 +3,13 @@ namespace VerticalHandoverPrediction.Cac
     using System.Linq;
     using VerticalHandoverPrediction.Mobile;
     using VerticalHandoverPrediction.Network;
-    using VerticalHandoverPrediction.Simulator;
     using VerticalHandoverPrediction.CallSession;
     using System;
     using static MoreLinq.Extensions.StartsWithExtension;
     using System.Collections.Generic;
     using VerticalHandoverPrediction.Utils;
+    using VerticalHandoverPrediction.Simulator.Events;
+
     public class Cac
     {
         public bool Predictive { get; set; }
