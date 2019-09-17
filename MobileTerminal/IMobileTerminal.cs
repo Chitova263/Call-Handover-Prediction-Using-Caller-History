@@ -7,15 +7,15 @@ namespace VerticalHandoverPrediction.Mobile
 
     public interface IMobileTerminal
     {
-        Guid MobileTerminalId { get; set; }
+        Guid MobileTerminalId { get; }
         Guid SessionId { get; }
-        Modality Modality { get; }
         MobileTerminalState State { get; }
         IReadOnlyCollection<CallLog> CallLogs { get; }
         bool IsActive { get; }
 
         void AddCallLog(CallLog log);
         void EndCall(CallEndedEvent evt);
+        void SetActive(bool isActive);
         void SetSessionId(Guid sessionId);
         void SetState(MobileTerminalState state);
         MobileTerminalState UpdateMobileTerminalState(ISession session);

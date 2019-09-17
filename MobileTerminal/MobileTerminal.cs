@@ -10,22 +10,22 @@ namespace VerticalHandoverPrediction.Mobile
 
     public class MobileTerminal : IMobileTerminal
     {
-        public Guid MobileTerminalId { get; set; }
+        public Guid MobileTerminalId { get; private set; }
         public Guid SessionId { get; private set; }
-        public Modality Modality { get; private set; }
         public MobileTerminalState State { get; private set; }
         private readonly List<CallLog> _callLogs;
         public IReadOnlyCollection<CallLog> CallLogs => _callLogs;
         public bool IsActive { get; private set; }
 
-        public MobileTerminal(Modality modality)
+        public MobileTerminal()
         {
             MobileTerminalId = Guid.NewGuid();
-            Modality = modality;
             _callLogs = new List<CallLog>();
             State = MobileTerminalState.Idle;
             IsActive = false;
         }
+
+        public void SetActive(bool isActive) => IsActive = isActive;
 
         public void AddCallLog(CallLog log)
         {

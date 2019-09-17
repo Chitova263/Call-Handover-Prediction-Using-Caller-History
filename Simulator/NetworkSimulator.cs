@@ -54,9 +54,9 @@ namespace VerticalHandoverPrediction.Simulator
             if(test){
                 //HetNet._HetNet.RandomCallsGenerated += n;
             
-                foreach (var mt in HetNet._HetNet.MobileTerminals)
+                foreach (var mobileTerminal in HetNet._HetNet.MobileTerminals)
                 {
-                    mt.Activated = false;
+                    mobileTerminal.SetActive(false);
                 }
 
                 //Random rnd = new Random();

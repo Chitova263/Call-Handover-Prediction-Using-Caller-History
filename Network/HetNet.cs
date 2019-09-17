@@ -153,7 +153,7 @@ namespace VerticalHandoverPrediction.Network
 
             for (int i = 0; i < users; i++)
             {
-                _mobileTerminals.Add(new MobileTerminal(Modality.TrippleMode));
+                _mobileTerminals.Add(new MobileTerminal());
             }
         }
 
