@@ -1,31 +1,41 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using VerticalHandoverPrediction.Cac;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Network;
-using VerticalHandoverPrediction.Simulator;
-
 namespace VerticalHandoverPrediction.Mobile
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using VerticalHandoverPrediction.Cac;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Network;
+    using VerticalHandoverPrediction.Simulator;
+
     public class MobileTerminal : IMobileTerminal
     {
         public Guid MobileTerminalId { get; set; }
         public Guid SessionId { get; private set; }
         public Modality Modality { get; private set; }
         public MobileTerminalState State { get; private set; }
-        public IList<CallLog> CallHistoryLogs { get; private set; }
-        public bool Activated { get; set; } = false;
+        private readonly List<CallLog> _callLogs;
+        public IReadOnlyCollection<CallLog> CallLogs => _callLogs;
+        public bool IsActive { get; private set; }
 
-        private MobileTerminal(Modality modality)
+        public MobileTerminal(Modality modality)
         {
             MobileTerminalId = Guid.NewGuid();
             Modality = modality;
-            CallHistoryLogs = new List<CallLog>();
+            _callLogs = new List<CallLog>();
             State = MobileTerminalState.Idle;
+            IsActive = false;
         }
 
-        public static MobileTerminal CreateMobileTerminal(Modality modality) => new MobileTerminal(modality);
+        public void AddCallLog(CallLog log)
+        {
+            if (log is null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(log)} is invalid");
+            }
+
+            _callLogs.Add(log);
+        }
 
         public void SetState(MobileTerminalState state) => State = state;
 
@@ -33,8 +43,6 @@ namespace VerticalHandoverPrediction.Mobile
 
         public void EndCall(CallEndedEvent evt)
         {
-           
-            //Find the current session
             var session = HetNet._HetNet.Rats
                 .SelectMany(x => x.OngoingSessions)
                 .FirstOrDefault(x => x.SessionId == this.SessionId);
@@ -123,32 +131,33 @@ namespace VerticalHandoverPrediction.Mobile
             rat.RemoveSession(session);
             session.SetEndTime(end);
 
-            this.SessionId = Guid.Empty;
+            SessionId = Guid.Empty;
 
-            var callHistory = new CallLog
+            var callLog = new CallLog
             {
                 UserId = MobileTerminalId,
                 SessionId = session.SessionId,
-                Duration =  session.End.Subtract(session.Start),  
-            
+                Duration = session.End.Subtract(session.Start),
+
                 SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };
 
-            this.Activated = false;
+            IsActive = false;
 
-            this.CallHistoryLogs.Add(callHistory);
+            AddCallLog(callLog);
 
-            if(Simulator.NetworkSimulator._NetworkSimulator.UseCallLogs){
-                 Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callHistory, $"{Environment.CurrentDirectory}/calllogs.csv");
+            if (Simulator.NetworkSimulator._NetworkSimulator.UseCallLogs)
+            {
+                Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callLog, $"{Environment.CurrentDirectory}/calllogs.csv");
             }
-           
+
             HetNet._HetNet.TotalSessions++;
         }
 
         public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)
         {
-            
-            if(activeCalls.Count() == 1 || activeCalls.Count() == 0 || activeCalls.Count() > 3)
+
+            if (activeCalls.Count() == 1 || activeCalls.Count() == 0 || activeCalls.Count() > 3)
             {
                 throw new VerticalHandoverPredictionException($"{nameof(activeCalls)} can not have {activeCalls.Count()} calls");
             }
@@ -156,7 +165,7 @@ namespace VerticalHandoverPrediction.Mobile
             var ongoingServices = activeCalls.Select(x => x.Service);
 
             MobileTerminalState state = MobileTerminalState.VoiceDataVideo;
-            if(activeCalls.Count() == 2)
+            if (activeCalls.Count() == 2)
             {
                 if (ongoingServices.Intersect(new List<Service> { Service.Voice, Service.Data }).Count() == ongoingServices.Count())
                 {
