@@ -19,6 +19,6 @@ namespace VerticalHandoverPrediction.Mobile
         void SetSessionId(Guid sessionId);
         void SetState(MobileTerminalState state);
         MobileTerminalState UpdateMobileTerminalState(ISession session);
-        MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls);
+        MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IEnumerable<ICall> activeCalls);
     }
 }

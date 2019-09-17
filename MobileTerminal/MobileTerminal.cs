@@ -169,7 +169,7 @@ namespace VerticalHandoverPrediction.Mobile
             HetNet._HetNet.TotalSessions++;
         }
 
-        public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls)
+        public MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IEnumerable<ICall> activeCalls)
         {
             if (activeCalls == null)
             {

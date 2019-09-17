@@ -1,10 +1,10 @@
-using System;
-using System.Collections.Generic;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Mobile;
-
 namespace VerticalHandoverPrediction.Network
 {
+    using System;
+    using System.Collections.Generic;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Mobile;
+
     public interface IRat
     {
         Guid RatId { get; }
