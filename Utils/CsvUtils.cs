@@ -10,8 +10,7 @@ namespace VerticalHandoverPrediction.Utils
     public sealed class CsvUtils
     {
         private static CsvUtils instance = null;
-        private static readonly object padlock = new object();
-        private List<string> Header { get; set; } = new List<string>();
+        private static readonly object _locker = new object();
 
         private CsvUtils()
         {
@@ -21,7 +20,7 @@ namespace VerticalHandoverPrediction.Utils
         {
             get
             {
-                lock (padlock)
+                lock (_locker)
                 {
                     if (instance == null)
                     {
@@ -32,28 +31,44 @@ namespace VerticalHandoverPrediction.Utils
             }
         }
 
-        public void Write<TMap,TSource>(TSource log, string filename) where TMap: ClassMap
+        public void Write<TMap,TRecord>(TRecord record, string filename) 
+            where TMap : ClassMap
+            where TRecord : class
         {
-            using (var writer = new StreamWriter(filename, true, Encoding.UTF8))
-            using (var csvWriter = new CsvWriter(writer))
+            try
             {
-                csvWriter.Configuration.Delimiter =",";
-                csvWriter.Configuration.HasHeaderRecord = true;
-                csvWriter.Configuration.RegisterClassMap<TMap>();
-
-                if(!Header.Contains($"{log.GetType()}"))
+                using (var writer = new StreamWriter(filename, true))
+                using (var reader = new StreamReader(filename))
+                using (var csvWriter = new CsvWriter(writer))
+                using (var csvReader = new CsvReader(reader))
                 {
-                    Header.Add($"{log.GetType()}");
-                    csvWriter.WriteHeader<TSource>();
+                    csvReader.Read();
+                    csvReader.ReadHeader();
+                    csvWriter.Configuration.Delimiter =",";
+                    csvWriter.Configuration.RegisterClassMap<TMap>();
+                    csvWriter.WriteHeader<TRecord>();
+                    csvWriter.WriteRecord(record);
+                }
+            }
+            catch (CsvHelper.ReaderException)
+            {
+                //Work around
+                using (var writer = new StreamWriter(filename, true))
+                using (var csvWriter = new CsvWriter(writer))
+                {
+                    csvWriter.Configuration.Delimiter =",";
+                    csvWriter.Configuration.RegisterClassMap<TMap>();
+                    csvWriter.WriteHeader<TRecord>();
+                    csvWriter.NextRecord();
+                    csvWriter.WriteRecord(record);
                     csvWriter.NextRecord();
                 }
-
-                csvWriter.WriteRecord(log);
-                csvWriter.NextRecord();
             }
         }
 
-        public IEnumerable<Tout> Read<TMap,Tout>(string filename) where TMap : ClassMap
+        public IEnumerable<Tout> Read<TMap,Tout>(string filename) 
+            where TMap : ClassMap
+            where Tout : class
         {
             try
             {
@@ -77,8 +92,6 @@ namespace VerticalHandoverPrediction.Utils
             using (var csvWriter = new CsvWriter(writer))
             {
                 csvWriter.WriteField(String.Empty);
-                //work around
-                Header.Clear();
             }
         }
 

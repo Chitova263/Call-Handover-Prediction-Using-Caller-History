@@ -6,7 +6,6 @@ namespace VerticalHandoverPrediction.Mobile
     using VerticalHandoverPrediction.Cac;
     using VerticalHandoverPrediction.CallSession;
     using VerticalHandoverPrediction.Network;
-    using VerticalHandoverPrediction.Simulator;
     using VerticalHandoverPrediction.Simulator.Events;
 
     public class MobileTerminal : IMobileTerminal

@@ -10,7 +10,7 @@ namespace VerticalHandoverPrediction.Simulator
     using VerticalHandoverPrediction.Simulator.Events;
     using VerticalHandoverPrediction.Simulator.Extensions;
 
-    public sealed class NetworkSimulator 
+    public class NetworkSimulator 
     {
         private static NetworkSimulator instance = null;
         private static readonly object padlock = new object();
@@ -45,7 +45,6 @@ namespace VerticalHandoverPrediction.Simulator
                     mobileTerminal.SetActive(false);
                 }
 
-                //Random rnd = new Random();
                 var poisson = new Poisson(12); 
                 var exponential = new Exponential(0.01);
 
