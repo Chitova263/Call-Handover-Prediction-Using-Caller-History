@@ -46,8 +46,8 @@ namespace VerticalHandoverPrediction.Utils
                     csvReader.ReadHeader();
                     csvWriter.Configuration.Delimiter =",";
                     csvWriter.Configuration.RegisterClassMap<TMap>();
-                    csvWriter.WriteHeader<TRecord>();
-                    csvWriter.WriteRecord(record);
+                    csvWriter.WriteRecord<TRecord>(record);
+                    csvWriter.NextRecord();
                 }
             }
             catch (CsvHelper.ReaderException)

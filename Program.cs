@@ -16,42 +16,65 @@ namespace VerticalHandoverPrediction
   
             HetNet.Instance.GenerateRats();
 
-            HetNet.Instance.GenerateUsers(20);
+            Console.WriteLine("Enter the number of users: ");
+            var numberOfUsers = int.Parse(Console.ReadLine().Trim());
+            HetNet.Instance.GenerateUsers(numberOfUsers);
             
             Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
             Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
             
-            for (int i = 0; i < 10; i++)
-            {
-                NetworkSimulator._NetworkSimulator.Run(500, true, false);
-            }
+            Console.WriteLine("Enter the number of call history records to generate: ");
+            var numberOfRecords = int.Parse(Console.ReadLine().Trim());
+            NetworkSimulator._NetworkSimulator.Run(numberOfRecords, true, false);
 
-           
-            
+            Console.WriteLine("Enter -1 to terminate simulation");
             while(true)
             {
-                var input = int.Parse(Console.ReadLine());
-                if(input == -1) break;
-
-                for (int i = 0; i < 10; i++)
+                Console.WriteLine("Enter the number of calls to generate");
+                var numberOfCalls = int.Parse(Console.ReadLine().Trim());
+                if(numberOfCalls == -1)
                 {
-                    NetworkSimulator._NetworkSimulator.Run(input, true, false);
+                    break;
                 }
 
+                NetworkSimulator._NetworkSimulator.Run(numberOfCalls, true, false);
+                
                 NetworkSimulator._NetworkSimulator.UseCallLogs = false;
               
-                //None Predictive Scheme
-                NetworkSimulator._NetworkSimulator.Run(10, false, false);
-                var calls = HetNet.Instance.CallsGenerated;
-                var nonPredictive = HetNet.Instance.VerticalHandovers;
-                //PredictiveScheme
-                NetworkSimulator._NetworkSimulator.Run(10, false, true);
-                var predictive = HetNet.Instance.VerticalHandovers;
-                System.Console.WriteLine(calls + "   " + nonPredictive + "   "+ predictive);
+                Log.Information("Running Non Predictive Scheme");
+                NetworkSimulator._NetworkSimulator.Run(default(int), false, false);
+                var results = new SimulationResults
+                {
+                    Handovers = HetNet.Instance.VerticalHandovers,
+                    BlockedCalls = HetNet.Instance.BlockedCalls,
+                    FailedPredictions  = HetNet.Instance.FailedPredictions,
+                    SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
+                    Calls = HetNet.Instance.CallsGenerated,
+                    TotalSessions = HetNet.Instance.TotalSessions,
+                };
 
+                Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(results, $"{Environment.CurrentDirectory}/nonpredictiveresults.csv");
+                
+                Log.Information("Running Predictive Scheme");
+                NetworkSimulator._NetworkSimulator.Run(default(int), false, true);
+                results = new SimulationResults
+                {
+                    Handovers = HetNet.Instance.VerticalHandovers,
+                    BlockedCalls = HetNet.Instance.BlockedCalls,
+                    FailedPredictions  = HetNet.Instance.FailedPredictions,
+                    SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
+                    Calls = HetNet.Instance.CallsGenerated,
+                    TotalSessions = HetNet.Instance.TotalSessions,
+                };
+                
+                Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(results, $"{Environment.CurrentDirectory}/predictiveresults.csv");
+                
+                //Clear Events -- consider storing these events in memory as an optimization
+                //No need to store them on csv file
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
             }
+            System.Console.WriteLine("Simulation Ended");
         }
     }
 }
