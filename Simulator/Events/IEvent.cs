@@ -4,6 +4,6 @@ namespace VerticalHandoverPrediction.Simulator.Events
 
     public interface IEvent
     {
-        public DateTime Time { get; }
+        public DateTime Time { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace VerticalHandoverPrediction.Simulator.Events
         public Guid EventId { get; }
         public Guid CallId { get; }
         public Guid MobileTerminalId { get; }
-        public DateTime Time { get; }
+        public DateTime Time { get; set; }
 
         public CallEndedEvent(Guid callId, Guid mobileTerminalId, DateTime time)
         {

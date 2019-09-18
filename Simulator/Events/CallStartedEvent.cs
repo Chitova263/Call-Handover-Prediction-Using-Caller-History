@@ -7,7 +7,7 @@ namespace VerticalHandoverPrediction.Simulator.Events
     public class CallStartedEvent : IEvent
     {
         public Guid EventId { get;  }
-        public DateTime Time { get; }
+        public DateTime Time { get; set; }
         public ICall Call { get; }
 
         public CallStartedEvent(DateTime time,  ICall call)

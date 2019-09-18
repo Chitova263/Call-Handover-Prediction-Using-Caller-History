@@ -16,21 +16,21 @@ namespace VerticalHandoverPrediction
   
             HetNet.Instance.GenerateRats();
 
-            Console.WriteLine("Enter the number of users: ");
+            Console.WriteLine(">>>> Enter the number of users: ");
             var numberOfUsers = int.Parse(Console.ReadLine().Trim());
             HetNet.Instance.GenerateUsers(numberOfUsers);
             
             Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
             Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
             
-            Console.WriteLine("Enter the number of call history records to generate: ");
+            Console.WriteLine(">>>>> Enter the number of call history records to generate: ");
             var numberOfRecords = int.Parse(Console.ReadLine().Trim());
             NetworkSimulator._NetworkSimulator.Run(numberOfRecords, true, false);
 
-            Console.WriteLine("Enter -1 to terminate simulation");
+            Console.WriteLine(">>>>> Enter {-1} to terminate simulation");
             while(true)
             {
-                Console.WriteLine("Enter the number of calls to generate");
+                Console.WriteLine(">>>>>> Enter the number of calls to generate");
                 var numberOfCalls = int.Parse(Console.ReadLine().Trim());
                 if(numberOfCalls == -1)
                 {
@@ -45,11 +45,11 @@ namespace VerticalHandoverPrediction
                 NetworkSimulator._NetworkSimulator.Run(default(int), false, false);
                 var results = new SimulationResults
                 {
+                    Calls = HetNet.Instance.CallsGenerated,
                     Handovers = HetNet.Instance.VerticalHandovers,
                     BlockedCalls = HetNet.Instance.BlockedCalls,
                     FailedPredictions  = HetNet.Instance.FailedPredictions,
                     SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
-                    Calls = HetNet.Instance.CallsGenerated,
                     TotalSessions = HetNet.Instance.TotalSessions,
                 };
 
