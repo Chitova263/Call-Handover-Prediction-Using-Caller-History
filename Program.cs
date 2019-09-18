@@ -2,6 +2,7 @@
 using Serilog;
 using VerticalHandoverPrediction.Simulator;
 using System;
+using System.Collections.Generic;
 
 namespace VerticalHandoverPrediction
 {
@@ -27,16 +28,16 @@ namespace VerticalHandoverPrediction
             var numberOfRecords = int.Parse(Console.ReadLine().Trim());
             NetworkSimulator._NetworkSimulator.Run(numberOfRecords, true, false);
 
-            Console.WriteLine(">>>>> Enter {-1} to terminate simulation");
-            while(true)
+            Console.WriteLine(">>>>>> Enter the list of number of calls to generate for simulation e.g 10 20 30");
+            var input = Console.ReadLine().Split(" ");
+            var calls = new List<int>();
+            foreach (var item in input)
             {
-                Console.WriteLine(">>>>>> Enter the number of calls to generate");
-                var numberOfCalls = int.Parse(Console.ReadLine().Trim());
-                if(numberOfCalls == -1)
-                {
-                    break;
-                }
+                calls.Add(int.Parse(item));
+            }
 
+            foreach (var numberOfCalls in calls)
+            {
                 NetworkSimulator._NetworkSimulator.Run(numberOfCalls, true, false);
                 
                 NetworkSimulator._NetworkSimulator.UseCallLogs = false;
@@ -74,7 +75,7 @@ namespace VerticalHandoverPrediction
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
             }
-            System.Console.WriteLine("Simulation Ended");
+            Log.Information("Simulation Ended");
         }
     }
 }
