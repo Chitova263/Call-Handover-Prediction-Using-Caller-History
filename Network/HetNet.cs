@@ -140,14 +140,9 @@ namespace VerticalHandoverPrediction.Network
             return;
         }
 
-        public void GenerateUsers(int users)
-        {
-            if (users <= 0) 
-            {
-                throw new VerticalHandoverPredictionException();
-            }
-           
-            for (int i = 0; i < users; i++)
+        public void GenerateMobileTerminals(int numOfUsers)
+        {  
+            for (int i = 0; i < numOfUsers; i++)
             {
                 _mobileTerminals.Add(new MobileTerminal());
             }

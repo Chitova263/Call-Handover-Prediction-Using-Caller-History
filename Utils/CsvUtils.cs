@@ -52,7 +52,6 @@ namespace VerticalHandoverPrediction.Utils
             }
             catch (CsvHelper.ReaderException)
             {
-                //Work around
                 using (var writer = new StreamWriter(filename, true))
                 using (var csvWriter = new CsvWriter(writer))
                 {

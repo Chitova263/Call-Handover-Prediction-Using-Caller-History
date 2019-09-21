@@ -135,14 +135,10 @@ namespace VerticalHandoverPrediction.Mobile
         private void EndSession(ISession session, DateTime end, IRat rat)
         {
             if (session == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is null");
-            }
 
             if (rat == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(rat)} is null");
-            }
 
             rat.RemoveSession(session);
             session.SetEndTime(end);
@@ -161,10 +157,8 @@ namespace VerticalHandoverPrediction.Mobile
 
             AddCallLog(callLog);
 
-            if (Simulator.NetworkSimulator._NetworkSimulator.UseCallLogs)
-            {
-                Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callLog, $"{Environment.CurrentDirectory}/calllogs.csv");
-            }
+            //if (Simulator.NetworkSimulator.Instance.SaveCallLogs)
+                //Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(callLog, $"{Environment.CurrentDirectory}/calllogs.csv");
 
             HetNet.Instance.TotalSessions++;
         }

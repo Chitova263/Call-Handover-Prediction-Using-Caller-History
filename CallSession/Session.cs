@@ -47,15 +47,9 @@ namespace VerticalHandoverPrediction.CallSession
             _activeCalls.Remove(call);
         }
 
-        public void AddToSessionSequence(MobileTerminalState state)
-        {
-            _sessionSequence.Add(state);
-        }
+        public void AddToSessionSequence(MobileTerminalState state) => _sessionSequence.Add(state);
 
-        public void RemoveFromSessionSequence(MobileTerminalState state)
-        {
-            _sessionSequence.Remove(state);
-        }
+        public void RemoveFromSessionSequence(MobileTerminalState state) => _sessionSequence.Remove(state);
         public void SetRatId(Guid ratId) => RatId = ratId;
 
         public void SetEndTime(DateTime end) => End = end;

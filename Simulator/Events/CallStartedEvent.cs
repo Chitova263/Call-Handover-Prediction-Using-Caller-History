@@ -13,8 +13,8 @@ namespace VerticalHandoverPrediction.Simulator.Events
         public CallStartedEvent(DateTime time,  ICall call)
         {
             EventId = Guid.NewGuid();
-            Time = time;
             Call = call;
+            Time = time;
         }
     }
 

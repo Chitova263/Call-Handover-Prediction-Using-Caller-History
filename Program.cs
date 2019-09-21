@@ -1,11 +1,12 @@
-﻿using VerticalHandoverPrediction.Network;
-using Serilog;
-using VerticalHandoverPrediction.Simulator;
-using System;
-using System.Collections.Generic;
-
-namespace VerticalHandoverPrediction
+﻿namespace VerticalHandoverPrediction
 {
+    using VerticalHandoverPrediction.Network;
+    using Serilog;
+    using VerticalHandoverPrediction.Simulator;
+    using System;
+    using VerticalHandoverPrediction.Mobile;
+    using System.Linq;
+
     class Program
     {
         static void Main(string[] args)
@@ -14,68 +15,70 @@ namespace VerticalHandoverPrediction
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
-  
+
             HetNet.Instance.GenerateRats();
-
-            Console.WriteLine(">>>> Enter the number of users: ");
-            var numberOfUsers = int.Parse(Console.ReadLine().Trim());
-            HetNet.Instance.GenerateUsers(numberOfUsers);
+            HetNet.Instance.GenerateMobileTerminals(50);
             
-            Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
-            Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
+            NetworkSimulator.Instance.GenerateCalls(5000);
             
-            Console.WriteLine(">>>>> Enter the number of call history records to generate: ");
-            var numberOfRecords = int.Parse(Console.ReadLine().Trim());
-            NetworkSimulator._NetworkSimulator.Run(numberOfRecords, true, false);
+            foreach (var log in HetNet.Instance.MobileTerminals.SelectMany(x => x.CallLogs))
+            {
+                Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(
+                    log, 
+                    $"{Environment.CurrentDirectory}/calllogs.csv");
+            }
 
-            Console.WriteLine(">>>>>> Enter the list of number of calls to generate for simulation e.g 10 20 30");
-            var input = Console.ReadLine().Split(" ");
-            var calls = new List<int>();
+            NetworkSimulator.Instance.Events.Clear();
+
+            System.Console.WriteLine(">>> Enter List of Number Of Calls To Be Generated For Simulation e.g 10 20 30 40");
+            var input = Console.ReadLine().Trim().Split()
+                .Select(x => int.Parse(x));
+            
             foreach (var item in input)
             {
-                calls.Add(int.Parse(item));
-            }
-
-            foreach (var numberOfCalls in calls)
-            {
-                NetworkSimulator._NetworkSimulator.Run(numberOfCalls, true, false);
+                NetworkSimulator.Instance.GenerateCalls(item);
                 
-                NetworkSimulator._NetworkSimulator.UseCallLogs = false;
-              
-                Log.Information("Running Non Predictive Scheme");
-                NetworkSimulator._NetworkSimulator.Run(default(int), false, false);
-                var results = new SimulationResults
+                NetworkSimulator.Instance.SaveCallLogs = false;
+                
+                //Non Predictive Scheme
+                NetworkSimulator.Instance.Run(false);
+                var nonPredictiveSchemeResults = new 
                 {
                     Calls = HetNet.Instance.CallsGenerated,
-                    Handovers = HetNet.Instance.VerticalHandovers,
-                    BlockedCalls = HetNet.Instance.BlockedCalls,
-                    FailedPredictions  = HetNet.Instance.FailedPredictions,
-                    SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
+                    NonPredictiveHandovers = HetNet.Instance.VerticalHandovers,
+                    NonPredictiveBlockedCalls = HetNet.Instance.BlockedCalls,
                     TotalSessions = HetNet.Instance.TotalSessions,
                 };
 
-                Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(results, $"{Environment.CurrentDirectory}/nonpredictiveresults.csv");
-                
-                Log.Information("Running Predictive Scheme");
-                NetworkSimulator._NetworkSimulator.Run(default(int), false, true);
-                results = new SimulationResults
+                //Predictive Scheme
+                NetworkSimulator.Instance.Run(true);
+                var predictiveSchemeResults = new 
                 {
-                    Handovers = HetNet.Instance.VerticalHandovers,
-                    BlockedCalls = HetNet.Instance.BlockedCalls,
+                    PredictiveHandovers = HetNet.Instance.VerticalHandovers,
+                    PredictiveBlockedCalls = HetNet.Instance.BlockedCalls,
                     FailedPredictions  = HetNet.Instance.FailedPredictions,
                     SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
-                    Calls = HetNet.Instance.CallsGenerated,
-                    TotalSessions = HetNet.Instance.TotalSessions,
                 };
-                
-                Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(results, $"{Environment.CurrentDirectory}/predictiveresults.csv");
-                
-                //Clear Events -- consider storing these events in memory as an optimization
-                //No need to store them on csv file
-                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
-                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
+
+                var simulationResults = new SimulationResults
+                {
+                    Calls = nonPredictiveSchemeResults.Calls,
+                    TotalSessions = nonPredictiveSchemeResults.TotalSessions,
+                    NonPredictiveHandovers = nonPredictiveSchemeResults.NonPredictiveHandovers,
+                    NonPredictiveBlockedCalls = nonPredictiveSchemeResults.NonPredictiveBlockedCalls,
+                    PredictiveHandovers = predictiveSchemeResults.PredictiveHandovers,
+                    PredictiveBlockedCalls = predictiveSchemeResults.PredictiveBlockedCalls,
+                    FailedPredictions = predictiveSchemeResults.FailedPredictions,
+                    SuccessfulPredictions = predictiveSchemeResults.SuccessfulPredictions
+                };
+
+                Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(
+                    simulationResults, $"{Environment.CurrentDirectory}/SimResults.csv"
+                );
+
+                HetNet.Instance.Reset(); 
+                NetworkSimulator.Instance.Events.Clear();            
             }
-            Log.Information("Simulation Ended");
         }
     }
 }

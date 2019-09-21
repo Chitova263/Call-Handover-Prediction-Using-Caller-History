@@ -9,6 +9,7 @@ namespace VerticalHandoverPrediction.Cac
     using System.Collections.Generic;
     using VerticalHandoverPrediction.Utils;
     using VerticalHandoverPrediction.Simulator.Events;
+    using Serilog;
 
     public class Cac
     {
@@ -21,9 +22,7 @@ namespace VerticalHandoverPrediction.Cac
         public void AdmitCall(CallStartedEvent evt)
         {
             if (evt is null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
-            }
 
             var mobileTerminal = HetNet.Instance.MobileTerminals
                 .FirstOrDefault(x => x.MobileTerminalId == evt.Call.MobileTerminalId);
@@ -43,12 +42,7 @@ namespace VerticalHandoverPrediction.Cac
                     return;
                 }
 
-                //Log to csv
-                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
-
-                //------------------------------------------------------------------------------------------------
-
-
+                Simulator.NetworkSimulator.Instance.Events.Add(evt);
                 HetNet.Instance.CallsGenerated++;
 
                 var rat = HetNet.Instance.Rats
@@ -65,51 +59,44 @@ namespace VerticalHandoverPrediction.Cac
 
                 return;
             }
-            //IF mobile terminal was idle
+            //If Idle
             else
             {
-                //----------------
                 if(mobileTerminal.IsActive)
                 {
                     //Log.Warning("Session Already Terminated");
                     HetNet.Instance.CallStartedEventsRejectedWhenIdle++;
                     return;
                 }
-                //----------------
 
+                //Mobile Terminal is now active
                 mobileTerminal.SetActive(true);
 
+                //Call successfuly generated
+                Simulator.NetworkSimulator.Instance.Events.Add(evt);
                 HetNet.Instance.CallsGenerated++;
 
-                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
-
-                HetNet.Instance.CallsToBePredictedInitialRatSelection++;
-                
-                if(Predictive){
-                    RunPredictiveAlgorithm(evt, mobileTerminal); 
+                if(Predictive)
+                {
+                    //Number of calls to be used for prediction -- use this to compute success rate --
+                    HetNet.Instance.CallsToBePredictedInitialRatSelection++;
+                    RunPredictiveAlgorithm(evt, mobileTerminal);
                 }
                 else
                 {
                     RunNonPredictiveAlgorithm(evt, mobileTerminal);
-                }
-               
-                return;
+                }        
             }
         }
 
         private void RunPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            //var callHistory = mobileTerminal.CallHistoryLogs
-            //    .Select(x => x.SessionSequence)
-            //    .ToList();
-            
             var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
             
             var nextState =  evt.Call.Service.GetState();
 
             if(history.Any())
-            {
-                
+            {    
                 var group = history
                     .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
                     .Select(x => x.SessionSequence)
@@ -120,7 +107,6 @@ namespace VerticalHandoverPrediction.Cac
                     .Where(x => x != MobileTerminalState.Idle)
                     .GroupBy(x => x);
                    
-                
                 //If group is empty it means prediction has failed
                 if(!group.Any()) 
                 {
@@ -186,7 +172,6 @@ namespace VerticalHandoverPrediction.Cac
 
             //Try just accommodating the incoming call without predicting before blocking it
             RunNonPredictiveAlgorithm(evt, mobileTerminal);
-            return;
         }
 
         private void RunNonPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
@@ -205,7 +190,6 @@ namespace VerticalHandoverPrediction.Cac
                 }
             }
             HetNet.Instance.BlockedCalls++;
-            return;
         }
 
         private void StartNewSessionAndAdmitCall(CallStartedEvent evt, IMobileTerminal mobileTerminal, IRat rat)
