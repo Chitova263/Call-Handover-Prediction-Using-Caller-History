@@ -1,15 +1,16 @@
-using System.Linq;
-using VerticalHandoverPrediction.Mobile;
-using VerticalHandoverPrediction.Network;
-using VerticalHandoverPrediction.Simulator;
-using VerticalHandoverPrediction.CallSession;
-using System;
-using static MoreLinq.Extensions.StartsWithExtension;
-using System.Collections.Generic;
-using VerticalHandoverPrediction.Utils;
-
 namespace VerticalHandoverPrediction.Cac
 {
+    using System.Linq;
+    using VerticalHandoverPrediction.Mobile;
+    using VerticalHandoverPrediction.Network;
+    using VerticalHandoverPrediction.CallSession;
+    using System;
+    using static MoreLinq.Extensions.StartsWithExtension;
+    using System.Collections.Generic;
+    using VerticalHandoverPrediction.Utils;
+    using VerticalHandoverPrediction.Simulator.Events;
+    using Serilog;
+
     public class Cac
     {
         public bool Predictive { get; set; }
@@ -21,17 +22,14 @@ namespace VerticalHandoverPrediction.Cac
         public void AdmitCall(CallStartedEvent evt)
         {
             if (evt is null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(evt)} is null");
-            }
 
-            var mobileTerminal = HetNet._HetNet.MobileTerminals
+            var mobileTerminal = HetNet.Instance.MobileTerminals
                 .FirstOrDefault(x => x.MobileTerminalId == evt.Call.MobileTerminalId);
             
-            //IF mobile terminal is not idle
             if(mobileTerminal.State != MobileTerminalState.Idle)
             {
-                var session = HetNet._HetNet.Rats
+                var session = HetNet.Instance.Rats
                     .SelectMany(x => x.OngoingSessions)
                     .FirstOrDefault(x => x.SessionId == mobileTerminal.SessionId);
                 
@@ -39,20 +37,15 @@ namespace VerticalHandoverPrediction.Cac
                 var services = session.ActiveCalls.Select(x => x.Service);
                 if(services.Contains(evt.Call.Service))
                 {
-                    HetNet._HetNet.CallStartedEventsRejectedWhenNotIdle++;
+                    HetNet.Instance.CallStartedEventsRejectedWhenNotIdle++;
                     //Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
                     return;
                 }
 
-                //Log to csv
-                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
+                Simulator.NetworkSimulator.Instance.Events.Add(evt);
+                HetNet.Instance.CallsGenerated++;
 
-                //------------------------------------------------------------------------------------------------
-
-
-                HetNet._HetNet.CallsGenerated++;
-
-                var rat = HetNet._HetNet.Rats
+                var rat = HetNet.Instance.Rats
                     .FirstOrDefault(x => x.RatId == session.RatId);
 
                 if(rat.CanAdmitNewCallToOngoingSession(session, evt.Call, mobileTerminal))
@@ -62,55 +55,48 @@ namespace VerticalHandoverPrediction.Cac
                     return;
                 }
 
-                HetNet._HetNet.Handover(evt.Call, session, mobileTerminal, rat);
+                HetNet.Instance.Handover(evt.Call, session, mobileTerminal, rat);
 
                 return;
             }
-            //IF mobile terminal was idle
+            //If Idle
             else
             {
-                //----------------
-                if(mobileTerminal.Activated)
+                if(mobileTerminal.IsActive)
                 {
                     //Log.Warning("Session Already Terminated");
-                    HetNet._HetNet.CallStartedEventsRejectedWhenIdle++;
+                    HetNet.Instance.CallStartedEventsRejectedWhenIdle++;
                     return;
                 }
-                //----------------
 
-                mobileTerminal.Activated = true;
+                //Mobile Terminal is now active
+                mobileTerminal.SetActive(true);
 
-                HetNet._HetNet.CallsGenerated++;
+                //Call successfuly generated
+                Simulator.NetworkSimulator.Instance.Events.Add(evt);
+                HetNet.Instance.CallsGenerated++;
 
-                Utils.CsvUtils._Instance.Write<CallStartedEventMap, CallStartedEvent>(evt, $"{Environment.CurrentDirectory}/start.csv");
-
-                HetNet._HetNet.CallsToBePredictedInitialRatSelection++;
-                
-                if(Predictive){
-                    RunPredictiveAlgorithm(evt, mobileTerminal); 
+                if(Predictive)
+                {
+                    //Number of calls to be used for prediction -- use this to compute success rate --
+                    HetNet.Instance.CallsToBePredictedInitialRatSelection++;
+                    RunPredictiveAlgorithm(evt, mobileTerminal);
                 }
                 else
                 {
                     RunNonPredictiveAlgorithm(evt, mobileTerminal);
-                }
-               
-                return;
+                }        
             }
         }
 
         private void RunPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            //var callHistory = mobileTerminal.CallHistoryLogs
-            //    .Select(x => x.SessionSequence)
-            //    .ToList();
-            
             var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
             
             var nextState =  evt.Call.Service.GetState();
 
             if(history.Any())
-            {
-                
+            {    
                 var group = history
                     .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
                     .Select(x => x.SessionSequence)
@@ -121,11 +107,10 @@ namespace VerticalHandoverPrediction.Cac
                     .Where(x => x != MobileTerminalState.Idle)
                     .GroupBy(x => x);
                    
-                
                 //If group is empty it means prediction has failed
                 if(!group.Any()) 
                 {
-                    HetNet._HetNet.FailedPredictions++;
+                    HetNet.Instance.FailedPredictions++;
                 }
                 else
                 {
@@ -156,7 +141,7 @@ namespace VerticalHandoverPrediction.Cac
                 if(!services.Contains(service)) services.Add(service);
             }
 
-            var rats = HetNet._HetNet.Rats
+            var rats = HetNet.Instance.Rats
                 .Where(x => x.Services.ToHashSet().IsSupersetOf(services))
                 .OrderBy(x => x.Services.Count)
                 .ToList();
@@ -176,23 +161,22 @@ namespace VerticalHandoverPrediction.Cac
                     if(evt.Call.Service.GetState() != nextState) 
                     {
                         //Successful Prediction means 1. predicted state was not idle 2. call ends up being admited as predicted
-                        HetNet._HetNet.SuccessfulPredictions++;
+                        HetNet.Instance.SuccessfulPredictions++;
                         //Log.Information("----- Successful prediction");
                     } 
                     return;
                 }
             }
             //All Possible Rats Cannot Admit Call i.e [call in its predicted state]
-            HetNet._HetNet.BlockedUsingPredictiveScheme++;
+            HetNet.Instance.BlockedUsingPredictiveScheme++;
 
             //Try just accommodating the incoming call without predicting before blocking it
             RunNonPredictiveAlgorithm(evt, mobileTerminal);
-            return;
         }
 
         private void RunNonPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            var rats = HetNet._HetNet.Rats
+            var rats = HetNet.Instance.Rats
                 .Where(x => x.Services.Contains(evt.Call.Service))
                 .OrderBy(x => x.Services.Count)
                 .ToList();
@@ -205,23 +189,22 @@ namespace VerticalHandoverPrediction.Cac
                     return;
                 }
             }
-            HetNet._HetNet.BlockedCalls++;
-            return;
+            HetNet.Instance.BlockedCalls++;
         }
 
         private void StartNewSessionAndAdmitCall(CallStartedEvent evt, IMobileTerminal mobileTerminal, IRat rat)
         {
-            var session = Session.StartSession(rat.RatId, evt.Time);
+            var session = new Session(rat.RatId, evt.Time);
 
             mobileTerminal.SetSessionId(session.SessionId);
 
             rat.TakeNetworkResources(evt.Call.Service.ComputeRequiredNetworkResources());
 
-            session.ActiveCalls.Add(evt.Call);
+            session.AddToActiveCalls(evt.Call);
 
             var state = mobileTerminal.UpdateMobileTerminalState(session);
 
-            session.SessionSequence.Add(state);
+            session.AddToSessionSequence(state);
 
             rat.AddSession(session);
         }

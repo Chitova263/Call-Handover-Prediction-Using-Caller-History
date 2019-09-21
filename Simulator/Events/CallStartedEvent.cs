@@ -1,9 +1,9 @@
-using System;
-using CsvHelper.Configuration.Attributes;
-using VerticalHandoverPrediction.CallSession;
-
-namespace VerticalHandoverPrediction.Simulator
+namespace VerticalHandoverPrediction.Simulator.Events
 {
+    using System;
+    using CsvHelper.Configuration;
+    using VerticalHandoverPrediction.CallSession;
+
     public class CallStartedEvent : IEvent
     {
         public Guid EventId { get;  }
@@ -13,8 +13,13 @@ namespace VerticalHandoverPrediction.Simulator
         public CallStartedEvent(DateTime time,  ICall call)
         {
             EventId = Guid.NewGuid();
-            Time = time;
             Call = call;
+            Time = time;
         }
+    }
+
+    public class CallStartedEventMap: ClassMap<CallStartedEvent>
+    {
+        public CallStartedEventMap() => AutoMap();
     }
 }

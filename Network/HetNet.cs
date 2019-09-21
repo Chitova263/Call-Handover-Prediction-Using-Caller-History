@@ -1,12 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using VerticalHandoverPrediction.Cac;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Mobile;
-
 namespace VerticalHandoverPrediction.Network
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using VerticalHandoverPrediction.Cac;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Mobile;
 
     public sealed class HetNet 
     {
@@ -29,27 +28,21 @@ namespace VerticalHandoverPrediction.Network
         public int CallStartedEventsRejectedWhenNotIdle { get; set; }
         public int CallStartedEventsRejected
         {
-            get
-            {
-                return CallStartedEventsRejectedWhenIdle + CallStartedEventsRejectedWhenNotIdle + BlockedCalls;
-            }
-            set{}
+            get => CallStartedEventsRejectedWhenIdle + CallStartedEventsRejectedWhenNotIdle + BlockedCalls;
+            private set{}
         }
 
         public int CallEndedEventsRejected { get; set; }
         public int TotalSessions { get; set; }
        
-
         private HetNet()
         {
             HetNetId = Guid.NewGuid();
-
             _rats = new List<IRat>();
-
             _mobileTerminals = new List<IMobileTerminal>();
         }
 
-        public static HetNet _HetNet
+        public static HetNet Instance
         {
             get
             {
@@ -81,18 +74,28 @@ namespace VerticalHandoverPrediction.Network
             CallStartedEventsRejected = 0;
         } 
 
-        public void AddRats(IEnumerable<IRat> rats)
-        {
-            if (rats is null)
-            {
-                throw new System.ArgumentNullException(nameof(rats));
-            }
-
-            _rats.AddRange(rats);
-        }
-
         public void Handover(ICall call, ISession session, IMobileTerminal mobileTerminal, IRat source)
         {
+            if (call == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(call)} is invalid");
+            }
+
+            if (session == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
+            }
+
+            if (mobileTerminal == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(mobileTerminal)} is invalid");
+            }
+
+            if (source == null)
+            {
+                throw new VerticalHandoverPredictionException($"{nameof(source)} is invalid");
+            }
+
             var callsToHandedOverToTargetRat = session.ActiveCalls.Select(x => x.Service).ToList();
             
             callsToHandedOverToTargetRat.Add(call.Service);
@@ -113,7 +116,7 @@ namespace VerticalHandoverPrediction.Network
             {
                 if(requiredNetworkResouces <= target.AvailableNetworkResources())
                 {
-                    HetNet._HetNet.VerticalHandovers++;
+                    VerticalHandovers++;
 
                     source.RealeaseNetworkResources(requiredNetworkResouces - call.Service.ComputeRequiredNetworkResources());
                     source.RemoveSession(session);
@@ -122,38 +125,26 @@ namespace VerticalHandoverPrediction.Network
 
                     target.TakeNetworkResources(requiredNetworkResouces);
 
-                    session.ActiveCalls.Add(call);
+                    session.AddToActiveCalls(call);
 
                     var state = mobileTerminal.UpdateMobileTerminalState(session);
             
-                    session.SessionSequence.Add(state);
+                    session.AddToSessionSequence(state);
 
                     target.AddSession(session);
 
                     return;
                 }
             }
-            HetNet._HetNet.BlockedCalls++;
+            BlockedCalls++;
             return;
         }
 
-        public void AddMobileTerminals(IEnumerable<IMobileTerminal> mobileTerminals)
-        {
-            if (mobileTerminals is null)
+        public void GenerateMobileTerminals(int numOfUsers)
+        {  
+            for (int i = 0; i < numOfUsers; i++)
             {
-                throw new ArgumentNullException(nameof(mobileTerminals));
-            }
-
-            _mobileTerminals.AddRange(mobileTerminals);
-        }
-
-        public void GenerateUsers(int users)
-        {
-            if (users <= 0) throw new VerticalHandoverPredictionException();
-
-            for (int i = 0; i < users; i++)
-            {
-                _mobileTerminals.Add(MobileTerminal.CreateMobileTerminal(Modality.TrippleMode));
+                _mobileTerminals.Add(new MobileTerminal());
             }
         }
 
@@ -161,25 +152,25 @@ namespace VerticalHandoverPrediction.Network
         {
             var rats = new List<Rat>
             {
-                Rat.CreateRat(new List<Service>
+                new Rat(new List<Service>
                 {
                     Service.Voice
                 }, 100,  "RAT 1 (Voice)"),
-                Rat.CreateRat(new List<Service>
+                new Rat(new List<Service>
                 {
                     Service.Data
                 }, 100, "RAT 2 (Data)"),
-                Rat.CreateRat(new List<Service>
+                new Rat(new List<Service>
                 {
                     Service.Voice, Service.Data
                 }, 100,  "RAT 3 (Voice - Data)"),
-                Rat.CreateRat(new List<Service>
+                new Rat(new List<Service>
                 {
                     Service.Voice, Service.Video, Service.Data
                 }, 100,  "RAT 4 (Voice - Data - Video)"),
             };
 
-            AddRats(rats);
+            _rats.AddRange(rats);
         }
     }
 }
