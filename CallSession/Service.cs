@@ -1,13 +1,13 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
 namespace VerticalHandoverPrediction.CallSession
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
+    
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Service
     {
-        Voice = 1,
-        Data = 2,
-        Video = 3,
+        Voice,
+        Data,
+        Video,
     }
 }

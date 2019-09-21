@@ -1,8 +1,8 @@
-using System;
-using System.Linq;
-
-namespace VerticalHandoverPrediction.Simulator
+namespace VerticalHandoverPrediction.Simulator.Extensions
 {
+    using System;
+    using System.Linq;
+
     public static class EnumExtensions
     {
         public static Enum GetRandomEnumValue(this Type t)

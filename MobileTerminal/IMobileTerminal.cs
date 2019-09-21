@@ -1,23 +1,24 @@
-using System;
-using System.Collections.Generic;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Simulator;
-
 namespace VerticalHandoverPrediction.Mobile
 {
+    using System;
+    using System.Collections.Generic;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Simulator.Events;
+
     public interface IMobileTerminal
     {
-        Guid MobileTerminalId { get; set; }
+        Guid MobileTerminalId { get; }
         Guid SessionId { get; }
-        Modality Modality { get; }
         MobileTerminalState State { get; }
-        IList<CallLog> CallHistoryLogs { get; }
-        bool Activated { get; set; }
+        IReadOnlyCollection<CallLog> CallLogs { get; }
+        bool IsActive { get; }
 
+        void AddCallLog(CallLog log);
         void EndCall(CallEndedEvent evt);
+        void SetActive(bool isActive);
         void SetSessionId(Guid sessionId);
         void SetState(MobileTerminalState state);
         MobileTerminalState UpdateMobileTerminalState(ISession session);
-        MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IList<ICall> activeCalls);
+        MobileTerminalState UpdateMobileTerminalStateWhenAdmitingNewCallToOngoingSession(IEnumerable<ICall> activeCalls);
     }
 }

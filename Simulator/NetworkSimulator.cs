@@ -1,111 +1,79 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MathNet.Numerics.Distributions;
-using Medallion.Collections;
-using Serilog;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Network;
-using VerticalHandoverPrediction.Utils;
-
 namespace VerticalHandoverPrediction.Simulator
 {
-    public class DateTimeComparer : IComparer<IEvent>
-    {
-        public int Compare(IEvent x, IEvent y)
-        {
-            if (x.Time > y.Time)
-                return 1;
-            if (x.Time < y.Time)
-                return -1;
-            else
-                return 0;
-        }
-    }
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Medallion.Collections;
+    using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Network;
+    using VerticalHandoverPrediction.Simulator.Events;
+    using VerticalHandoverPrediction.Simulator.Extensions;
 
-    public sealed class NetworkSimulator 
+    public class NetworkSimulator 
     {
         private static NetworkSimulator instance = null;
-        private static readonly object padlock = new object();
-        public PriorityQueue<IEvent> EventQueue { get; set; }
-        public bool UseCallLogs { get; set; } = true;
+        private static Random random = new Random();
+        private static List<Service> Services = new List<Service>{Service.Data, Service.Video, Service.Voice};
+        public PriorityQueue<IEvent> EventQueue { get; }
+        public bool SaveCallLogs { get; set; } = true;
+        public IList<IEvent> Events { get; set; } //write to this list for successfull calls using the non predictive scheme
+
         private NetworkSimulator()
         {
             EventQueue = new PriorityQueue<IEvent>(new DateTimeComparer());
+            Events = new List<IEvent>();
         }
 
-        public static NetworkSimulator _NetworkSimulator
+        public static NetworkSimulator Instance
         {
             get
             {
-                lock (padlock)
+                if (instance == null)
                 {
-                    if (instance == null)
-                    {
-                        instance = new NetworkSimulator();
-                    }
-                    return instance;
+                    instance = new NetworkSimulator();
                 }
+                return instance;
             }
         }
 
-        public void Run(int n, bool test, bool predictive)
+        //First time you run this generate call history
+        public void GenerateCalls(int numberOfCalls)
         {
-            if(test){
-                //HetNet._HetNet.RandomCallsGenerated += n;
-            
-                foreach (var mt in HetNet._HetNet.MobileTerminals)
-                {
-                    mt.Activated = false;
-                }
-
-                //Random rnd = new Random();
-                var poisson = new Poisson(12); 
-                var exponential = new Exponential(0.01);
-
-                var services = new List<Service>{Service.Data, Service.Video, Service.Voice};
-            
-                for (int i = 0; i < n; i++)
-                {
-                    var call = Call.StartCall(HetNet._HetNet.MobileTerminals.PickRandom().MobileTerminalId, services.PickRandom());
-                    
-                    var callStartedEvent = new CallStartedEvent(
-                        DateTime.Now.AddMinutes(poisson.Sample()*120), //0.1 calls per unit time
-                        call
-                    );
-
-                    EventQueue.Enqueue(callStartedEvent);
-                    
-                    var callEndedEvent = new CallEndedEvent(
-                        call.CallId,
-                        call.MobileTerminalId,
-                        callStartedEvent.Time.AddMinutes(exponential.Sample())
-                    );
-
-                    EventQueue.Enqueue(callEndedEvent);
-                }
-            }
-            else
+            for (int i = 0; i < numberOfCalls; i++)
             {
-                var startEvents = Utils.CsvUtils._Instance.Read<StartEventMap ,StartEvent>($"{Environment.CurrentDirectory}/start.csv");
-                var endEvents = Utils.CsvUtils._Instance.Read<EndEventMap ,EndEvent>($"{Environment.CurrentDirectory}/end.csv");
-                foreach (var evt in startEvents)
-                {
-                    EventQueue.Enqueue(new CallStartedEvent(evt.Time, new Call(evt.MobileTerminalId, evt.Service, evt.CallId)));
-                }
-                foreach (var evt in endEvents)
-                {
-                   EventQueue.Enqueue(new CallEndedEvent(evt.CallId, evt.MobileTerminalId, evt.Time));
-                }
-                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/start.csv");
-                Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/end.csv");
-                HetNet._HetNet.Reset();
+                var service = Services.PickRandom();
+                var mobileTerminal = HetNet.Instance.MobileTerminals.PickRandom();
+                var call = new Call(mobileTerminal.MobileTerminalId, service);
+                
+                var callStartedEvent = new CallStartedEvent(
+                    DateTime.Now.AddMinutes(1 + (120 - 1) * random.NextDouble()), 
+                    call);
+                
+                var callEndedEvent = new CallEndedEvent(
+                    call.CallId,
+                    call.MobileTerminalId,
+                    callStartedEvent.Time.AddMinutes(GenerateCallLifetime(service)));
+
+                EventQueue.Enqueue(callStartedEvent);
+                EventQueue.Enqueue(callEndedEvent);
             }
-            
-            ServeQueue(predictive);
+            ServeEventQueue(false); 
         }
 
-        private void ServeQueue(bool predictive)
+        public void Run(bool predictive)
+        {
+            
+            foreach (var evt in Events)
+            {
+                EventQueue.Enqueue(evt);
+            }
+
+            Events.Clear();
+            HetNet.Instance.Reset();     
+            ServeEventQueue(predictive);
+        }
+
+        private void ServeEventQueue(bool predictive)
         {   
             var cac = new Cac.Cac(predictive);
             while(EventQueue.Any())
@@ -121,11 +89,11 @@ namespace VerticalHandoverPrediction.Simulator
                 {
                     var evt = (CallEndedEvent)@event;
 
-                    var mobileTerminal = HetNet._HetNet.MobileTerminals
+                    var mobileTerminal = HetNet.Instance.MobileTerminals
                         .FirstOrDefault(x => x.MobileTerminalId == evt.MobileTerminalId);
                     
                     //Find if call was considered
-                    var call = HetNet._HetNet.Rats
+                    var call = HetNet.Instance.Rats
                         .SelectMany(x => x.OngoingSessions)
                         .SelectMany(x => x.ActiveCalls)
                         .FirstOrDefault(x => x.CallId == evt.CallId);
@@ -133,15 +101,30 @@ namespace VerticalHandoverPrediction.Simulator
                     //if no session contains this call then it was never considered
                     if(call is null) 
                     {
-                        HetNet._HetNet.CallEndedEventsRejected++;
-                        //Log.Warning($"CallStartedEventCorresponding o this {nameof(CallEndedEvent)} was rejected");
+                        HetNet.Instance.CallEndedEventsRejected++;
+                        //Log.Warning($"CallStartedEventCorresponding to {nameof(CallEndedEvent)} was rejected");
                     } 
                     else
                     {
-                        Utils.CsvUtils._Instance.Write<CallEndedEventMap, CallEndedEvent>(evt, $"{Environment.CurrentDirectory}/end.csv");
+                        Events.Add(evt);
                         mobileTerminal.EndCall(evt);
                     }
                 }
+            }
+        }
+
+        private double GenerateCallLifetime(Service service)
+        {
+            switch (service)
+            {
+                case Service.Voice:
+                    return  1 + (10 - 1) * random.NextDouble();
+                case Service.Data:
+                    return  3 + (20 - 1) * random.NextDouble();
+                case Service.Video:
+                    return  5 + (60 - 1) * random.NextDouble();
+                default:
+                    return default(double);
             }
         }
     }
