@@ -1,8 +1,7 @@
-using System;
-using Newtonsoft.Json;
-
-namespace HandoverPrediction.Utils
+namespace VerticalHandoverPrediction.Utils
 {
+    using System;
+    using Newtonsoft.Json;
     public static class JsonDumper
     {
         public static void Dump(this object obj)
