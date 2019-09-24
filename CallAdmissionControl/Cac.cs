@@ -1,4 +1,4 @@
-namespace VerticalHandoverPrediction.Cac
+namespace VerticalHandoverPrediction.CallAdimissionControl
 {
     using System.Linq;
     using VerticalHandoverPrediction.Mobile;
@@ -14,6 +14,7 @@ namespace VerticalHandoverPrediction.Cac
     public class Cac
     {
         public bool Predictive { get; set; }
+
         public Cac(bool predictive)
         {
             Predictive = predictive;

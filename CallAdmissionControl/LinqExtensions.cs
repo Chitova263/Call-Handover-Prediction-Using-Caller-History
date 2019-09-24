@@ -1,4 +1,4 @@
-namespace VerticalHandoverPrediction.Cac
+namespace VerticalHandoverPrediction.CallAdimissionControl
 {
     using System.Collections.Generic;
     using VerticalHandoverPrediction.CallSession;

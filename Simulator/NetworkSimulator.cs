@@ -4,6 +4,7 @@ namespace VerticalHandoverPrediction.Simulator
     using System.Collections.Generic;
     using System.Linq;
     using Medallion.Collections;
+    using VerticalHandoverPrediction.CallAdimissionControl;
     using VerticalHandoverPrediction.CallSession;
     using VerticalHandoverPrediction.Network;
     using VerticalHandoverPrediction.Simulator.Events;
@@ -75,7 +76,7 @@ namespace VerticalHandoverPrediction.Simulator
 
         private void ServeEventQueue(bool predictive)
         {   
-            var cac = new Cac.Cac(predictive);
+            var cac = new Cac(predictive);
             while(EventQueue.Any())
             {
                 var @event = EventQueue.Dequeue();
