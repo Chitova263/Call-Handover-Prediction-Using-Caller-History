@@ -6,6 +6,7 @@
     using System;
     using VerticalHandoverPrediction.Mobile;
     using System.Linq;
+    using ElectronCgi.DotNet;
 
     class Program
     {
@@ -15,6 +16,10 @@
                 .MinimumLevel.Debug()
                 .WriteTo.Console()
                 .CreateLogger();
+
+            var connection = new ConnectionBuilder()
+                .WithLogging()
+                .Build();
 
             HetNet.Instance.GenerateRats();
             HetNet.Instance.GenerateMobileTerminals(50);
@@ -79,6 +84,9 @@
                 HetNet.Instance.Reset(); 
                 NetworkSimulator.Instance.Events.Clear();            
             }
+
+            connection.On<string, string>("greeting", name => "Hello mama " + name);
+            connection.Listen();         
         }
     }
 }

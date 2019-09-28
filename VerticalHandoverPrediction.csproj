@@ -10,6 +10,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CsvHelper" Version="12.1.2" />
+    <PackageReference Include="ElectronCgi.DotNet" Version="0.0.2" />
     <PackageReference Include="FluentAssertions" Version="5.9.0" />
     <PackageReference Include="MathNet.Numerics" Version="4.8.1" />
     <PackageReference Include="MedallionPriorityQueue" Version="1.1.0" />
