@@ -4,6 +4,7 @@ const BrowserWindow = electron.BrowserWindow;
 
 const path = require('path');
 const isDev = require('electron-is-dev');
+const { ConnectionBuilder } = require('electron-cgi');
 
 let mainWindow;
 
@@ -15,6 +16,20 @@ function createWindow() {
     //BrowserWindow.addDevToolsExtension('<location to your react chrome extension>');
     mainWindow.webContents.openDevTools();
   }
+
+  
+  let connection = new ConnectionBuilder()
+    .connectTo("dotnet", "run", "--project", "./Core")
+    .build();
+
+  connection.send("greeting", "Mom from C#", response => {
+    console.log(response);
+  });
+
+  connection.onDisconnect = () => {
+    console.log("lost");
+  };
+
   mainWindow.on('closed', () => mainWindow = null);
 }
 
