@@ -18,17 +18,17 @@ function createWindow() {
   }
 
   
-  let connection = new ConnectionBuilder()
-    .connectTo("dotnet", "run", "--project", "./Core")
-    .build();
+  // let connection = new ConnectionBuilder()
+  //   .connectTo("dotnet", "run", "--project", "./Main")
+  //   .build();
 
-  connection.send("greeting", "Mom from C#", response => {
-    console.log(response);
-  });
+  // // connection.send("greeting", "Mom from C#", response => {
+  // //   console.log(response);
+  // // });
 
-  connection.onDisconnect = () => {
-    console.log("lost");
-  };
+  // connection.onDisconnect = () => {
+  //   console.log("lost");
+  // };
 
   mainWindow.on('closed', () => mainWindow = null);
 }

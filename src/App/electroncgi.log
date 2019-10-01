@@ -1,0 +1,30 @@
+2019-10-01 16:17:17.510 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.IO.IOException: The process cannot access the file 'C:\Users\bluelabuser\Desktop\Call-Handover-Prediction-Using-Caller-History\src\App\calllogs.csv' because it is being used by another process.
+   at System.IO.FileStream.ValidateFileHandle(SafeFileHandle fileHandle)
+   at System.IO.FileStream.CreateFileOpenHandle(FileMode mode, FileShare share, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.StreamReader..ctor(String path)
+   at VerticalHandoverPrediction.Utils.CsvUtils.Write[TMap,TRecord](TRecord record, String filename) in C:\Users\bluelabuser\Desktop\Call-Handover-Prediction-Using-Caller-History\src\App\Main\Utils\CsvUtils.cs:line 41
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in C:\Users\bluelabuser\Desktop\Call-Handover-Prediction-Using-Caller-History\src\App\Main\Program.cs:line 39
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-01 16:17:28.393 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.IO.IOException: The process cannot access the file 'C:\Users\bluelabuser\Desktop\Call-Handover-Prediction-Using-Caller-History\src\App\calllogs.csv' because it is being used by another process.
+   at System.IO.FileStream.ValidateFileHandle(SafeFileHandle fileHandle)
+   at System.IO.FileStream.CreateFileOpenHandle(FileMode mode, FileShare share, FileOptions options)
+   at System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.StreamReader..ctor(String path)
+   at VerticalHandoverPrediction.Utils.CsvUtils.Write[TMap,TRecord](TRecord record, String filename) in C:\Users\bluelabuser\Desktop\Call-Handover-Prediction-Using-Caller-History\src\App\Main\Utils\CsvUtils.cs:line 41
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in C:\Users\bluelabuser\Desktop\Call-Handover-Prediction-Using-Caller-History\src\App\Main\Program.cs:line 39
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
