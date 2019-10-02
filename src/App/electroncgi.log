@@ -28,3 +28,63 @@ ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type '
    at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
    --- End of inner exception stack trace ---
    at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-01 22:03:10.896 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 31
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-01 22:05:14.079 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 31
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-02 03:00:45.669 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Func`2 predicate, Boolean& found)
+   at System.Linq.Enumerable.FirstOrDefault[TSource](IEnumerable`1 source, Func`2 predicate)
+   at VerticalHandoverPrediction.Simulator.NetworkSimulator.ServeEventQueue(Boolean predictive) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Simulator/NetworkSimulator.cs:line 97
+   at VerticalHandoverPrediction.Simulator.NetworkSimulator.GenerateCalls(Int32 numberOfCalls) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Simulator/NetworkSimulator.cs:line 61
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 29
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-02 03:09:18.501 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 31
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-02 03:38:13.325 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 31
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()

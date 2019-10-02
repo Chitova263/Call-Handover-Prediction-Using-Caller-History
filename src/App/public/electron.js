@@ -5,8 +5,11 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 const isDev = require('electron-is-dev');
 const { ConnectionBuilder } = require('electron-cgi');
+const { ipcMain } = require('electron');
+
 
 let mainWindow;
+let connection;
 
 function createWindow() {
   mainWindow = new BrowserWindow({width: 900, height: 680});
@@ -16,19 +19,6 @@ function createWindow() {
     //BrowserWindow.addDevToolsExtension('<location to your react chrome extension>');
     mainWindow.webContents.openDevTools();
   }
-
-  
-  // let connection = new ConnectionBuilder()
-  //   .connectTo("dotnet", "run", "--project", "./Main")
-  //   .build();
-
-  // // connection.send("greeting", "Mom from C#", response => {
-  // //   console.log(response);
-  // // });
-
-  // connection.onDisconnect = () => {
-  //   console.log("lost");
-  // };
 
   mainWindow.on('closed', () => mainWindow = null);
 }
@@ -46,3 +36,19 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+connection = new ConnectionBuilder()
+    .connectTo("dotnet", "run", "--project", "./Main")
+    .build();
+
+connection.onDisconnect = () => {
+  console.log("lost");
+};
+
+ipcMain.on('results', (event, response) => {
+  connection.send("greeting", "Mom from C#", response => {
+    console.log(`${response} herer`)
+    event.sender.send("res", response)
+    //mainWindow.webContents.send("greeting", response);
+  });
+})
