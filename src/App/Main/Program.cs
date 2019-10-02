@@ -91,7 +91,6 @@
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/SimResults.csv"); 
                 Utils.CsvUtils._Instance.Clear($"{Environment.CurrentDirectory}/calllogs.csv"); 
                 
-
                 return results;
             });
             connection.Listen();
