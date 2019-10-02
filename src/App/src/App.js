@@ -8,17 +8,18 @@ import ResultLog from './components/ResultLog';
 
 const App = () => {
   const [results, setResults] = useState({
-    data:null,
-    isLoading: true
+    data: null,
+    isLoading: true,
+    init: true,
   })
   
   const run = () => {
-    setResults({ data:null, isLoading: true })
+    setResults({ data:null, isLoading: true , init: false })
     console.log('fetching results')
     ipcRenderer.send('results');
     ipcRenderer.on('res', (event, response) => {
       console.log(response)
-      setResults({data: response, isLoading: false})
+      setResults({init: false, data: response, isLoading: false})
     })
   }
 

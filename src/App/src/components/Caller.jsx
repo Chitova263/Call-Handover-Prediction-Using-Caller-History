@@ -70,7 +70,6 @@ export default function Caller() {
             </div>
             <div className={classes.button}>
                 <Button text="Call"
-                    icon="mobile-phone"
                     large={true}
                 />
             </div>

@@ -155,19 +155,19 @@ namespace VerticalHandoverPrediction.Network
                 new Rat(new List<Service>
                 {
                     Service.Voice
-                }, 100,  "RAT 1 (Voice)"),
+                }, 50,  "RAT 1 (Voice)"),
                 new Rat(new List<Service>
                 {
                     Service.Data
-                }, 100, "RAT 2 (Data)"),
+                }, 50, "RAT 2 (Data)"),
                 new Rat(new List<Service>
                 {
                     Service.Voice, Service.Data
-                }, 100,  "RAT 3 (Voice - Data)"),
+                }, 50,  "RAT 3 (Voice - Data)"),
                 new Rat(new List<Service>
                 {
                     Service.Voice, Service.Video, Service.Data
-                }, 100,  "RAT 4 (Voice - Data - Video)"),
+                }, 50,  "RAT 4 (Voice - Data - Video)"),
             };
 
             _rats.AddRange(rats);

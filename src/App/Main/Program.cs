@@ -24,7 +24,7 @@
             connection.On<dynamic, List<SimulationResults>>("greeting", message => {
                 
                 HetNet.Instance.GenerateRats();
-                HetNet.Instance.GenerateMobileTerminals(50);
+                HetNet.Instance.GenerateMobileTerminals(20);
                 
                 NetworkSimulator.Instance.GenerateCalls(500);
                 
@@ -37,7 +37,7 @@
 
                 NetworkSimulator.Instance.Events.Clear();
 
-                var list = new int[]{ 100, 200, 300, 400 };
+                var list = new int[]{ 100, 200, 300, 400, 500, 600, 700 };
                 var results = new List<SimulationResults>();
                 
                 foreach (var item in list)

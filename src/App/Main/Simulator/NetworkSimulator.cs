@@ -47,7 +47,7 @@ namespace VerticalHandoverPrediction.Simulator
                 var call = new Call(mobileTerminal.MobileTerminalId, service);
                 
                 var callStartedEvent = new CallStartedEvent(
-                    DateTime.Now.AddMinutes(1 + (120 - 1) * random.NextDouble()), 
+                    DateTime.Now.AddMinutes(1 + (60 - 1) * random.NextDouble()), 
                     call);
                 
                 var callEndedEvent = new CallEndedEvent(
