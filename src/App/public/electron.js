@@ -38,7 +38,7 @@ app.on('activate', () => {
 });
 
 connection = new ConnectionBuilder()
-    .connectTo("dotnet", "run", "--project", "./Main")
+    .connectTo("./publish/VerticalHandoverPrediction")
     .build();
 
 connection.onDisconnect = () => {
@@ -48,7 +48,7 @@ connection.onDisconnect = () => {
 ipcMain.on('results', (event, response) => {
   connection.send("greeting", "Mom from C#", response => {
     console.log(`${response} herer`)
-    event.sender.send("res", response)
-    //mainWindow.webContents.send("greeting", response);
+    //event.sender.send("res", response)
+    mainWindow.webContents.send("res", response);
   });
 })
