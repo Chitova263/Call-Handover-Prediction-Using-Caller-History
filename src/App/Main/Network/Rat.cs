@@ -33,9 +33,7 @@ namespace VerticalHandoverPrediction.Network
         public void RemoveSession(ISession session)
         {
             if (session == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
-            }
 
             _ongoingSessions.Remove(session);
         }
@@ -43,9 +41,7 @@ namespace VerticalHandoverPrediction.Network
         public void AddSession(ISession session)
         {
             if (session == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
-            }
 
             _ongoingSessions.Add(session);
         }
@@ -58,24 +54,16 @@ namespace VerticalHandoverPrediction.Network
         public bool CanAdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal)
         {
             if (session == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
-            }
 
             if (call == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(call)} is invalid");
-            }
-
+    
             if (mobileTerminal == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(mobileTerminal)} is invalid");
-            }
-
+    
             if (!this.Services.Contains(call.Service))
-            {
                 return false;
-            }
 
             var requiredNetworkResources = call.Service.ComputeRequiredNetworkResources();
             return requiredNetworkResources <= AvailableNetworkResources();
@@ -84,19 +72,13 @@ namespace VerticalHandoverPrediction.Network
         public void AdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal)
         {
             if (session == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
-            }
 
             if (call == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(call)} is invalid");
-            }
 
             if (mobileTerminal == null)
-            {
                 throw new VerticalHandoverPredictionException($"{nameof(mobileTerminal)} is invalid");
-            }
 
             TakeNetworkResources(call.Service.ComputeRequiredNetworkResources());
 

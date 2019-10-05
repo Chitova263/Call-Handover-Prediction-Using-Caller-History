@@ -12,7 +12,7 @@ let mainWindow;
 let connection;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({width: 900, height: 680});
+  mainWindow = new BrowserWindow({width: 1000, height: 680});
   mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
   if (isDev) {
     // Open the DevTools.
@@ -38,17 +38,25 @@ app.on('activate', () => {
 });
 
 connection = new ConnectionBuilder()
-    .connectTo("./publish/VerticalHandoverPrediction")
+    .connectTo("dotnet", "run", "--project", "./Main")
     .build();
 
 connection.onDisconnect = () => {
-  console.log("lost");
+  connection = new ConnectionBuilder()
+    .connectTo("dotnet", "run", "--project", "./Main")
+    .build();
 };
 
-ipcMain.on('results', (event, response) => {
-  connection.send("greeting", "Mom from C#", response => {
-    console.log(`${response} herer`)
+ipcMain.on('results', (event, request) => {
+  connection.send("greeting", request, response => {
     //event.sender.send("res", response)
     mainWindow.webContents.send("res", response);
   });
 })
+
+//Load users from datastore
+connection.send('getusers', null, response => {
+  console.log(response)
+  mainWindow.webContents.send('getusers', response)
+})
+

@@ -12,29 +12,33 @@ const App = () => {
     isLoading: true,
     init: true,
   })
+  const [users, setusers] = useState([]);
   
-  const run = () => {
+  useEffect(() => {
+    ipcRenderer.on('getusers', (event, response) => {
+      setusers([...response]);
+    })
+    return () => {
+      ipcRenderer.removeAllListeners('greeting');
+      ipcRenderer.removeAllListeners('getusers');
+    }
+  },[users]);
+
+  const run = calls => {
     setResults({ data:null, isLoading: true , init: false })
     console.log('fetching results')
-    ipcRenderer.send('results');
+    ipcRenderer.send('results',{calls});
     ipcRenderer.on('res', (event, response) => {
       console.log(response)
       setResults({init: false, data: response, isLoading: false})
     })
   }
 
-  //component will unmount
-  useEffect(() => {
-    return () => {
-      ipcRenderer.removeAllListeners('greeting')
-    }
-  }, [results]);
-
   return (
     <div className="App">
      <Appbar/>
      <Calls run={run}/>
-     <Caller/>
+     <Caller users={users}/>
      <GraphsPanel {...results}/>
      <ResultLog {...results}/>
     </div>

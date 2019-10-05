@@ -34,7 +34,7 @@ const useStyles = makeStyles({
     }
   });
 
-export default function Caller() {
+export default function Caller({users}) {
     const classes = useStyles();
     
     const radioValues = {Voice:'Voice', Data:'Data', Video:'Video'};
@@ -60,13 +60,16 @@ export default function Caller() {
                     <Radio label="Data" value={radioValues.Data} />
                     <Radio label="Video" value={radioValues.Video} />
                 </RadioGroup>
+               
                 <HTMLSelect 
                     onChange={event=>setmobileTerminal(event.target.value)}
                 >
-                    <option value={mobileTerminals.mobileTerminal1}>{mobileTerminals.mobileTerminal1}</option>
-                    <option value={mobileTerminals.mobileTerminal2}>{mobileTerminals.mobileTerminal2}</option>
-                    <option value={mobileTerminals.mobileTerminal3}>{mobileTerminals.mobileTerminal3}</option>
+                    {users.map((user, index) => {
+                    return <option value={user} key={index}>{user}</option>
+                    })}
                 </HTMLSelect>
+                
+             
             </div>
             <div className={classes.button}>
                 <Button text="Call"

@@ -1,8 +1,7 @@
-import React from 'react'
-import { FormGroup, 
-    InputGroup,
-    Button } from '@blueprintjs/core';
+import React, { useState} from 'react'
+import { FormGroup,  InputGroup, Button } from '@blueprintjs/core';
 import { makeStyles } from '@material-ui/styles';
+import Config from './Config';
 
 const useStyles = makeStyles({
     root: {
@@ -31,11 +30,18 @@ const useStyles = makeStyles({
         margin: "auto 0.5rem auto auto",
         fontFamily: "Inconsolata, monospace",
         fontWeight: "bolder",
+    },
+    config:{
+        display: 'flex',
+        margin: "0.5rem"
     }
   });
 
 export default function Calls({run}) {
     const classes = useStyles();
+    
+    const [calls, setcalls] = useState("")
+    
     return (
         <div className={classes.root}>
             <FormGroup className={classes.form}
@@ -45,22 +51,25 @@ export default function Calls({run}) {
                 inline
             >
                 <InputGroup id="num-of-calls" 
-                    placeholder="100,200,300,400,500" 
+                    onChange={event => setcalls(event.target.value)}
+                    placeholder="100,200,300,400,500"
+                    value={calls} 
                 />   
             </FormGroup>
+            <Config/>
             <div className={classes.button}>
                 <Button 
-                    onClick={run}
+                    onClick={()=>run(calls)}
                     text="Run"
                     large={true}
                 />
             </div>
             <div className={classes.rightPane}>
                 <div className={classes.results}>
-                    <div>RAT-1 - Capacity: 100; Services:[voice] </div>
-                    <div>RAT-2 - Capacity: 100; Services:[data]</div>
-                    <div>RAT-3 - Capacity: 100; Services:[voice, data] </div>
-                    <div>RAT-4 - Capacity: 100; Services:[voice, data, video]</div>
+                    <div>RAT-1 - Capacity: {}; Services:[voice] </div>
+                    <div>RAT-2 - Capacity: {}; Services:[data]</div>
+                    <div>RAT-3 - Capacity: {}; Services:[voice, data] </div>
+                    <div>RAT-4 - Capacity: {}; Services:[voice, data, video]</div>
                 </div>
                 <div className={classes.results}>
                     <div>Voice - 1 bbu</div>

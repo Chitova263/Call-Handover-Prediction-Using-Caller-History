@@ -8,6 +8,8 @@
     using System.Linq;
     using ElectronCgi.DotNet;
     using System.Collections.Generic;
+    using Electron;
+
     class Program
     {
         static void Main(string[] args)
@@ -21,9 +23,24 @@
                 .WithLogging()
                 .Build();
 
-            connection.On<dynamic, List<SimulationResults>>("greeting", message => {
+            // var result = NetworkSimulator.Instance.Predict(new PredictionParameters{
+            //     Service = CallSession.Service.Data,
+            //     MobileTerminalId = Guid.Parse("9e89f07c-ac04-4e0e-b113-fe418996b5cc")
+            // });
+
+            // result.Dump();
+
+            connection.On<dynamic, List<Guid>>("getusers", request => {
+                return NetworkSimulator.Instance.LoadUsers();
+            });
+
+            connection.On<PredictionParameters,dynamic>("predict", data => {
+                return NetworkSimulator.Instance.Predict(data);
+            });
+
+            connection.On<SimulationParameters,dynamic>("greeting", message => {
                 
-                HetNet.Instance.GenerateRats();
+                HetNet.Instance.GenerateRats(100, 100, 100, 100);
                 HetNet.Instance.GenerateMobileTerminals(20);
                 
                 NetworkSimulator.Instance.GenerateCalls(500);
@@ -33,11 +50,13 @@
                     Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(
                         log, 
                         $"{Environment.CurrentDirectory}/calllogs.csv");
+                    //load history in memory    
+                    HetNet.Instance.CallerHistory.Add(log);
                 }
 
                 NetworkSimulator.Instance.Events.Clear();
 
-                var list = new int[]{ 100, 200, 300, 400, 500, 600, 700 };
+                var list = message.Calls.Split(",").Select(x => int.Parse(x));
                 var results = new List<SimulationResults>();
                 
                 foreach (var item in list)
@@ -93,11 +112,7 @@
                 
                 return results;
             });
-            connection.Listen();
-
-                
-
-                  
+            connection.Listen();  
         }
        
     }

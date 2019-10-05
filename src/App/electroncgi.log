@@ -88,3 +88,61 @@ ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type '
    at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
    --- End of inner exception stack trace ---
    at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-02 23:29:23.320 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at System.Linq.Enumerable.TryGetFirst[TSource](IEnumerable`1 source, Func`2 predicate, Boolean& found)
+   at System.Linq.Enumerable.FirstOrDefault[TSource](IEnumerable`1 source, Func`2 predicate)
+   at VerticalHandoverPrediction.Simulator.NetworkSimulator.ServeEventQueue(Boolean predictive) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Simulator/NetworkSimulator.cs:line 97
+   at VerticalHandoverPrediction.Simulator.NetworkSimulator.Run(Boolean predictive) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Simulator/NetworkSimulator.cs:line 74
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_0(Object message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 60
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-02 23:49:39.197 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> ElectronCgi.DotNet.SerialiserException: Failed to deserialise arguments
+ ---> Newtonsoft.Json.JsonReaderException: Unexpected character encountered while parsing value: {. Path '', line 1, position 1.
+   at Newtonsoft.Json.JsonTextReader.ReadStringValue(ReadType readType)
+   at Newtonsoft.Json.JsonTextReader.ReadAsString()
+   at Newtonsoft.Json.JsonReader.ReadForType(JsonContract contract, Boolean hasConverter)
+   at Newtonsoft.Json.Serialization.JsonSerializerInternalReader.Deserialize(JsonReader reader, Type objectType, Boolean checkAdditionalContent)
+   at Newtonsoft.Json.JsonSerializer.DeserializeInternal(JsonReader reader, Type objectType)
+   at Newtonsoft.Json.JsonSerializer.Deserialize(JsonReader reader, Type objectType)
+   at Newtonsoft.Json.JsonConvert.DeserializeObject(String value, Type type, JsonSerializerSettings settings)
+   at Newtonsoft.Json.JsonConvert.DeserializeObject(String value, Type type)
+   at ElectronCgi.DotNet.JsonSerialiser.DeserialiseArguments(String args, Type argumentsType)
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.JsonSerialiser.DeserialiseArguments(String args, Type argumentsType)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-05 13:42:43.132 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.FormatException: Input string was not in a correct format.
+   at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, TypeCode type)
+   at System.Number.ParseInt32(ReadOnlySpan`1 value, NumberStyles styles, NumberFormatInfo info)
+   at System.Int32.Parse(String s)
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_3(String x) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 59
+   at System.Linq.Enumerable.SelectArrayIterator`2.MoveNext()
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_2(SimulationParameters message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 62
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-05 14:15:15.966 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'greeting' failed.
+ ---> System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+   at System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_2(SimulationParameters message) in /Users/DjMadd/Call-Handover-Prediction-Using-Caller-History/src/App/Main/Program.cs:line 48
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()

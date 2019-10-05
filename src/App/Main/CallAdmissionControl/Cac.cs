@@ -7,14 +7,16 @@ namespace VerticalHandoverPrediction.CallAdimissionControl
     using System;
     using static MoreLinq.Extensions.StartsWithExtension;
     using System.Collections.Generic;
-    using VerticalHandoverPrediction.Utils;
     using VerticalHandoverPrediction.Simulator.Events;
-    using Serilog;
 
     public class Cac
     {
         public bool Predictive { get; set; }
 
+        public Cac()
+        {
+
+        }
         public Cac(bool predictive)
         {
             Predictive = predictive;
@@ -34,17 +36,18 @@ namespace VerticalHandoverPrediction.CallAdimissionControl
                     .SelectMany(x => x.OngoingSessions)
                     .FirstOrDefault(x => x.SessionId == mobileTerminal.SessionId);
                 
-                //------------- Cant have a voice call admitted when we have another voice call active in same session -----------------
+                //Check if there is a same class of call active in session
                 var services = session.ActiveCalls.Select(x => x.Service);
                 if(services.Contains(evt.Call.Service))
                 {
-                    HetNet.Instance.CallStartedEventsRejectedWhenNotIdle++;
-                    //Log.Warning($"There is a @{evt.Call.Service} call active in session @{session.SessionId}");
+                    //Call already exists in the list of active calls so block event
                     return;
                 }
 
                 Simulator.NetworkSimulator.Instance.Events.Add(evt);
-                HetNet.Instance.CallsGenerated++;
+
+                //At this point we can establish that call is generated
+                HetNet.Instance.UpdateGeneratedCalls(evt.Call.Service);
 
                 var rat = HetNet.Instance.Rats
                     .FirstOrDefault(x => x.RatId == session.RatId);
@@ -60,22 +63,21 @@ namespace VerticalHandoverPrediction.CallAdimissionControl
 
                 return;
             }
-            //If Idle
+            //If Mobile terminal was idle, do the initial RAT Selection
             else
             {
+                //Session already terminated so reject all incoming initial calls
                 if(mobileTerminal.IsActive)
-                {
-                    //Log.Warning("Session Already Terminated");
-                    HetNet.Instance.CallStartedEventsRejectedWhenIdle++;
                     return;
-                }
 
                 //Mobile Terminal is now active
                 mobileTerminal.SetActive(true);
 
-                //Call successfuly generated
+                
                 Simulator.NetworkSimulator.Instance.Events.Add(evt);
-                HetNet.Instance.CallsGenerated++;
+
+                //At this point we can establish that the call is generated
+                HetNet.Instance.UpdateGeneratedCalls(evt.Call.Service);
 
                 if(Predictive)
                 {
@@ -90,15 +92,17 @@ namespace VerticalHandoverPrediction.CallAdimissionControl
             }
         }
 
+
         private void RunPredictiveAlgorithm(CallStartedEvent evt, IMobileTerminal mobileTerminal)
         {
-            var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
+            
+            //var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/calllogs.csv").ToList();
             
             var nextState =  evt.Call.Service.GetState();
 
-            if(history.Any())
+            if(HetNet.Instance.CallerHistory.Any())
             {    
-                var group = history
+                var group = HetNet.Instance.CallerHistory
                     .Where(x => x.UserId == mobileTerminal.MobileTerminalId)
                     .Select(x => x.SessionSequence)
                     .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))

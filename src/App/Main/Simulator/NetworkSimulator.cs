@@ -3,12 +3,16 @@ namespace VerticalHandoverPrediction.Simulator
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Electron;
     using Medallion.Collections;
+    using MoreLinq.Extensions;
     using VerticalHandoverPrediction.CallAdimissionControl;
     using VerticalHandoverPrediction.CallSession;
+    using VerticalHandoverPrediction.Mobile;
     using VerticalHandoverPrediction.Network;
     using VerticalHandoverPrediction.Simulator.Events;
     using VerticalHandoverPrediction.Simulator.Extensions;
+    using VerticalHandoverPrediction.Utils;
 
     public class NetworkSimulator 
     {
@@ -25,6 +29,14 @@ namespace VerticalHandoverPrediction.Simulator
             Events = new List<IEvent>();
         }
 
+        public List<Guid> LoadUsers()
+        {
+            var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/history.csv")
+                .Select(x => x.UserId)
+                .Distinct();
+            return history.ToList();
+        }
+
         public static NetworkSimulator Instance
         {
             get
@@ -35,6 +47,45 @@ namespace VerticalHandoverPrediction.Simulator
                 }
                 return instance;
             }
+        }
+
+        public PredictionResults Predict(PredictionParameters data)
+        {
+            var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/history.csv").ToList();
+            var group = history
+                .Where(x => x.UserId == data.MobileTerminalId)
+                .Select(x => x.SessionSequence)
+                .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))
+                .Select(x => x.Skip(1).Take(2))
+                .Where(x => x.StartsWith(new List<MobileTerminalState>{data.Service.GetState()}))
+                .SelectMany(x => x.Skip(1))
+                .Where(x => x != MobileTerminalState.Idle)
+                .GroupBy(x => x);
+            
+            if(!group.Any()) 
+                return null;
+           
+            //continue to compute frequency table
+            var prediction = default(IGrouping<MobileTerminalState, MobileTerminalState>);
+            var max = 0;
+
+            //Deal with ties
+            foreach(var grp in group )
+            {
+                if(grp.Count() > max) 
+                {
+                    prediction = grp;
+                    max = prediction.Count();
+                }
+                //Console.WriteLine( $"next state is {grp.Key}, Frequency: {grp.Count()}");
+            }
+
+            return new PredictionResults
+            {
+                NextState = prediction.Key,
+                Frequency = prediction.Count(),
+                FrequencyDictionary = group.ToDictionary(g => g.Key, g => g.Select(x => x).Count())
+            };
         }
 
         //First time you run this generate call history
@@ -102,7 +153,6 @@ namespace VerticalHandoverPrediction.Simulator
                     //if no session contains this call then it was never considered
                     if(call is null) 
                     {
-                        HetNet.Instance.CallEndedEventsRejected++;
                         //Log.Warning($"CallStartedEventCorresponding to {nameof(CallEndedEvent)} was rejected");
                     } 
                     else
