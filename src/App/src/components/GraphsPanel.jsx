@@ -16,8 +16,17 @@ const useStyles = makeStyles({
     chart:{
        margin: "0.5rem 0.5rem 0.5rem 0.5rem"
     },
+    loading:{
+      border: "2px solid gray",
+      margin: "1rem 1rem 0",
+      boxShadow: "inset 0 0 10px #000000", 
+      height: "30rem",    
+    },
     logo:{
-      margin: "auto"
+      position: 'relative',
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)"
     }
   });
 
@@ -168,13 +177,13 @@ export default function GraphsPanel({data:results, isLoading, init }) {
       ]
     };  
     if(isLoading && !init){
-        return<div className={classes.root}>
-             <Spinner size={Spinner.SIZE_LARGE} />
+        return<div className={classes.loading}>
+             <Spinner size={Spinner.SIZE_LARGE} className={classes.logo}/>
         </div>
     }if(init){
-      return <div className={classes.root}>
-        <div className={classes.logo}>
-          <img src={logo} alt="logo"/>
+      return <div >
+        <div className={classes.loading}>
+          <img src={logo} alt="logo" className={classes.logo}/>
         </div>
       </div>
     }

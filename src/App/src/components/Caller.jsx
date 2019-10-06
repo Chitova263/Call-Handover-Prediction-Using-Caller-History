@@ -31,6 +31,10 @@ const useStyles = makeStyles({
     },
     htmtselect:{
         width: '60%'
+    },
+    resultsPane:{
+        display: 'grid',
+        gridTemplateColumns: 'auto auto'     
     }
   });
 
@@ -62,7 +66,6 @@ export default function Caller({users}) {
 
     return (
         <div className={classes.root}>
-            {JSON.stringify(results)}
             <Divider/>
             <RadioGroup className={classes.radio}
                 label="SELECT SERVICE"
@@ -85,10 +88,14 @@ export default function Caller({users}) {
                 <Button text="Call" className={classes.btn} onClick={handleCall}/>
             </div>
             <Divider/>
-            <ResultsPanel label="Service" value={service}/>
-            <ResultsPanel label="UserId" value={mobileTerminalId}/> 
-            <ResultsPanel label="Predicted State" value={8}/>
-            <ResultsPanel label="Predicted Rat" value="RAT-4"/> 
+            <div className={classes.resultsPane}>
+                <ResultsPanel label="Service" value={service}/>
+                <ResultsPanel label="UserId" value={mobileTerminalId}/> 
+                <ResultsPanel label="Predicted State" value={results['nextState']}/>
+                <ResultsPanel label="Frequency" value={results['frequency']}/> 
+                
+
+            </div>
             <Divider/>
         </div>
     )

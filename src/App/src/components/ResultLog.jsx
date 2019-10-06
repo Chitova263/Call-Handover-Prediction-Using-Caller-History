@@ -34,7 +34,7 @@ export default function ResultLog({data, isLoading}) {
     const classes = useStyles();
     if(isLoading){
         return  <div className={classes.rootLoading}>
-              $>> NET. SIMULATOR.LOGGER
+             >>>
         </div>
     }
     return (

@@ -64,7 +64,7 @@ ipcMain.on('predict', (event, request) => {
 ipcMain.on('getusers', event => {
   connection.send('getusers', null, response => {
     console.log(response)
-    event.sender.send("getuser", response);
+    event.sender.send("getusers", response);
   })
 })
 
