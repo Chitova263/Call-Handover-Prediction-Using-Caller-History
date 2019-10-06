@@ -53,7 +53,7 @@ namespace VerticalHandoverPrediction.Simulator
         {
             var history = CsvUtils._Instance.Read<CallLogMap,CallLog>($"{Environment.CurrentDirectory}/history.csv").ToList();
             var group = history
-                .Where(x => x.UserId == data.MobileTerminalId)
+                .Where(x => x.UserId == Guid.Parse(data.Id))
                 .Select(x => x.SessionSequence)
                 .Select(x => x.ToList().Select(x =>(MobileTerminalState)(int.Parse(x.ToString()))))
                 .Select(x => x.Skip(1).Take(2))

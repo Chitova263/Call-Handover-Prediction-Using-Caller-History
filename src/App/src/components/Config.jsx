@@ -1,46 +1,29 @@
-import React,{ useState } from 'react';
-import { HTMLSelect } from '@blueprintjs/core';
+import React from 'react';
 import { makeStyles } from '@material-ui/styles';
+import RatConfig from './RatConfig';
 
 const useStyles = makeStyles({
     root: {
-       margin: "auto"
+        display: 'grid',
+        gridTemplateRows:'auto auto',
+        gridTemplateColumns: '1fr 1fr',   
     },
-    htmselect:{
-        marginLeft: "0.8rem"
-    }
 })
 
-export default function Config() {
+export default function Config({handleChangedCapacity}) {
     const classes = useStyles();
-    const initialCapacity = { c1:100, c2:100, c3:100, c4:100 }
-    const [capacity, setcapacity] = useState(initialCapacity);
-
-    const handleChangedCapacity = event => {
-        const target = event.target;
-        const value = target.value;
-        const name = target.name;
-        setcapacity(prevState=>({ ...prevState, [name]:value }));
-    }
-
-    const items = [1,2,3,4];
-
+    
+    const values = [1,2,3,4];
     return (
         <div className={classes.root}>
-            {items.map( value => {
-                let name = `RAT${value}`
-                return <div key={value}>
-                    <HTMLSelect onChange={handleChangedCapacity} 
-                        name={name} 
-                        defaultValue={100}
-                        className={classes.htmselect} >
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={75}>75</option>
-                        <option value={100}>100</option>
-                    </HTMLSelect>
-                </div>
-            })}
+          {values.map((value, index) => {
+              return <RatConfig key={index}
+                name={`c${index+1}`}
+                handleChangedCapacity={handleChangedCapacity} 
+                label={`RAT-${value}`}
+                />
+          })}
         </div>
     )
 }
+

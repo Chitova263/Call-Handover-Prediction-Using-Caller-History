@@ -1,89 +1,96 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { RadioGroup, 
     Radio,
     Button,
-    Divider,
-    HTMLSelect
+    HTMLSelect,
+    Divider
 } from '@blueprintjs/core';
 import { makeStyles } from '@material-ui/styles';
+import ResultsPanel from './ResultsPanel';
+import { ipcRenderer } from 'electron';
 
 const useStyles = makeStyles({
     root: {
-        display: "flex",
-        justifyContent: "even",
-        border: "2px solid black",
-        margin: "1rem 1rem 0"
+        margin: '0 1rem 1rem 0',
+        border: "2px solid gray",
+        display: 'flex',
+        flexDirection: 'column'
     },
-    form:{
-        margin: "0.5rem 0.5rem"
+    radio:{
+        display: 'flex',
+        justifyContent: 'space-around',
+        marginTop: '0.3rem'
     },
-    button:{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-around",
-        margin: "0.5rem 0.8rem 0 2rem"
+    controls: {
+        display: 'flex',
+        justifyContent: 'space-around'
     },
-    results:{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent:"space-around",
-        margin: "0.5rem 0.5rem"
+    btn: {
+        display: 'block',
+        width: '35%'
     },
-    result:{
-        marginRight: "0.5rem"
+    htmtselect:{
+        width: '60%'
     }
   });
 
 export default function Caller({users}) {
     const classes = useStyles();
     
-    const radioValues = {Voice:'Voice', Data:'Data', Video:'Video'};
-    const mobileTerminals = { 
-        mobileTerminal1:'mobileTerminal1',
-        mobileTerminal2:'mobileTerminal2',
-        mobileTerminal3:'mobileTerminal3',
+    const services = ['Voice', 'Data', 'Video'];
+
+    const [service, setservice] = useState(services[0]);
+    const [mobileTerminalId, setmobileTerminal] = useState(null)
+    const [results, setresults] = useState({})
+    const handleCall = () => {
+        const args = {
+            mobileTerminalId,
+            service
+        }
+        ipcRenderer.send('predict', args);
+        ipcRenderer.on('prediction_results', (event, response) => {
+            console.log(response)
+            setresults({...response})
+        })
     }
 
-    const [radioValue, setradioValue] = useState(radioValues.Voice);
-    const [mobileTerminal, setmobileTerminal] = useState(mobileTerminals.mobileTerminal1)
-    
+    useEffect(() => {
+        return () => {
+            ipcRenderer.removeAllListeners('prediction_results');
+        };
+    }, [results])
+
     return (
         <div className={classes.root}>
-            <div className={classes.form}>
-                <RadioGroup 
-                    label="Select Service"
-                    onChange={event => setradioValue(event.target.value)}
-                    selectedValue={radioValue}
-                    
-                >
-                    <Radio label="Voice" value={radioValues.Voice} />
-                    <Radio label="Data" value={radioValues.Data} />
-                    <Radio label="Video" value={radioValues.Video} />
-                </RadioGroup>
-               
-                <HTMLSelect 
+            {JSON.stringify(results)}
+            <Divider/>
+            <RadioGroup className={classes.radio}
+                label="SELECT SERVICE"
+                onChange={event => setservice(event.target.value)}
+                selectedValue={service}    
+            >
+                {services.map((service, index) => (
+                    <Radio label={service} value={service} key={index}/>
+                ))}
+            </RadioGroup>
+            <Divider/>
+            <div className={classes.controls}>
+                <HTMLSelect className={classes.htmtselect}
                     onChange={event=>setmobileTerminal(event.target.value)}
                 >
                     {users.map((user, index) => {
                     return <option value={user} key={index}>{user}</option>
                     })}
                 </HTMLSelect>
-                
-             
-            </div>
-            <div className={classes.button}>
-                <Button text="Call"
-                    large={true}
-                />
+                <Button text="Call" className={classes.btn} onClick={handleCall}/>
             </div>
             <Divider/>
-            <div className={classes.results}>
-                <div className={classes.result}>MobileTerminalId: {mobileTerminal} </div>
-                <div className={classes.result}>Service:  {radioValue}</div>
-                <div className={classes.result}>Predicted State:  </div>
-                <div className={classes.result}>Rat Selected:  </div>
-                <div className={classes.result}>Successfull Prediction:  </div>
-            </div>
+            <ResultsPanel label="Service" value={service}/>
+            <ResultsPanel label="UserId" value={mobileTerminalId}/> 
+            <ResultsPanel label="Predicted State" value={8}/>
+            <ResultsPanel label="Predicted Rat" value="RAT-4"/> 
+            <Divider/>
         </div>
     )
 }
+

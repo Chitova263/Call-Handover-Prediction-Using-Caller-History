@@ -1,83 +1,70 @@
 import React, { useState} from 'react'
-import { FormGroup,  InputGroup, Button } from '@blueprintjs/core';
+import { FormGroup,  InputGroup, Button, Divider } from '@blueprintjs/core';
 import { makeStyles } from '@material-ui/styles';
 import Config from './Config';
 
 const useStyles = makeStyles({
     root: {
-        display: "flex",
-        justifyContent: "start",
-        border: "2px solid blue",
-        margin: "1rem 1rem 0",
-        boxShadow: "inset 0 0 10px #000000",
+        display: 'flex',
+        flexDirection: 'column', 
+        margin: '0 1rem 1rem 1rem',
+        border: "2px solid gray",
+    },
+    btn:{
+        margin:"auto",
+        width: "95%"
     },
     form:{
-        margin: "0.5rem 0.5rem"
+        
     },
-    button:{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-around",
-        margin: "0.5rem 0.5rem"
+    input:{
+        width:"24rem"
     },
-    results:{
-        fontSize: "0.7rem",
-        marginRight: "0.5rem"
-    },
-    rightPane:{
-        display: "flex",
-        justifyContent: "space-between",
-        margin: "auto 0.5rem auto auto",
-        fontFamily: "Inconsolata, monospace",
-        fontWeight: "bolder",
-    },
-    config:{
+    container:{
         display: 'flex',
-        margin: "0.5rem"
-    }
+        margin: "0.5rem 0.1rem auto 0.5rem",
+    },
+    label:{
+        margin: "0.4rem 0.5rem 0 0.5rem",
+        color:"blue"
+    } 
   });
 
 export default function Calls({run}) {
     const classes = useStyles();
+    const initialState = "100,200,300,400,500,600,700"
     
-    const [calls, setcalls] = useState("")
-    
+    const [calls, setcalls] = useState(initialState)
+    const initialCapacity = { c1:100, c2:100, c3:100, c4:100 }
+    const [capacity, setcapacity] = useState(initialCapacity);
+
+    const handleChangedCapacity = event => {
+        const target = event.target;
+        const value = target.value;
+        const name = target.name;
+        setcapacity(prevState=>({ ...prevState, [name]:value }));
+    }
+
     return (
         <div className={classes.root}>
-            <FormGroup className={classes.form}
-                helperText="enter comma separated number of calls"
-                label="Calls"
-                labelFor="num-of-calls"
-                inline
-            >
-                <InputGroup id="num-of-calls" 
-                    onChange={event => setcalls(event.target.value)}
-                    placeholder="100,200,300,400,500"
-                    value={calls} 
-                />   
-            </FormGroup>
-            <Config/>
-            <div className={classes.button}>
-                <Button 
-                    onClick={()=>run(calls)}
-                    text="Run"
-                    large={true}
-                />
-            </div>
-            <div className={classes.rightPane}>
-                <div className={classes.results}>
-                    <div>RAT-1 - Capacity: {}; Services:[voice] </div>
-                    <div>RAT-2 - Capacity: {}; Services:[data]</div>
-                    <div>RAT-3 - Capacity: {}; Services:[voice, data] </div>
-                    <div>RAT-4 - Capacity: {}; Services:[voice, data, video]</div>
-                </div>
-                <div className={classes.results}>
-                    <div>Voice - 1 bbu</div>
-                    <div>Data - 2 bbu</div>
-                    <div>Video - 2 bbu</div>
-                </div>
+            <div className={classes.container}>
+                <div className={classes.label}>CALLS</div>
+                <FormGroup className={classes.form}
+                    labelFor="num-of-calls"
+                    inline
+                >
+                    <InputGroup id="num-of-calls" className={classes.input}
+                        onChange={event => setcalls(event.target.value)}
+                        placeholder="100,200,300,400,500,600"
+                        value={calls} 
+                    />   
+                </FormGroup>
             </div>
             
+            <Config handleChangedCapacity={handleChangedCapacity}/> 
+            <Divider/>  
+            <Button className={classes.btn} onClick={()=>run(calls, capacity)} text="Run"/>
+            <Divider/>
         </div>
     )
 }

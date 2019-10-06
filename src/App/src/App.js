@@ -5,8 +5,24 @@ import Calls from './components/Calls';
 import GraphsPanel from './components/GraphsPanel';
 import Caller from './components/Caller';
 import ResultLog from './components/ResultLog';
+import { makeStyles } from '@material-ui/styles';
+
+const useStyles = makeStyles({
+  root: {
+    boxSizing: 'border-box',
+    marginTop: '0',
+    marginBottom: '1rem'
+
+  },
+  simulations: {
+    display: "grid",
+    gridTemplateColumns: '1fr 1fr'
+  }
+})
+
 
 const App = () => {
+  const classes = useStyles();
   const [results, setResults] = useState({
     data: null,
     isLoading: true,
@@ -15,19 +31,21 @@ const App = () => {
   const [users, setusers] = useState([]);
   
   useEffect(() => {
+    ipcRenderer.send('getusers');
     ipcRenderer.on('getusers', (event, response) => {
       setusers([...response]);
     })
     return () => {
-      ipcRenderer.removeAllListeners('greeting');
+      ipcRenderer.removeAllListeners('results');
       ipcRenderer.removeAllListeners('getusers');
     }
-  },[users]);
+  },[]);
 
-  const run = calls => {
+  const run = (calls, capacity) => {
+    console.log(capacity)
     setResults({ data:null, isLoading: true , init: false })
     console.log('fetching results')
-    ipcRenderer.send('results',{calls});
+    ipcRenderer.send('results',{calls, capacity});
     ipcRenderer.on('res', (event, response) => {
       console.log(response)
       setResults({init: false, data: response, isLoading: false})
@@ -35,10 +53,12 @@ const App = () => {
   }
 
   return (
-    <div className="App">
+    <div className={classes.root}>
      <Appbar/>
-     <Calls run={run}/>
-     <Caller users={users}/>
+     <div className={classes.simulations}>
+      <Calls run={run}/>
+      <Caller users={users}/>
+     </div>
      <GraphsPanel {...results}/>
      <ResultLog {...results}/>
     </div>

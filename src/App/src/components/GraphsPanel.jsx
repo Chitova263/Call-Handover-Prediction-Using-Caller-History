@@ -1,20 +1,20 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/styles';
 import Chart from "react-apexcharts";
-import { Divider, Spinner } from '@blueprintjs/core';
+import { Spinner } from '@blueprintjs/core';
 import logo from './logo.png';
 
 const useStyles = makeStyles({
     root: {
-        display: "flex",
-        justifyContent: "space-around",
-        border: "2px solid black",
+        display: "grid",
+        gridTemplateColumns:"1fr 1fr",
+        border: "2px solid gray",
         margin: "1rem 1rem 0",
         boxShadow: "inset 0 0 10px #000000", 
-        height: "377px",    
+        height: "30rem",    
     },
     chart:{
-        margin: "1.5rem"
+       margin: "0.5rem 0.5rem 0.5rem 0.5rem"
     },
     logo:{
       margin: "auto"
@@ -40,6 +40,7 @@ export default function GraphsPanel({data:results, isLoading, init }) {
     const classes = useStyles();
     const data = {
         options: {
+          colors: ['#125590', '#69b742'],
           chart: {
             id: "basic-bar",
           },
@@ -106,7 +107,7 @@ export default function GraphsPanel({data:results, isLoading, init }) {
 
     const avoided = {
       options: {
-        colors: ['#b76942', '#43ba14'],
+        colors: ['#000316'],
         chart: {
           id: "basic-bar",
         },
@@ -183,15 +184,12 @@ export default function GraphsPanel({data:results, isLoading, init }) {
                 <Chart className={classes.chart}
                   options={data.options}
                   series={data.series}
-                  type="bar"
-                  width="500"
+                  type="bar"      
                 />
-                <Divider/>
                 <Chart className={classes.chart}
                   options={avoided.options}
                   series={avoided.series}
-                  type="bar"
-                  width="500"
+                  type="bar"  
                 />
             </div>
         )

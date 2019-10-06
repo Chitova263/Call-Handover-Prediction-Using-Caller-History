@@ -1,5 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/styles';
+import { Divider } from '@blueprintjs/core';
 
 const useStyles = makeStyles({
     root: {
@@ -38,7 +39,17 @@ export default function ResultLog({data, isLoading}) {
     }
     return (
         <div className={classes.root}>
-            {JSON.stringify(data, null, 2)}
+            {data.map((value, index) => (
+                <div key={index}>
+                    <span>Number of calls:  {value['calls']}  | </span>
+                    <span>Number of sessions:  {value['totalSessions']}  | </span>
+                    <span>Number of predictive VHO:  {value['predictiveHandovers']}  | </span>
+                    <span>Number of non predictive:  {value['nonPredictiveHandovers']} | </span>
+                    <span>Number of predictive Blocked Calls:  {value['predictiveBlockedCalls']} | </span>
+                    <span>Number of non predictive Blocked Calls:  {value['nonPredictiveBlockedCalls']} | </span>
+                    <Divider/>
+                </div>
+            ))}
         </div>
     )
 }

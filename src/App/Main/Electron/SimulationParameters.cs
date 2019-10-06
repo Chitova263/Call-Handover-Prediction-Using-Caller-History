@@ -8,11 +8,12 @@ namespace Electron
     public class SimulationParameters
     {
         public string Calls { get; set; }
+        public dynamic Capacity { get; set; }
     }
 
     public class PredictionParameters
     {
-        public Guid MobileTerminalId { get; set; }
+        public string Id { get; set; }
         public Service Service { get; set; }
     }
 

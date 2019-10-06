@@ -48,15 +48,24 @@ connection.onDisconnect = () => {
 };
 
 ipcMain.on('results', (event, request) => {
-  connection.send("greeting", request, response => {
-    //event.sender.send("res", response)
-    mainWindow.webContents.send("res", response);
+  connection.send("results", request, response => {
+    event.sender.send("res", response)
+    //mainWindow.webContents.send("res", response);
+  });
+})
+
+ipcMain.on('predict', (event, request) => {
+  connection.send("predict", request, response => {
+    event.sender.send("prediction_results", response);
   });
 })
 
 //Load users from datastore
-connection.send('getusers', null, response => {
-  console.log(response)
-  mainWindow.webContents.send('getusers', response)
+ipcMain.on('getusers', event => {
+  connection.send('getusers', null, response => {
+    console.log(response)
+    event.sender.send("getuser", response);
+  })
 })
+
 

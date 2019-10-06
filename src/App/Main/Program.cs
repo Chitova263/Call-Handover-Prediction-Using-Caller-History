@@ -9,6 +9,7 @@
     using ElectronCgi.DotNet;
     using System.Collections.Generic;
     using Electron;
+    using VerticalHandoverPrediction.CallSession;
 
     class Program
     {
@@ -34,13 +35,28 @@
                 return NetworkSimulator.Instance.LoadUsers();
             });
 
-            connection.On<PredictionParameters,dynamic>("predict", data => {
-                return NetworkSimulator.Instance.Predict(data);
+            connection.On<dynamic,dynamic>("predict", request => {
+                Service service = default(Service);
+                switch ((string)request.service)
+                {
+                    case "Voice":
+                        service = Service.Voice;
+                        break;
+                    case "Data":
+                        service = Service.Data;
+                        break;
+                    case "Video":
+                        service = Service.Video;
+                        break;
+                };
+
+                
+                return NetworkSimulator.Instance.Predict(new PredictionParameters{ Service = service, Id = (string)request.mobileTerminalId});
             });
 
-            connection.On<SimulationParameters,dynamic>("greeting", message => {
+            connection.On<SimulationParameters,dynamic>("results", request => {
                 
-                HetNet.Instance.GenerateRats(100, 100, 100, 100);
+                HetNet.Instance.GenerateRats((int)request.Capacity.c1, (int)request.Capacity.c2, (int)request.Capacity.c3, (int)request.Capacity.c4);
                 HetNet.Instance.GenerateMobileTerminals(20);
                 
                 NetworkSimulator.Instance.GenerateCalls(500);
@@ -56,7 +72,7 @@
 
                 NetworkSimulator.Instance.Events.Clear();
 
-                var list = message.Calls.Split(",").Select(x => int.Parse(x));
+                var list = request.Calls.Split(",").Select(x => int.Parse(x));
                 var results = new List<SimulationResults>();
                 
                 foreach (var item in list)
