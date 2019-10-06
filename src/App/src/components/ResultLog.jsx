@@ -46,7 +46,10 @@ export default function ResultLog({data, isLoading}) {
                     <span>Number of predictive VHO:  {value['predictiveHandovers']}  | </span>
                     <span>Number of non predictive:  {value['nonPredictiveHandovers']} | </span>
                     <span>Number of predictive Blocked Calls:  {value['predictiveBlockedCalls']} | </span>
-                    <span>Number of non predictive Blocked Calls:  {value['nonPredictiveBlockedCalls']} | </span>
+                    <span>Percentage Video VHOs Avoided:  {value['videoAvoided']}% | </span>
+                    <span>Percentage Data VHOs Avoided:  {value['dataAvoided']}% | </span>
+                    <span>Percentage Voice VHOs Avoided:  {value['voiceAvoided']}% | </span>
+                    <span>Percentage Total VHOs Avoided:  {value['totalAvoided']}% | </span>
                     <Divider/>
                 </div>
             ))}

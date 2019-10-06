@@ -1756,6 +1756,11 @@ accepts@~1.3.4, accepts@~1.3.5:
     mime-types "~2.1.18"
     negotiator "0.6.1"
 
+accessibility-developer-tools@^2.11.0:
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/accessibility-developer-tools/-/accessibility-developer-tools-2.12.0.tgz#3da0cce9d6ec6373964b84f35db7cfc3df7ab514"
+  integrity sha1-PaDM6dbsY3OWS4TzXbfPw996tRQ=
+
 acorn-globals@^4.1.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.3.0.tgz#e3b6f8da3c1552a95ae627571f7dd6923bb54103"
@@ -3984,6 +3989,15 @@ detect-port-alt@1.1.6:
     address "^1.0.1"
     debug "^2.6.0"
 
+devtron@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/devtron/-/devtron-1.4.0.tgz#b5e748bd6e95bbe70bfcc68aae6fe696119441e1"
+  integrity sha1-tedIvW6Vu+cL/MaKrm/mlhGUQeE=
+  dependencies:
+    accessibility-developer-tools "^2.11.0"
+    highlight.js "^9.3.0"
+    humanize-plus "^1.8.1"
+
 diff-sequences@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/diff-sequences/-/diff-sequences-24.9.0.tgz#5715d6244e2aa65f48bba0bc972db0b0b11e95b5"
@@ -4225,7 +4239,7 @@ electron-builder@^20.44.4:
     update-notifier "^3.0.0"
     yargs "^13.2.4"
 
-electron-cgi@0.0.3:
+electron-cgi@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/electron-cgi/-/electron-cgi-0.0.3.tgz#a27de9b34e6da3cd22a51318c4b47043c52ca786"
   integrity sha512-m0PMm4sBzKdJc0X1WkJntDttr4aFYyK32RvvFevjxoC7mi9MO/buLLoXlQMiySNhi8xK3qrxXfU51K9F1Y2d/w==
@@ -5550,6 +5564,11 @@ hex-color-regex@^1.1.0:
   resolved "https://registry.yarnpkg.com/hex-color-regex/-/hex-color-regex-1.1.0.tgz#4c06fccb4602fe2602b3c93df82d7e7dbf1a8a8e"
   integrity sha512-l9sfDFsuqtOqKDsQdqrMRk0U85RZc0RtOR9yPI7mRVOa4FsR/BVnZ0shmQRM96Ji99kYZP/7hn1cedc1+ApsTQ==
 
+highlight.js@^9.3.0:
+  version "9.15.10"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-9.15.10.tgz#7b18ed75c90348c045eef9ed08ca1319a2219ad2"
+  integrity sha512-RoV7OkQm0T3os3Dd2VHLNMoaoDVx77Wygln3n9l5YV172XonWG6rgQD3XnF/BuFFZw9A0TJgmMSO8FEWQgvcXw==
+
 hmac-drbg@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
@@ -5705,6 +5724,11 @@ https-browserify@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
   integrity sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM=
+
+humanize-plus@^1.8.1:
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/humanize-plus/-/humanize-plus-1.8.2.tgz#a65b34459ad6367adbb3707a82a3c9f916167030"
+  integrity sha1-pls0RZrWNnrbs3B6gqPJ+RYWcDA=
 
 hyphenate-style-name@^1.0.3:
   version "1.0.3"

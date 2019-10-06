@@ -89,6 +89,12 @@
                         NonPredictiveHandovers = HetNet.Instance.VerticalHandovers,
                         NonPredictiveBlockedCalls = HetNet.Instance.BlockedCalls,
                         TotalSessions = HetNet.Instance.TotalSessions,
+                        HetNet.Instance.DataCallsGenerated,
+                        HetNet.Instance.DataHandovers,
+                        HetNet.Instance.VideoCallsGenerated,
+                        HetNet.Instance.VideoHandovers,
+                        HetNet.Instance.VoiceCallsGenerated,
+                        HetNet.Instance.VoiceHandovers,
                     };
 
                     //Predictive Scheme
@@ -99,6 +105,16 @@
                         PredictiveBlockedCalls = HetNet.Instance.BlockedCalls,
                         FailedPredictions  = HetNet.Instance.FailedPredictions,
                         SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
+                        HetNet.Instance.DataCallsGenerated,
+                        HetNet.Instance.DataHandovers,
+                        HetNet.Instance.VideoCallsGenerated,
+                        HetNet.Instance.VideoHandovers,
+                        HetNet.Instance.VoiceCallsGenerated,
+                        HetNet.Instance.VoiceHandovers,
+                        PercentageVoiceAvoided =(double)(nonPredictiveSchemeResults.VoiceHandovers - HetNet.Instance.VoiceHandovers)/nonPredictiveSchemeResults.VoiceHandovers,
+                        PercentageDataAvoided = (double)(nonPredictiveSchemeResults.DataHandovers - HetNet.Instance.DataHandovers )/nonPredictiveSchemeResults.DataHandovers,
+                        PercentageVideoAvoided = (double)(nonPredictiveSchemeResults.VideoHandovers - HetNet.Instance.VideoHandovers )/nonPredictiveSchemeResults.VideoHandovers,
+                        PercentageTotalAvoided = (double)(nonPredictiveSchemeResults.NonPredictiveHandovers - HetNet.Instance.VerticalHandovers)/nonPredictiveSchemeResults.NonPredictiveHandovers
                     };
 
                     var simulationResults = new SimulationResults
@@ -110,12 +126,16 @@
                         PredictiveHandovers = predictiveSchemeResults.PredictiveHandovers,
                         PredictiveBlockedCalls = predictiveSchemeResults.PredictiveBlockedCalls,
                         FailedPredictions = predictiveSchemeResults.FailedPredictions,
-                        SuccessfulPredictions = predictiveSchemeResults.SuccessfulPredictions
+                        SuccessfulPredictions = predictiveSchemeResults.SuccessfulPredictions,
+                        DataAvoided = Math.Round(predictiveSchemeResults.PercentageDataAvoided*100,2),
+                        VideoAvoided = Math.Round(predictiveSchemeResults.PercentageVideoAvoided*100,2),
+                        VoiceAvoided = Math.Round(predictiveSchemeResults.PercentageVoiceAvoided*100,2),
+                        TotalAvoided = Math.Round(predictiveSchemeResults.PercentageTotalAvoided*100,2)
                     };
 
-                    Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(
-                        simulationResults, $"{Environment.CurrentDirectory}/SimResults.csv"
-                    );
+                    // Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(
+                    //     simulationResults, $"{Environment.CurrentDirectory}/SimResults.csv"
+                    // );
 
                     results.Add(simulationResults);
 
