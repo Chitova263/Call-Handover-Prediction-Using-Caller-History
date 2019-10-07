@@ -1,6 +1,6 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/styles';
-import { Divider, HTMLTable } from '@blueprintjs/core';
+import { HTMLTable } from '@blueprintjs/core';
 
 const useStyles = makeStyles({
     root: {
@@ -20,9 +20,6 @@ const useStyles = makeStyles({
         fontWeight: "bolder",
         height: "10rem"
     },
-    terminal:{
-        
-    }
   });
 
 export default function ResultLog({data, isLoading}) {
