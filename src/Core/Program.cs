@@ -104,16 +104,11 @@
                         PredictiveBlockedCalls = HetNet.Instance.BlockedCalls,
                         FailedPredictions  = HetNet.Instance.FailedPredictions,
                         SuccessfulPredictions = HetNet.Instance.SuccessfulPredictions,
-                        HetNet.Instance.DataCallsGenerated,
-                        HetNet.Instance.DataHandovers,
-                        HetNet.Instance.VideoCallsGenerated,
-                        HetNet.Instance.VideoHandovers,
-                        HetNet.Instance.VoiceCallsGenerated,
-                        HetNet.Instance.VoiceHandovers,
                         PercentageVoiceAvoided =(double)(nonPredictiveSchemeResults.VoiceHandovers - HetNet.Instance.VoiceHandovers)/nonPredictiveSchemeResults.VoiceHandovers,
                         PercentageDataAvoided = (double)(nonPredictiveSchemeResults.DataHandovers - HetNet.Instance.DataHandovers )/nonPredictiveSchemeResults.DataHandovers,
                         PercentageVideoAvoided = (double)(nonPredictiveSchemeResults.VideoHandovers - HetNet.Instance.VideoHandovers )/nonPredictiveSchemeResults.VideoHandovers,
-                        PercentageTotalAvoided = (double)(nonPredictiveSchemeResults.NonPredictiveHandovers - HetNet.Instance.VerticalHandovers)/nonPredictiveSchemeResults.NonPredictiveHandovers
+                        PercentageTotalAvoided = (double)(nonPredictiveSchemeResults.NonPredictiveHandovers - HetNet.Instance.VerticalHandovers)/nonPredictiveSchemeResults.NonPredictiveHandovers,
+                        
                     };
 
                     var simulationResults = new SimulationResults
@@ -129,7 +124,16 @@
                         DataAvoided = Math.Round(predictiveSchemeResults.PercentageDataAvoided*100,2),
                         VideoAvoided = Math.Round(predictiveSchemeResults.PercentageVideoAvoided*100,2),
                         VoiceAvoided = Math.Round(predictiveSchemeResults.PercentageVoiceAvoided*100,2),
-                        TotalAvoided = Math.Round(predictiveSchemeResults.PercentageTotalAvoided*100,2)
+                        TotalAvoided = Math.Round(predictiveSchemeResults.PercentageTotalAvoided*100,2),
+                        DataCalls = nonPredictiveSchemeResults.DataCallsGenerated,
+                        VoiceCalls = nonPredictiveSchemeResults.VoiceCallsGenerated,
+                        VideoCalls = nonPredictiveSchemeResults.VideoCallsGenerated,
+                        PredictiveVoiceHandovers = HetNet.Instance.VoiceHandovers,
+                        PredictiveVideoHandovers = HetNet.Instance.VideoHandovers,
+                        PredictiveDataHandovers =  HetNet.Instance.DataHandovers,
+                        NonPredictiveVoiceHandovers = nonPredictiveSchemeResults.VoiceHandovers,
+                        NonPredictiveVideoHandovers = nonPredictiveSchemeResults.VideoHandovers,
+                        NonPredictiveDataHandovers =  nonPredictiveSchemeResults.DataHandovers,
                     };
 
                     // Utils.CsvUtils._Instance.Write<SimulationResultsMap, SimulationResults>(

@@ -59,6 +59,13 @@ namespace VerticalHandoverPrediction.CallAdimissionControl
                     return;
                 }
 
+                //NB if video call cannot be admitted block call immediately cannot be handed over elsewhere
+                if(evt.Call.Service == Service.Video)
+                {
+                    HetNet.Instance.BlockedCalls ++;
+                    return;
+                }
+
                 HetNet.Instance.Handover(evt.Call, session, mobileTerminal, rat);
 
                 return;
