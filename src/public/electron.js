@@ -38,37 +38,32 @@ app.on('activate', () => {
 });
 
 connection = new ConnectionBuilder()
-    .connectTo("dotnet", "run", "--project", "./Main")
+    .connectTo("dotnet", "run", "--project", "./Core")
     .build();
 
 connection.onDisconnect = () => {
   connection = new ConnectionBuilder()
-    .connectTo("dotnet", "run", "--project", "./Main")
+    .connectTo("dotnet", "run", "--project", "./Core")
     .build();
 };
 
 ipcMain.on('results', (event, request) => {
   connection.send("results", request, response => {
     event.sender.send("res", response)
-    //mainWindow.webContents.send("res", response);
   });
-  //connection.close();
 })
 
 ipcMain.on('predict', (event, request) => {
   connection.send("predict", request, response => {
     event.sender.send("prediction_results", response);
   });
-  //connection.close();
 })
 
 //Load users from datastore
 ipcMain.on('getusers', event => {
   connection.send('getusers', null, response => {
-    console.log(response)
     event.sender.send("getusers", response);
   })
-  //connection.close();
 })
 
 
