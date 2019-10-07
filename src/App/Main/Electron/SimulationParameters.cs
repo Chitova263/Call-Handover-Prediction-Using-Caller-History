@@ -21,6 +21,6 @@ namespace Electron
     {
         public int Frequency { get; set; }
         public MobileTerminalState NextState { get; set; }
-        public Dictionary<MobileTerminalState, int> FrequencyDictionary { get; set; }
+        public Dictionary<int, int> FrequencyDictionary { get; set; }
     }
 }

@@ -35,6 +35,16 @@ const useStyles = makeStyles({
     resultsPane:{
         display: 'grid',
         gridTemplateColumns: 'auto auto'     
+    },
+    logs:{
+        display: 'flex',
+       justifyContent: 'space-between',
+       boxShadow: "inset 0 0 10px #000000", 
+       margin: '0 0.5rem 0 0.5rem'
+    },
+    spn:{
+        display:"block",
+        margin: '0 0.5rem 0 0.5rem'
     }
   });
 
@@ -93,11 +103,25 @@ export default function Caller({users}) {
                 <ResultsPanel label="UserId" value={mobileTerminalId}/> 
                 <ResultsPanel label="Predicted State" value={results['nextState']}/>
                 <ResultsPanel label="Frequency" value={results['frequency']}/> 
-                
-
             </div>
             <Divider/>
+            <States frequencyDictionary={results['frequencyDictionary']}/>
         </div>
     )
+}
+
+function States({frequencyDictionary}) {
+    const classes = useStyles();
+    let list = []
+    if(frequencyDictionary !== undefined)
+        list = Object.keys(frequencyDictionary);
+    return <div  className={classes.logs}>
+        {list.map((key,index) => (
+            <div key={index}>
+                <span className={classes.spn}>State: {key}</span>
+                <span className={classes.spn}> Frequency: {frequencyDictionary[key]}</span>
+            </div>
+        ))}
+    </div>
 }
 

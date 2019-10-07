@@ -84,7 +84,7 @@ namespace VerticalHandoverPrediction.Simulator
             {
                 NextState = prediction.Key,
                 Frequency = prediction.Count(),
-                FrequencyDictionary = group.ToDictionary(g => g.Key, g => g.Select(x => x).Count())
+                FrequencyDictionary = group.ToDictionary(g => (int)g.Key, g => g.Select(x => x).Count())
             };
         }
 

@@ -50,7 +50,6 @@
                         break;
                 };
 
-                
                 return NetworkSimulator.Instance.Predict(new PredictionParameters{ Service = service, Id = (string)request.mobileTerminalId});
             });
 
