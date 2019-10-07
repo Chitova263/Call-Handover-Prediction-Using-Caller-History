@@ -11,7 +11,8 @@ const useStyles = makeStyles({
         border: "2px solid gray",
         margin: "1rem 1rem 0",
         boxShadow: "inset 0 0 10px #000000", 
-        height: "30rem",    
+        height: "30rem",
+        overflowY: "auto",    
     },
     chart:{
        margin: "0.5rem 0.5rem 0.5rem 0.5rem"
@@ -32,22 +33,181 @@ const useStyles = makeStyles({
 
 
 export default function GraphsPanel({data:results, isLoading, init }) {
+  
+    const classes = useStyles();  
+  
     console.log(results, isLoading);
+
     const numOfCalls = [];
     const predictiveVHO = [];
     const nonPredictiveVHO = [];
     const handoversAvoided = [];
+    const predictiveVoiceHandovers = [];
+    const nonPredictiveVoiceHandovers = [];
+    const voiceCalls = [];
+    const predictiveDataHandovers = [];
+    const nonPredictiveDataHandovers = [];
+    const dataCalls = [];
+    const voiceHandoversAvoided = [];
+    const dataHandoversAvoided = [];
+
     if(!isLoading){
         results.forEach(result => {
             numOfCalls.push(result['calls']);
             predictiveVHO.push(result['predictiveHandovers']);
             nonPredictiveVHO.push(result['nonPredictiveHandovers']);
             handoversAvoided.push(result['nonPredictiveHandovers'] - result['predictiveHandovers']);
+            predictiveVoiceHandovers.push(result['predictiveVoiceHandovers']);
+            nonPredictiveVoiceHandovers.push(result['nonPredictiveVoiceHandovers']);
+            voiceCalls.push(result['voiceCalls']);
+            predictiveDataHandovers.push(result['predictiveDataHandovers']);
+            nonPredictiveDataHandovers.push(result['nonPredictiveDataHandovers']);
+            dataCalls.push(result['dataCalls']);
+            voiceHandoversAvoided.push(result['nonPredictiveVoiceHandovers'] - result['predictiveVoiceHandovers']);
+            dataHandoversAvoided.push(result['nonPredictiveDataHandovers'] - result['predictiveDataHandovers']);
         })
+        console.log(predictiveDataHandovers, predictiveVoiceHandovers, voiceCalls, dataCalls)
+        
     }
 
-    const classes = useStyles();
+
+
+    //Extract this to a component
+    const voice = {
+      options: {
+        colors: ['#125590', '#69b742'],
+        chart: {
+          id: "basic-bar",
+        },
+        legend: {
+          onItemHover: {
+            highlightDataSeries: true
+          },
+          onItemClick: {
+              toggleDataSeries: true
+          },
+        },
+        title: {
+          text: "Number Of Voice Calls vs Number of Vertical handovers",
+          align: 'center',
+          margin: 10,
+          offsetX: 0,
+          offsetY: 0,
+          floating: false,
+          style: {
+            fontSize:  '16px',
+            color:  '#263238'
+          },
+      },
+      yaxis:{
+          title: {
+              text: "Vertical Handovers"
+          },
+      },
+        xaxis: {
+          title: {
+              text: "Number of Voice Calls"
+          },
+          labels: {
+              show: true,
+              rotate: -45,
+              rotateAlways: false,
+              hideOverlappingLabels: true,
+              showDuplicates: false,
+              trim: true,
+              minHeight: undefined,
+              maxHeight: 120,
+              style: {
+                  colors: [],
+                  fontSize: '12px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cssClass: 'apexcharts-xaxis-label',
+              },
+          },
+          categories: [...voiceCalls]
+        }
+      },
+      series: [
+        {
+          
+          name: "predictive algorithm",
+          data: [...predictiveVoiceHandovers]
+        },
+        {
+          name: "non predictive algorithm",
+          data: [...nonPredictiveVoiceHandovers]
+        }
+      ]
+    };
+
     const data = {
+      options: {
+        colors: ['#125590', '#69b742'],
+        chart: {
+          id: "basic-bar",
+        },
+        legend: {
+          onItemHover: {
+            highlightDataSeries: true
+          },
+          onItemClick: {
+              toggleDataSeries: true
+          },
+        },
+        title: {
+          text: "Number Of Data Calls vs Number of Vertical handovers",
+          align: 'center',
+          margin: 10,
+          offsetX: 0,
+          offsetY: 0,
+          floating: false,
+          style: {
+            fontSize:  '16px',
+            color:  '#263238'
+          },
+      },
+      yaxis:{
+          title: {
+              text: "Vertical Handovers"
+          },
+      },
+        xaxis: {
+          title: {
+              text: "Number of Data Calls"
+          },
+          labels: {
+              show: true,
+              rotate: -45,
+              rotateAlways: false,
+              hideOverlappingLabels: true,
+              showDuplicates: false,
+              trim: true,
+              minHeight: undefined,
+              maxHeight: 120,
+              style: {
+                  colors: [],
+                  fontSize: '12px',
+                  fontFamily: 'Helvetica, Arial, sans-serif',
+                  cssClass: 'apexcharts-xaxis-label',
+              },
+          },
+          categories: [...dataCalls]
+        }
+      },
+      series: [
+        {
+          
+          name: "predictive algorithm",
+          data: [...predictiveDataHandovers]
+        },
+        {
+          name: "non predictive algorithm",
+          data: [...nonPredictiveDataHandovers]
+        }
+      ]
+    };
+  
+    const all = {
         options: {
           colors: ['#125590', '#69b742'],
           chart: {
@@ -114,9 +274,135 @@ export default function GraphsPanel({data:results, isLoading, init }) {
         ]
       };
 
+      const dataAvoided = {
+        options: {
+          colors: ['#125590', '#69b742'],
+          chart: {
+            id: "basic-bar",
+          },
+          legend: {
+            onItemHover: {
+              highlightDataSeries: true
+            },
+            onItemClick: {
+                toggleDataSeries: true
+            },
+          },
+          title: {
+            text: "Vertical Handovers Avoided For Requested Data Calls",
+            align: 'center',
+            margin: 10,
+            offsetX: 0,
+            offsetY: 0,
+            floating: false,
+            style: {
+              fontSize:  '16px',
+              color:  '#263238'
+            },
+        },
+        yaxis:{
+            title: {
+                text: "Vertical Handovers Avoided"
+            },
+        },
+          xaxis: {
+            title: {
+                text: "Number of Data Calls Requested"
+            },
+            labels: {
+                show: true,
+                rotate: -45,
+                rotateAlways: false,
+                hideOverlappingLabels: true,
+                showDuplicates: false,
+                trim: true,
+                minHeight: undefined,
+                maxHeight: 120,
+                style: {
+                    colors: [],
+                    fontSize: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cssClass: 'apexcharts-xaxis-label',
+                },
+            },
+            categories: [...dataCalls]
+          }
+        },
+        series: [
+          {
+            
+            name: "predictive algorithm",
+            data: [...dataHandoversAvoided]
+          }
+        ]
+      };
+
+      const voiceAvoided = {
+        options: {
+          colors: ['#125590', '#69b742'],
+          chart: {
+            id: "basic-bar",
+          },
+          legend: {
+            onItemHover: {
+              highlightDataSeries: true
+            },
+            onItemClick: {
+                toggleDataSeries: true
+            },
+          },
+          title: {
+            text: "Vertical Handovers Avoided For Requested Voice Calls",
+            align: 'center',
+            margin: 10,
+            offsetX: 0,
+            offsetY: 0,
+            floating: false,
+            style: {
+              fontSize:  '16px',
+              color:  '#263238'
+            },
+        },
+        yaxis:{
+            title: {
+                text: "Vertical Handovers Avoided"
+            },
+        },
+          xaxis: {
+            title: {
+                text: "Number of Requested Voice Calls"
+            },
+            labels: {
+                show: true,
+                rotate: -45,
+                rotateAlways: false,
+                hideOverlappingLabels: true,
+                showDuplicates: false,
+                trim: true,
+                minHeight: undefined,
+                maxHeight: 120,
+                style: {
+                    colors: [],
+                    fontSize: '12px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    cssClass: 'apexcharts-xaxis-label',
+                },
+            },
+            categories: [...voiceCalls]
+          }
+        },
+        series: [
+          {
+            
+            name: "predictive algorithm",
+            data: [...voiceHandoversAvoided]
+          }
+        ]
+      };
+
     const avoided = {
       options: {
-        colors: ['#000316'],
+        colors: ['#125590', '#69b742'],
         chart: {
           id: "basic-bar",
         },
@@ -142,7 +428,7 @@ export default function GraphsPanel({data:results, isLoading, init }) {
       },
       yaxis:{
           title: {
-              text: "Vertical Handovers"
+              text: "Vertical Handovers Avoided"
           },
       },
         xaxis: {
@@ -175,7 +461,8 @@ export default function GraphsPanel({data:results, isLoading, init }) {
           data: [...handoversAvoided]
         }
       ]
-    };  
+    };
+
     if(isLoading && !init){
         return<div className={classes.loading}>
              <Spinner size={Spinner.SIZE_LARGE} className={classes.logo}/>
@@ -191,13 +478,33 @@ export default function GraphsPanel({data:results, isLoading, init }) {
         return (
             <div className={classes.root}>
                 <Chart className={classes.chart}
-                  options={data.options}
-                  series={data.series}
+                  options={all.options}
+                  series={all.series}
                   type="bar"      
                 />
                 <Chart className={classes.chart}
                   options={avoided.options}
                   series={avoided.series}
+                  type="bar"  
+                />
+                <Chart className={classes.chart}
+                  options={voice.options}
+                  series={voice.series}
+                  type="bar"  
+                />
+                <Chart className={classes.chart}
+                  options={voiceAvoided.options}
+                  series={voiceAvoided.series}
+                  type="bar"  
+                />
+                <Chart className={classes.chart}
+                  options={data.options}
+                  series={data.series}
+                  type="bar"  
+                />
+                <Chart className={classes.chart}
+                  options={dataAvoided.options}
+                  series={dataAvoided.series}
                   type="bar"  
                 />
             </div>
