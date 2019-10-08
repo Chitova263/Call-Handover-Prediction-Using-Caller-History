@@ -13,3 +13,22 @@ ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type '
    at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
    --- End of inner exception stack trace ---
    at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
+2019-10-08 21:37:37.961 +02:00 [ERR] 
+ElectronCgi.DotNet.HandlerFailedException: Request handler for request of type 'predict' failed.
+ ---> System.ArgumentNullException: Value cannot be null. (Parameter 'input')
+   at System.Guid.Parse(String input)
+   at VerticalHandoverPrediction.Simulator.NetworkSimulator.<>c__DisplayClass18_0.<Predict>b__0(CallLog x) in /Users/DjMadd/Documents/Release/Call-Handover-Prediction-Using-Caller-History/src/Core/Simulator/NetworkSimulator.cs:line 56
+   at System.Linq.Enumerable.WhereSelectListIterator`2.MoveNext()
+   at System.Linq.Enumerable.WhereEnumerableIterator`1.MoveNext()
+   at System.Linq.Enumerable.SelectManySingleSelectorIterator`2.MoveNext()
+   at System.Linq.Enumerable.WhereEnumerableIterator`1.MoveNext()
+   at System.Linq.Lookup`2.Create(IEnumerable`1 source, Func`2 keySelector, IEqualityComparer`1 comparer)
+   at System.Linq.GroupedEnumerable`2.GetEnumerator()
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source)
+   at VerticalHandoverPrediction.Simulator.NetworkSimulator.Predict(PredictionParameters data) in /Users/DjMadd/Documents/Release/Call-Handover-Prediction-Using-Caller-History/src/Core/Simulator/NetworkSimulator.cs:line 65
+   at VerticalHandoverPrediction.Program.<>c.<Main>b__0_1(Object request) in /Users/DjMadd/Documents/Release/Call-Handover-Prediction-Using-Caller-History/src/Core/Program.cs:line 53
+   at ElectronCgi.DotNet.Connection.<>c__DisplayClass16_0`2.<On>b__0(TIn args)
+   at ElectronCgi.DotNet.RequestHandler`2.HandleRequestAsync(Guid id, Object arguments)
+   at ElectronCgi.DotNet.RequestExecutor.<>c__DisplayClass5_0.<<ExecuteAsync>b__0>d.MoveNext()
+   --- End of inner exception stack trace ---
+   at ElectronCgi.DotNet.ResponseDispatcher.<>c__DisplayClass3_0.<<StartAsync>b__0>d.MoveNext()
