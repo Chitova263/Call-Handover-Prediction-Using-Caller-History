@@ -62,9 +62,9 @@
                 
                 foreach (var log in HetNet.Instance.MobileTerminals.SelectMany(x => x.CallLogs))
                 {
-                    Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(
-                        log, 
-                        $"{Environment.CurrentDirectory}/calllogs.csv");
+                    // Utils.CsvUtils._Instance.Write<CallLogMap, CallLog>(
+                    //     log, 
+                    //     $"{Environment.CurrentDirectory}/calllogs.csv");
                     //load history in memory    
                     HetNet.Instance.CallerHistory.Add(log);
                 }

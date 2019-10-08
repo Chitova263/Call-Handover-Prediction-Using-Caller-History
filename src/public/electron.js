@@ -42,9 +42,10 @@ connection = new ConnectionBuilder()
     .build();
 
 connection.onDisconnect = () => {
+  console.log("lost")
   connection = new ConnectionBuilder()
-    .connectTo("dotnet", "run", "--project", "./Core")
-    .build();
+     .connectTo("dotnet", "run", "--project", "./Core")
+     .build();
 };
 
 ipcMain.on('results', (event, request) => {

@@ -37,7 +37,7 @@ namespace VerticalHandoverPrediction.Utils
         {
             try
             {
-                using (var writer = new StreamWriter(filename, true))
+                using (var writer = new StreamWriter(filename, true ))
                 using (var reader = new StreamReader(filename))
                 using (var csvWriter = new CsvWriter(writer))
                 using (var csvReader = new CsvReader(reader))
