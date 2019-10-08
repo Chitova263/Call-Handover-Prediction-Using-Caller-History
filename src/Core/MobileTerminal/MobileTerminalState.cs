@@ -1,9 +1,5 @@
 namespace VerticalHandoverPrediction.Mobile
 {
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Converters;
-
-    //[JsonConverter(typeof(StringEnumConverter))]
     public enum MobileTerminalState
     {
         Idle,
@@ -11,8 +7,8 @@ namespace VerticalHandoverPrediction.Mobile
         Video,
         Data,
         VoiceVideo,
-        VoiceData,
         VideoData,
+        VoiceData,
         VoiceDataVideo,
     }
 }
