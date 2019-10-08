@@ -55,6 +55,7 @@
 
             connection.On<SimulationParameters,dynamic>("results", request => {
                 
+                HetNet.Instance.CallerHistory.Clear();
                 HetNet.Instance.GenerateRats((int)request.Capacity.c1, (int)request.Capacity.c2, (int)request.Capacity.c3, (int)request.Capacity.c4);
                 HetNet.Instance.GenerateMobileTerminals(20);
                 
