@@ -59,7 +59,6 @@ namespace VerticalHandoverPrediction.Simulator
                 .Select(x => x.Skip(1).Take(2))
                 .Where(x => x.StartsWith(new List<MobileTerminalState>{data.Service.GetState()}))
                 .SelectMany(x => x.Skip(1))
-                .Where(x => x != MobileTerminalState.Idle)
                 .GroupBy(x => x);
             
             if(!group.Any()) 
