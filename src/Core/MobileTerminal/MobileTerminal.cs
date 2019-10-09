@@ -149,6 +149,7 @@ namespace VerticalHandoverPrediction.Mobile
             {
                 UserId = MobileTerminalId,
                 SessionId = session.SessionId,
+                StartTime = session.Start,
                 Duration = session.End.Subtract(session.Start),
                 SessionSequence = String.Join("", session.SessionSequence.Select(x => (int)x))
             };

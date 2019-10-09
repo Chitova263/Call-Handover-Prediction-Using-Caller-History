@@ -7,6 +7,7 @@ namespace VerticalHandoverPrediction.Mobile
     {
         public Guid UserId { get; set; }
         public Guid SessionId { get; set; }
+        public DateTime StartTime { get; set; }
         public TimeSpan Duration { get; set; }
         public string SessionSequence { get; set; }
     }
