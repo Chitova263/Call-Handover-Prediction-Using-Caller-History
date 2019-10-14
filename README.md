@@ -1,10 +1,6 @@
 # Call-Handover-Prediction-Using-Caller-History
 Predictive algorithm to perform Vertical Call Handover decisions in a 5g network using mobile user caller history logs
 
-
-![image](screen.png)
-
-
 ![image](tutorial.gif)
 
 To run application in developer mode run the following commands
@@ -33,3 +29,5 @@ $ yarn electron-dev
  ```
  
  run MyApp.exe
+
+![image](screen.png)
