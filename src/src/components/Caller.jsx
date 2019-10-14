@@ -51,7 +51,7 @@ const useStyles = makeStyles({
 export default function Caller({users}) {
     const classes = useStyles();
     
-    const services = ['Voice', 'Data', 'Video'];
+    const services = ['Voice', 'Data',];
 
     const [service, setservice] = useState(services[0]);
     const [mobileTerminalId, setmobileTerminal] = useState(null)
