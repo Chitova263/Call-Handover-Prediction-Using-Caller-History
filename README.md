@@ -4,6 +4,9 @@ Predictive algorithm to perform Vertical Call Handover decisions in a 5g network
 
 ![image](screen.png)
 
+
+![image](tutorial.gif)
+
 To run application in developer mode run the following commands
 
 1. Install Latest version of Node.JS [https://nodejs.org/en/download/]
