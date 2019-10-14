@@ -15,7 +15,7 @@ $ yarn install
 $ dotnet restore ./Core
 $ yarn electron-dev
 ```
- To build standalone desktop
+ To build standalone windows desktop app
  
  ```
  $ git clone https://github.com/Chitova263/Call-Handover-Prediction-Using-Caller-History.git
