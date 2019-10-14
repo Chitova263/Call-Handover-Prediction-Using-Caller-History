@@ -37,8 +37,12 @@ app.on('activate', () => {
   }
 });
 
+// connection = new ConnectionBuilder()
+//     .connectTo("dotnet", "run", "--project", "./Core")
+//     .build();
+
 connection = new ConnectionBuilder()
-    .connectTo("dotnet", "run", "--project", "./Core")
+    .connectTo("dotnet", "./Release/VerticalHandoverPrediction.dll")
     .build();
 
 connection.onDisconnect = () => {
