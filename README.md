@@ -1,7 +1,7 @@
 # Call-Handover-Prediction-Using-Caller-History
 Predictive algorithm to perform Vertical Call Handover decisions in a 5g network using mobile user caller history logs
 
-![image](tutorial.gif)
+![image](shot.gif)
 
 To run application in developer mode run the following commands
 
