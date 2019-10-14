@@ -3,6 +3,7 @@ Predictive algorithm to perform Vertical Call Handover decisions in a 5g network
 
 Install NodeJS 
 
+![image](screen.png)
 
 To run application in developer mode run the following commands
 
