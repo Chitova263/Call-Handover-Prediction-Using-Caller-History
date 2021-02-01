@@ -20,11 +20,11 @@ namespace VerticalHandoverPrediction
             return new Network(mobileTerminals, rats);
         }
 
-        public IOrderedEnumerable<KeyValuePair<Guid, Rat>> GetCompatibleRats(Service service)
+        public IEnumerable<Rat> GetCompatibleRats(Service service)
         {
-            return Rats
-                .Where(r => r.Value.SupportedServices.HasFlag(service))
-                .OrderByDescending(r => r.Value.Priority);
+            return Rats.Where(r => r.Value.SupportedServices.HasFlag(service))
+                 .OrderByDescending(r => r.Value.Priority)
+                 .Select(o => o.Value);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace VerticalHandoverPrediction
 {
@@ -29,13 +30,7 @@ namespace VerticalHandoverPrediction
             return new Rat(supportedServices, capacity, name, priority);
         }
 
-        public bool AdmitInitialCall(Call call, BasicBandwidthUnits basicBandwidthUnits)
-        {
-            if (Capacity < CurrentLoad + call.Service.GetRequiredBasicBandwidthUnits(basicBandwidthUnits))
-                return false;
-            Admit(call, basicBandwidthUnits);
-            return true;
-        }
+       
 
         private void Admit(Call call, BasicBandwidthUnits basicBandwidthUnits)
         {
@@ -47,15 +42,40 @@ namespace VerticalHandoverPrediction
 
         }
 
-        public bool CanAdmitToOngoingSession(Call call, BasicBandwidthUnits basicBandwidthUnits)
+        public void AdmitInitialCall(Call call, BasicBandwidthUnits basicBandwidthUnits)
         {
-            // Does current RAT support incoming call
-            if (!SupportedServices.HasFlag(call.Service))
+            // Increase load
+            CurrentLoad += call.Service.GetRequiredBasicBandwidthUnits(basicBandwidthUnits);
+            // Create new session
+            var session = Session.CreateSession(call.StartTime, call);
+            bool successful = OngoingSessions.TryAdd(session.SessionId, session);
+            if (!successful)
             {
-                return false;
+                throw new VerticalHandoverPredictionException("duplicate call session ids");
             }
+        }
 
-            return true;
+        public bool CanAdmitCall(Service requiredService, BasicBandwidthUnits basicBandwidthUnits) 
+            => SupportsRequiredService(requiredService) && HasEnoughCapacity(requiredService, basicBandwidthUnits);
+
+        private bool SupportsRequiredService(Service requiredService) => 
+            SupportedServices.HasFlag(requiredService);
+
+        private bool HasEnoughCapacity(Service requiredService, BasicBandwidthUnits basicBandwidthUnits) =>
+            Capacity >= CurrentLoad + requiredService.GetRequiredBasicBandwidthUnits(basicBandwidthUnits);
+
+        public void AdmitIncomingCallToOngoingSession(Call call, Session session, int resources)
+        {
+            CurrentLoad += resources;
+            Session ongoingSession;
+            if (!OngoingSessions.TryGetValue(session.SessionId, out ongoingSession))
+            {
+                throw new VerticalHandoverPredictionException("Session not found");
+            }
+            if (!ongoingSession.ActiveCalls.TryAdd(call.CallId, call))
+            {
+                throw new VerticalHandoverPredictionException("Duplicate callId not found");
+            }
         }
     }
 }
