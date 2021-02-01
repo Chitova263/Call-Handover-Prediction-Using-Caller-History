@@ -1,14 +1,12 @@
-namespace VerticalHandoverPrediction.Mobile
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using VerticalHandoverPrediction.CallAdimissionControl;
-    using VerticalHandoverPrediction.CallSession;
-    using VerticalHandoverPrediction.Network;
-    using VerticalHandoverPrediction.Simulator.Events;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VerticalHandoverPrediction.CallAdimissionControl;
+using VerticalHandoverPrediction.CallSession;
 
-    public class MobileTerminal : IMobileTerminal
+namespace VerticalHandoverPrediction
+{
+    public sealed class MobileTerminal
     {
         public Guid MobileTerminalId { get; private set; }
         public Guid SessionId { get; private set; }
@@ -24,6 +22,18 @@ namespace VerticalHandoverPrediction.Mobile
             State = MobileTerminalState.Idle;
             IsActive = false;
         }
+
+
+        public static MobileTerminal[] GenerateMobileTerminals(int count)
+        {
+            var terminals = new MobileTerminal[count];
+
+            for (int i = 0; i < count; i++)
+                terminals[i] = new MobileTerminal();
+            
+            return terminals;
+        }
+
 
         public void SetActive(bool isActive) => IsActive = isActive;
 

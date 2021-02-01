@@ -1,19 +1,15 @@
-namespace VerticalHandoverPrediction.Simulator
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Electron;
-    using Medallion.Collections;
-    using MoreLinq.Extensions;
-    using VerticalHandoverPrediction.CallAdimissionControl;
-    using VerticalHandoverPrediction.CallSession;
-    using VerticalHandoverPrediction.Mobile;
-    using VerticalHandoverPrediction.Network;
-    using VerticalHandoverPrediction.Simulator.Events;
-    using VerticalHandoverPrediction.Simulator.Extensions;
-    using VerticalHandoverPrediction.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Electron;
+using Medallion.Collections;
+using MoreLinq.Extensions;
+using VerticalHandoverPrediction.CallAdimissionControl;
+using VerticalHandoverPrediction.CallSession;
+using VerticalHandoverPrediction.Utils;
 
+namespace VerticalHandoverPrediction
+{
     public class NetworkSimulator 
     {
         private static NetworkSimulator instance = null;
@@ -94,6 +90,8 @@ namespace VerticalHandoverPrediction.Simulator
             {
                 var service = Services.PickRandom();
                 var mobileTerminal = HetNet.Instance.MobileTerminals.PickRandom();
+
+                //cannot be a call at this point in time still an event
                 var call = new Call(mobileTerminal.MobileTerminalId, service);
                 
                 var callStartedEvent = new CallStartedEvent(

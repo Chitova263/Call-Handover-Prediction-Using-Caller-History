@@ -1,4 +1,4 @@
-namespace VerticalHandoverPrediction.Simulator.Extensions
+namespace VerticalHandoverPrediction
 {
     using System;
     using System.Linq;

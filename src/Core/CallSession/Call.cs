@@ -1,8 +1,8 @@
+using System;
+
 namespace VerticalHandoverPrediction.CallSession
 {
-    using System;
-
-    public class Call : ICall
+    public class Call
     {
         public Guid CallId { get; private set; }
         public Guid MobileTerminalId { get; private set; }

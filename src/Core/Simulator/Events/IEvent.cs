@@ -1,9 +1,9 @@
-namespace VerticalHandoverPrediction.Simulator.Events
-{
-    using System;
+using System;
 
+namespace VerticalHandoverPrediction
+{
+    // marker interface
     public interface IEvent
     {
-        public DateTime Time { get; set; }
     }
 }

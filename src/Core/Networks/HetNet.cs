@@ -1,21 +1,21 @@
-namespace VerticalHandoverPrediction.Network
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using VerticalHandoverPrediction.CallAdimissionControl;
-    using VerticalHandoverPrediction.CallSession;
-    using VerticalHandoverPrediction.Mobile;
-    using VerticalHandoverPrediction.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using VerticalHandoverPrediction.CallAdimissionControl;
+using VerticalHandoverPrediction.CallSession;
+using VerticalHandoverPrediction.Mobile;
+using VerticalHandoverPrediction.Utils;
 
+namespace VerticalHandoverPrediction
+{
     public sealed class HetNet 
     {
         private static HetNet instance = null;
         public Guid HetNetId { get; private set; }
-        private readonly List<IRat> _rats;
-        public IReadOnlyCollection<IRat> Rats => _rats;
-        private readonly List<IMobileTerminal> _mobileTerminals;
-        public IReadOnlyCollection<IMobileTerminal> MobileTerminals => _mobileTerminals;
+        private readonly List<Rat> _rats;
+        public IReadOnlyCollection<Rat> Rats => _rats;
+        private readonly List<MobileTerminal> _mobileTerminals;
+        public IReadOnlyCollection<MobileTerminal> MobileTerminals => _mobileTerminals;
         public int VerticalHandovers { get; set; }
         public int BlockedCalls { get; set; }
         public int FailedPredictions { get; set; }
@@ -35,8 +35,8 @@ namespace VerticalHandoverPrediction.Network
         private HetNet()
         {
             HetNetId = Guid.NewGuid();
-            _rats = new List<IRat>();
-            _mobileTerminals = new List<IMobileTerminal>();
+            _rats = new List<Rat>();
+            _mobileTerminals = new List<MobileTerminal>();
             CallerHistory = new List<CallLog>();
         }
 
@@ -110,7 +110,7 @@ namespace VerticalHandoverPrediction.Network
             }
         } 
 
-        public void Handover(ICall call, ISession session, IMobileTerminal mobileTerminal, IRat source)
+        public void Handover(Call call, ISession session, MobileTerminal mobileTerminal, Rat source)
         {
             if (call == null)
                 throw new VerticalHandoverPredictionException($"{nameof(call)} is invalid");

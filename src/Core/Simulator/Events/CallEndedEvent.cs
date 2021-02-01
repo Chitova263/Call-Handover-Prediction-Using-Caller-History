@@ -1,26 +1,12 @@
-namespace VerticalHandoverPrediction.Simulator.Events
+using System;
+
+namespace VerticalHandoverPrediction
 {
-    using System;
-    using CsvHelper.Configuration;
-
-    public class CallEndedEvent: IEvent
+    public record CallEndedEvent : IEvent
     {
-        public Guid EventId { get; }
-        public Guid CallId { get; }
-        public Guid MobileTerminalId { get; }
-        public DateTime Time { get; set; }
-
-        public CallEndedEvent(Guid callId, Guid mobileTerminalId, DateTime time)
-        {
-            EventId = Guid.NewGuid();
-            CallId = callId;
-            MobileTerminalId = mobileTerminalId;
-            Time = time;
-        }
-    }
-
-    public class CallEndedEventMap: ClassMap<CallEndedEvent>
-    {
-        public CallEndedEventMap() => AutoMap();
+        public Guid EventId { get; } = Guid.NewGuid();
+        public Guid CallStartedEventId { get; init; }
+        public MobileTerminal MobileTerminal { get; init; }
+        public DateTime Timestamp { get; init; }
     }
 }

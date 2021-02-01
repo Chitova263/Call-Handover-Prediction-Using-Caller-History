@@ -1,7 +1,8 @@
-namespace VerticalHandoverPrediction.Simulator
+using CsvHelper.Configuration;
+
+namespace VerticalHandoverPrediction
 {
-    using CsvHelper.Configuration;
-    public class SimulationResults
+    public sealed class SimulationResults
     {
         public int Calls { get; set; }
         public int PredictiveHandovers { get; set; }

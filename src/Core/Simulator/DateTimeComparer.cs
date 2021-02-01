@@ -1,8 +1,8 @@
-namespace VerticalHandoverPrediction.Simulator
-{
-    using System.Collections.Generic;
-    using VerticalHandoverPrediction.Simulator.Events;
+using System.Collections.Generic;
+using VerticalHandoverPrediction.Simulator.Events;
 
+namespace VerticalHandoverPrediction
+{
     public class DateTimeComparer : IComparer<IEvent>
     {
         public int Compare(IEvent x, IEvent y)

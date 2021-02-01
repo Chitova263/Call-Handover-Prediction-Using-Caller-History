@@ -1,16 +1,13 @@
-﻿namespace VerticalHandoverPrediction
-{
-    using VerticalHandoverPrediction.Network;
-    using Serilog;
-    using VerticalHandoverPrediction.Simulator;
-    using System;
-    using VerticalHandoverPrediction.Mobile;
-    using System.Linq;
-    using ElectronCgi.DotNet;
-    using System.Collections.Generic;
-    using Electron;
-    using VerticalHandoverPrediction.CallSession;
+﻿using Serilog;
+using System;
+using System.Linq;
+using ElectronCgi.DotNet;
+using System.Collections.Generic;
+using Electron;
+using VerticalHandoverPrediction.CallSession;
 
+namespace VerticalHandoverPrediction
+{
     class Program
     {
         static void Main(string[] args)
@@ -24,6 +21,45 @@
                 .WithLogging()
                 .Build();
 
+            var network = new NetworBuilder()
+                .RegisterRat(options  => 
+                {
+                    options.Capacity = 60;
+                    options.Name = "RAT 1";
+                    options.SupportedServices = Service.Data | Service.Video;
+                })
+                .RegisterRat(options =>
+                {
+                    options.Capacity = 60;
+                    options.Name = "RAT 1";
+                    options.SupportedServices = Service.Data | Service.Video;
+                })
+                .RegisterRat(options =>
+                {
+                    options.Capacity = 60;
+                    options.Name = "RAT 1";
+                    options.SupportedServices = Service.Data | Service.Video;
+                })
+                .RegisterRat(options =>
+                {
+                    options.Capacity = 60;
+                    options.Name = "RAT 1";
+                    options.SupportedServices = Service.Data | Service.Video;
+                })
+                .RegisterMobileTerminals()
+                .Build();
+
+            var simulator = new SimulatorBuilder(network, options =>
+            {
+                options.NumberOfCalls = 2000;
+            })
+            .Build();
+
+            var result = simulator.Run<PredictiveAlgorithm>();
+
+
+           
+            
             // var result = NetworkSimulator.Instance.Predict(new PredictionParameters{
             //     Service = CallSession.Service.Data,
             //     MobileTerminalId = Guid.Parse("9e89f07c-ac04-4e0e-b113-fe418996b5cc")

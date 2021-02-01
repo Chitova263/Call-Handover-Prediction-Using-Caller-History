@@ -1,10 +1,10 @@
+using System;
+using System.Collections.Generic;
+using VerticalHandoverPrediction.Mobile;
+
 namespace VerticalHandoverPrediction.CallSession
 {
-    using System;
-    using System.Collections.Generic;
-    using VerticalHandoverPrediction.Mobile;
-
-    public class Session : ISession
+    public class Session
     {
         public Guid SessionId { get; private set; }
         public Guid RatId { get; private set; }
@@ -12,8 +12,8 @@ namespace VerticalHandoverPrediction.CallSession
         public DateTime End { get; private set; }
         private readonly List<MobileTerminalState> _sessionSequence;
         public IReadOnlyCollection<MobileTerminalState> SessionSequence => _sessionSequence;
-        private readonly List<ICall> _activeCalls;
-        public IReadOnlyCollection<ICall> ActiveCalls => _activeCalls;
+        private readonly List<Call> _activeCalls;
+        public IReadOnlyCollection<Call> ActiveCalls => _activeCalls;
 
         public Session(Guid ratId, DateTime start)
         {
@@ -26,10 +26,10 @@ namespace VerticalHandoverPrediction.CallSession
             RatId = ratId;
             Start = start;
             _sessionSequence = new List<MobileTerminalState> { MobileTerminalState.Idle };
-            _activeCalls = new List<ICall>();
+            _activeCalls = new List<Call>();
         }
 
-        public void AddToActiveCalls(ICall call)
+        public void AddToActiveCalls(Call call)
         {
             if (call == null)
             {

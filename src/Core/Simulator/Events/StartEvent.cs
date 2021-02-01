@@ -1,9 +1,9 @@
-namespace VerticalHandoverPrediction.Simulator.Events
-{
-    using System;
-    using CsvHelper.Configuration;
-    using VerticalHandoverPrediction.CallSession;
+using System;
+using CsvHelper.Configuration;
+using VerticalHandoverPrediction.CallSession;
 
+namespace VerticalHandoverPrediction
+{
     public class StartEvent : IEvent
     {
         public Guid EventId { get; set; }

@@ -1,36 +1,37 @@
-namespace VerticalHandoverPrediction.Network
-{
-    using System;
-    using System.Collections.Generic;
-    using VerticalHandoverPrediction.CallAdimissionControl;
-    using VerticalHandoverPrediction.CallSession;
-    using VerticalHandoverPrediction.Mobile;
+using System;
+using System.Collections.Generic;
+using VerticalHandoverPrediction.CallAdimissionControl;
+using VerticalHandoverPrediction.CallSession;
 
-    public class Rat : IRat
+namespace VerticalHandoverPrediction
+{
+    public sealed class Rat
     {
         public Guid RatId { get; private set; }
         public string Name { get; private set; }
         public int Capacity { get; private set; }
         public int UsedNetworkResources { get; private set; }
-        private readonly List<ISession> _ongoingSessions;
-        public IReadOnlyCollection<ISession> OngoingSessions => _ongoingSessions;
-        public IList<Service> Services { get; set; }
+        private readonly List<Session> _ongoingSessions;
+        public IReadOnlyCollection<Session> OngoingSessions => _ongoingSessions;
+        public Service Services { get; set; }
 
-        public Rat(IList<Service> services, int capacity, string name)
+        public static Rat CreateRat(Service services, int capacity, string name)
         {
-            if (services is null)
-            {
-                throw new VerticalHandoverPredictionException($"{nameof(services)} is invalid");
-            }
+            return new Rat(services, capacity, name);
+        }
 
+
+        public Rat(Service services, int capacity, string name)
+        {
+       
             RatId = Guid.NewGuid();
             Services = services;
             Capacity = capacity;
             Name = name;
-            _ongoingSessions = new List<ISession>();
+            _ongoingSessions = new List<Session>();
         }
 
-        public void RemoveSession(ISession session)
+        public void RemoveSession(Session session)
         {
             if (session == null)
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
@@ -38,7 +39,7 @@ namespace VerticalHandoverPrediction.Network
             _ongoingSessions.Remove(session);
         }
 
-        public void AddSession(ISession session)
+        public void AddSession(Session session)
         {
             if (session == null)
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
@@ -51,7 +52,7 @@ namespace VerticalHandoverPrediction.Network
 
         public int AvailableNetworkResources() => Capacity - UsedNetworkResources;
 
-        public bool CanAdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal)
+        public bool CanAdmitNewCallToOngoingSession(Session session, Call call, MobileTerminal mobileTerminal)
         {
             if (session == null)
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
@@ -69,7 +70,7 @@ namespace VerticalHandoverPrediction.Network
             return requiredNetworkResources <= AvailableNetworkResources();
         }
 
-        public void AdmitNewCallToOngoingSession(ISession session, ICall call, IMobileTerminal mobileTerminal)
+        public void AdmitNewCallToOngoingSession(Session session, Call call, MobileTerminal mobileTerminal)
         {
             if (session == null)
                 throw new VerticalHandoverPredictionException($"{nameof(session)} is invalid");
