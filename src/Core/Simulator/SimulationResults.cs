@@ -26,9 +26,4 @@ namespace VerticalHandoverPrediction
         public int PredictiveDataHandovers { get; set; }
         public int PredictiveVideoHandovers { get; set; }
     }
-
-    public class SimulationResultsMap: ClassMap<SimulationResults>
-    {
-        public SimulationResultsMap() => AutoMap();
-    }
 }

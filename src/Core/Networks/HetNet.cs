@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VerticalHandoverPrediction.CallAdimissionControl;
-using VerticalHandoverPrediction.CallSession;
-using VerticalHandoverPrediction.Mobile;
 using VerticalHandoverPrediction.Utils;
 
 namespace VerticalHandoverPrediction

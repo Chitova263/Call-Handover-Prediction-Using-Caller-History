@@ -8,6 +8,10 @@ namespace VerticalHandoverPrediction
 {
     public abstract class Algorithm
     {
-        public abstract void Admit(IEvent @event);
+        public abstract void Admit(
+            IEvent @event,
+            Network network,
+            BasicBandwidthUnits basicBandwidthUnits,
+            HashSet<Guid> IgnoreEvents);
     }
 }

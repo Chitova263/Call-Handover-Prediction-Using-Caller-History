@@ -10,7 +10,7 @@ namespace VerticalHandoverPrediction
         public SimulatorBuilder(Network network, Action<SimulatorOptions> action)
         {
             _network = network;
-            var options = SimulatorOptions.CreateDefaultSimulatorOptions();
+            var options = new SimulatorOptions();
             action(options);
             _simulatorOptions = options;
         }

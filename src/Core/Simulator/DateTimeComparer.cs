@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using VerticalHandoverPrediction.Simulator.Events;
 
 namespace VerticalHandoverPrediction
 {
@@ -7,9 +6,9 @@ namespace VerticalHandoverPrediction
     {
         public int Compare(IEvent x, IEvent y)
         {
-            if (x.Time > y.Time)
+            if (x.Timestamp > y.Timestamp)
                 return 1;
-            if (x.Time < y.Time)
+            if (x.Timestamp < y.Timestamp)
                 return -1;
             else
                 return 0;

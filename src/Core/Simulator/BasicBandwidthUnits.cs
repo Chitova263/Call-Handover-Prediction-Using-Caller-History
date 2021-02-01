@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace VerticalHandoverPrediction
 {
-    public class NetworkConfiguration
-    {
-        
-    }
+    public record BasicBandwidthUnits(int Voice, int Data, int Video);
+   
 }

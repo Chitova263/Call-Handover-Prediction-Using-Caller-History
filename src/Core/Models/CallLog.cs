@@ -1,5 +1,4 @@
 using System;
-using CsvHelper.Configuration;
 
 namespace VerticalHandoverPrediction
 {
@@ -10,10 +9,5 @@ namespace VerticalHandoverPrediction
         public DateTime StartTime { get; init; }
         public TimeSpan Duration { get; init; }
         public string SessionSequence { get; init; }
-    }
-
-    public class CallLogMap: ClassMap<CallLog>
-    {
-        public CallLogMap() => AutoMap();
     }
 }

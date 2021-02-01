@@ -1,5 +1,4 @@
 using System;
-using VerticalHandoverPrediction.CallSession;
 
 namespace VerticalHandoverPrediction
 {

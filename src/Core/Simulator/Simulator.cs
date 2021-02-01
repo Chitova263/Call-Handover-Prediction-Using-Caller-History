@@ -1,7 +1,6 @@
 ﻿using Medallion.Collections;
 using System;
 using System.Collections.Generic;
-using VerticalHandoverPrediction.CallSession;
 
 namespace VerticalHandoverPrediction
 {
@@ -11,7 +10,9 @@ namespace VerticalHandoverPrediction
         private readonly SimulatorOptions _simulatorOptions;
         private readonly Network _network;
         private static readonly List<Service> _services = new List<Service> { Service.Voice, Service.Data, Service.Video };
-        
+       
+        public HashSet<Guid> IgnoreEvents { get; }
+
         // Events that materialize to calls
         private Dictionary<Guid, IEvent> SuccessfulEvents { get; set; }
 
@@ -20,6 +21,7 @@ namespace VerticalHandoverPrediction
             _eventQueue = new PriorityQueue<IEvent>(new DateTimeComparer());
             _network = network;
             _simulatorOptions = simulatorOptions;
+            IgnoreEvents = new HashSet<Guid>();
         }
 
         public Result Run<TAlgorithm>() where TAlgorithm : Algorithm
@@ -68,15 +70,11 @@ namespace VerticalHandoverPrediction
                 algorithm = new PredictiveAlgorithm();
             }
 
-
             if (@event is CallStartedEvent evt)
             {
-                var mobileTerminal = evt.MobileTerminal;
-                //1. if there is no call
-                if(!mobileTerminal.IsActive)
-                    algorithm.Admit(@event);
+               
             }
-            else if ( @event is CallEndedEvent)
+            else if (@event is CallEndedEvent)
             {
 
             }

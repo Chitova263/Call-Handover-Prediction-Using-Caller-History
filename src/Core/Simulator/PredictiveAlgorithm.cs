@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace VerticalHandoverPrediction
 {
     public class PredictiveAlgorithm : Algorithm
     {
-        public override void Run(IEvent @event)
+        public override void Admit(
+            IEvent @event,
+            Network network,
+            BasicBandwidthUnits basicBandwidthUnits,
+            HashSet<Guid> IgnoreEvents)
         {
             throw new NotImplementedException();
         }

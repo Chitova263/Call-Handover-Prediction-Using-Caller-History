@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using VerticalHandoverPrediction.Networks;
-using System.Linq;
 
 namespace VerticalHandoverPrediction
 {
-    public class NetworBuilder
+    public class NetworkBuilder
     {
         private Dictionary<Guid, MobileTerminal> _mobileTerminals;
         private Dictionary<Guid, Rat> _rats;
 
-        public NetworBuilder()
+        private int _ratPriority = 0;
+
+        public NetworkBuilder()
         {
         }
 
         public Network Build()
         {
-            return new Network(_mobileTerminals, _rats);
+            return Network.Initialize(_mobileTerminals, _rats);
         }
 
-        public NetworBuilder RegisterMobileTerminals(int count = 1000)
+        public NetworkBuilder RegisterMobileTerminals(int count = 1000)
         {
             var mobileTerminals = MobileTerminal.GenerateMobileTerminals(count);
             foreach (var mobileTerminal in mobileTerminals)
@@ -32,12 +32,11 @@ namespace VerticalHandoverPrediction
             return this;
         }
 
-        public NetworBuilder RegisterRat(Action<RatConfiguration> action)
+        public NetworkBuilder RegisterRat(Action<RatConfiguration> action)
         {
-            var config = RatConfiguration.CreateDefaultConfiguration();
+            var config = new RatConfiguration();
             action(config);
-
-            var rat = Rat.CreateRat(config.SupportedServices, config.Capacity, config.Name);
+            var rat = Rat.CreateRat(config.SupportedServices, config.Capacity, config.Name, _ratPriority++);
             var success = _rats.TryAdd(rat.RatId, rat);
             if (!success)
                 throw new Exception();
