@@ -9,19 +9,15 @@ namespace VerticalHandoverPrediction
         private readonly PriorityQueue<IEvent> _eventQueue;
         private readonly SimulatorOptions _simulatorOptions;
         private readonly Network _network;
-        private static readonly List<Service> _services = new List<Service> { Service.Voice, Service.Data, Service.Video };
-       
-        public HashSet<Guid> IgnoreEvents { get; }
-
-        // Events that materialize to calls
-        private Dictionary<Guid, IEvent> SuccessfulEvents { get; set; }
+        private readonly List<Service> _services = new List<Service> { Service.Voice, Service.Data, Service.Video };
+        private readonly HashSet<Guid> _ignoreEvents;
 
         public Simulator(Network network, SimulatorOptions simulatorOptions)
         {
             _eventQueue = new PriorityQueue<IEvent>(new DateTimeComparer());
             _network = network;
             _simulatorOptions = simulatorOptions;
-            IgnoreEvents = new HashSet<Guid>();
+            _ignoreEvents = new HashSet<Guid>();
         }
 
         public Result Run<TAlgorithm>() where TAlgorithm : Algorithm

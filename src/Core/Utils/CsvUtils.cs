@@ -1,12 +1,13 @@
+using System.Collections.Generic;
+using System.IO;
+using CsvHelper;
+using System.Linq;
+using System;
+using System.Text;
+using CsvHelper.Configuration;
+
 namespace VerticalHandoverPrediction.Utils
 {
-    using System.Collections.Generic;
-    using System.IO;
-    using CsvHelper;
-    using System.Linq;
-    using System;
-    using System.Text;
-    using CsvHelper.Configuration;
     public sealed class CsvUtils
     {
         private static CsvUtils instance = null;

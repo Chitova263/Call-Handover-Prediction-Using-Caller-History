@@ -8,10 +8,13 @@ namespace VerticalHandoverPrediction
         private Dictionary<Guid, MobileTerminal> _mobileTerminals;
         private Dictionary<Guid, Rat> _rats;
 
-        private int _ratPriority = 0;
+        private int _ratPriority;
 
         public NetworkBuilder()
         {
+            _mobileTerminals = new Dictionary<Guid, MobileTerminal>();
+            _rats = new Dictionary<Guid, Rat>();
+            _ratPriority = -1;
         }
 
         public Network Build()
@@ -36,7 +39,8 @@ namespace VerticalHandoverPrediction
         {
             var config = new RatConfiguration();
             action(config);
-            var rat = Rat.CreateRat(config.SupportedServices, config.Capacity, config.Name, _ratPriority++);
+
+            var rat = Rat.CreateRat(config.SupportedServices, config.Capacity, config.Name, ++_ratPriority);
             var success = _rats.TryAdd(rat.RatId, rat);
             if (!success)
                 throw new Exception();

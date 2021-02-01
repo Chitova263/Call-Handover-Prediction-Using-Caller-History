@@ -1,9 +1,7 @@
-namespace VerticalHandoverPrediction.CallAdimissionControl
-{
-    using System.Collections.Generic;
-    using VerticalHandoverPrediction.CallSession;
-    using VerticalHandoverPrediction.Mobile;
+using System.Collections.Generic;
 
+namespace VerticalHandoverPrediction
+{
     public static class LinqExtensions
     {
         public static int ComputeRequiredNetworkResources(this Service service)
