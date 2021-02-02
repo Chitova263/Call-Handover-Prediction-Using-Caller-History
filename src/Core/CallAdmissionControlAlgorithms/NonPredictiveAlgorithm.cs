@@ -4,56 +4,33 @@ using System.Linq;
 
 namespace VerticalHandoverPrediction
 {
-    public class NonPredictiveAlgorithm : Algorithm
+    public sealed class NonPredictiveAlgorithm : Algorithm
     {
+      
         public override void Admit(
             IEvent @event,
             Network network,
             BasicBandwidthUnits basicBandwidthUnits,
-            HashSet<Guid> IgnoreEvents)
+            HashSet<Guid> ignoreEvents)
         {
             // Handle CallStarted Events
-            if(@event is CallStartedEvent evt)
+            if (@event is CallStartedEvent evt)
             {
-               
+                if (@evt.MobileTerminal.State == MobileTerminalState.Idle)
+                    HandleIncomingCallForIdleTerminal(evt, network, basicBandwidthUnits, ignoreEvents);
+                else
+                    HandleIncomingCallForActiveTerminal(evt, network, basicBandwidthUnits, ignoreEvents);
             }
             // Handle CallEnded Events
             else
-            {
-
-            }
+                HandleCallEndedEvent(@event as CallEndedEvent, network, basicBandwidthUnits);
         }
-
-
-        private bool HandleCallStartedEvent(
-            CallStartedEvent @event,
-            Network network,
-            BasicBandwidthUnits basicBandwidthUnits,
-            HashSet<Guid> IgnoreEvents)
-        {
-            MobileTerminal mobileTerminal;
-
-            if (!network.MobileTerminals.TryGetValue(@event.MobileTerminal.MobileTerminalId, out mobileTerminal))
-            {
-                throw new VerticalHandoverPredictionException("mobile terminal not found");
-            }
-
-            if (mobileTerminal.State == MobileTerminalState.Idle)
-            {
-                return HandleIncomingCallForIdleTerminal(@event, network, basicBandwidthUnits, IgnoreEvents);
-            } 
-            else
-            {
-                return false;
-            }
-        }
-
-
+        
         private bool HandleIncomingCallForIdleTerminal(
             CallStartedEvent @event,
             Network network,
             BasicBandwidthUnits basicBandwidthUnits,
-            HashSet<Guid> IgnoreEvents)
+            HashSet<Guid> ignoreEvents)
         {
             MobileTerminal mobileTerminal;
             if (!network.MobileTerminals.TryGetValue(@event.MobileTerminal.MobileTerminalId, out mobileTerminal))
@@ -61,7 +38,7 @@ namespace VerticalHandoverPrediction
                 throw new VerticalHandoverPredictionException("mobile terminal not found");
             }
 
-            var call = Call.CreateCall(@event.Service, @event.Timestamp);
+            var call = Call.CreateCall(@event.EventId, @event.Service, @event.Timestamp);
 
             IEnumerable<Rat> rats = network.GetCompatibleRats(@event.Service);
             foreach (var rat in rats)
@@ -69,17 +46,16 @@ namespace VerticalHandoverPrediction
                 if (rat.CanAdmitCall(call.Service, basicBandwidthUnits))
                 {
                     rat.AdmitInitialCall(call, basicBandwidthUnits);
-                    //*************
-                    // RECORD: 1. Call Admitted 2. Type of Call Dropped
-                    //*************
+                   
+                    _result.LogAdmittedCall(call.Service);
+
                     return true;
                 }
             }
             // If you reach here it means there is no available RAT to handle call, call is dropped
-            //*************
-            //RECORD:  1. Call Dropped 2. Type of Call Dropped
-            //*************
-            IgnoreEvents.Add(@event.EventId);
+            _result.LogDroppedCall(call.Service);
+
+            ignoreEvents.Add(@event.EventId);
             return false;
         }
 
@@ -87,7 +63,7 @@ namespace VerticalHandoverPrediction
             CallStartedEvent @event,
             Network network,
             BasicBandwidthUnits basicBandwidthUnits,
-            HashSet<Guid> IgnoreEvents)
+            HashSet<Guid> ignoreEvents)
         {
             MobileTerminal mobileTerminal;
             if (!network.MobileTerminals.TryGetValue(@event.MobileTerminal.MobileTerminalId, out mobileTerminal))
@@ -95,7 +71,7 @@ namespace VerticalHandoverPrediction
                 throw new VerticalHandoverPredictionException("mobile terminal not found");
             }
 
-            var call = Call.CreateCall(@event.Service, @event.Timestamp);
+            var call = Call.CreateCall(@event.EventId, @event.Service, @event.Timestamp);
 
             // RAT with ongoing call
             var rat = network.Rats
@@ -111,6 +87,9 @@ namespace VerticalHandoverPrediction
             {
                 int resources = requiredService.GetRequiredBasicBandwidthUnits(basicBandwidthUnits);
                 rat.AdmitIncomingCallToOngoingSession(call, mobileTerminal.Session, resources);
+
+                _result.LogAdmittedCall(call.Service);
+
                 return true;
             }
             // Find Compatible RATs and Attempt Vertical Handover
@@ -124,21 +103,48 @@ namespace VerticalHandoverPrediction
                 {
                     if(possibleRat.CanAdmitCall(requiredService, basicBandwidthUnits))
                     {
+                        
                         //Network Performs A Handover Action
+                        network.ExecuteHandover(
+                            sourceRat: rat, 
+                            targetRat: possibleRat, 
+                            currentSession: mobileTerminal.Session,
+                            call: call,
+                            requiredResources: requiredService.GetRequiredBasicBandwidthUnits(basicBandwidthUnits));
+                        
+                        // Successfull Vertical Handover
+                        _result.LogAdmittedCall(call.Service);
+                        _result.LogVerticalHandover(true);
 
-
-                        //**************************************
-                        // Record  1. Successfull Vertical Handover
-                        //**************************************
                         return true;
                     }
                 }
-                // If you reach here failed handover, incoming call dropped
-                //**************************************
-                // Record  1. Failled Vertical Handover
-                //**************************************
             }
+            // If you reach here failed handover, incoming call dropped
+            // Failled Vertical Handover
+            _result.LogDroppedCall(call.Service);
+            _result.LogVerticalHandover(false);
+            
             return false;
+        }
+
+        private void HandleCallEndedEvent(
+            CallEndedEvent @event,
+            Network network,
+            BasicBandwidthUnits basicBandwidthUnits)
+        {
+            MobileTerminal mobileTerminal;
+            if (!network.MobileTerminals.TryGetValue(@event.MobileTerminal.MobileTerminalId, out mobileTerminal))
+            {
+                throw new VerticalHandoverPredictionException("mobile terminal not found");
+            }
+
+            // Find RAT with the ongoing session
+            var rat = network.Rats
+                .Select(o => o.Value)
+                .FirstOrDefault(o => o.OngoingSessions.ContainsKey(mobileTerminal.Session.SessionId));
+            
+            rat.EndCall(@event.CallStartedEventId, mobileTerminal.Session, basicBandwidthUnits);
         }
     }
 }

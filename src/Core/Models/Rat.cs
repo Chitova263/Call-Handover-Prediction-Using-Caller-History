@@ -42,14 +42,32 @@ namespace VerticalHandoverPrediction
 
         }
 
+        public void AdmitSessionDuringHandover(Session session, int requiredResources)
+        {
+            if (!OngoingSessions.TryAdd(session.SessionId, session))
+            {
+                throw new VerticalHandoverPredictionException("duplicate session id");
+            }
+            CurrentLoad += requiredResources;
+        }
+
+        public Session Release(Session currentSession, int requiredResources)
+        {
+            CurrentLoad -= requiredResources;
+            Session session;
+            if (!OngoingSessions.TryGetValue(currentSession.SessionId, out session))
+            {
+                throw new VerticalHandoverPredictionException("session not found");
+            }
+            OngoingSessions.Remove(currentSession.SessionId);
+            return session;
+        }
+
         public void AdmitInitialCall(Call call, BasicBandwidthUnits basicBandwidthUnits)
         {
-            // Increase load
             CurrentLoad += call.Service.GetRequiredBasicBandwidthUnits(basicBandwidthUnits);
-            // Create new session
             var session = Session.CreateSession(call.StartTime, call);
-            bool successful = OngoingSessions.TryAdd(session.SessionId, session);
-            if (!successful)
+            if (!OngoingSessions.TryAdd(session.SessionId, session))
             {
                 throw new VerticalHandoverPredictionException("duplicate call session ids");
             }
@@ -76,6 +94,31 @@ namespace VerticalHandoverPrediction
             {
                 throw new VerticalHandoverPredictionException("Duplicate callId not found");
             }
+
+            session.UpdateMobileTerminalStateSequence(call.Service);
+        }
+
+        public void EndCall(Guid callId, Session session, BasicBandwidthUnits basicBandwidthUnits)
+        {
+            if (OngoingSessions.TryGetValue(session.SessionId, out Session ongoingSession))
+                throw new VerticalHandoverPredictionException("Session not found");
+
+            if (!ongoingSession.ActiveCalls.TryGetValue(callId, out Call callToTerminate))
+                throw new VerticalHandoverPredictionException("Call not found");
+
+            // Free up resources
+            CurrentLoad -=  callToTerminate.Service.GetRequiredBasicBandwidthUnits(basicBandwidthUnits);
+
+            ongoingSession.ActiveCalls.Remove(callId);
+
+            // Update session sequence state
+            var nextState = ongoingSession.MobileTerminalStateSequence.Last.Value &= ~callToTerminate.Service.DeriveMobileTerminalState();
+            ongoingSession.MobileTerminalStateSequence.AddLast(nextState);
+
+            // Terminate session if there are no more active calls
+            if (!ongoingSession.ActiveCalls.Any())
+                OngoingSessions.Remove(ongoingSession.SessionId);
+
         }
     }
 }

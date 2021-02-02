@@ -20,13 +20,29 @@ namespace VerticalHandoverPrediction
             _ignoreEvents = new HashSet<Guid>();
         }
 
-        public Result Run<TAlgorithm>() where TAlgorithm : Algorithm
+        public Result Run<TAlgorithm>() 
+            where TAlgorithm : Algorithm, new()
         {
+            var algorithm = new TAlgorithm();
             GenerateEvents();
             foreach (var @event in _eventQueue)
-                HandleEvent<TAlgorithm>(@event);
-            
-            return new Result();
+            {
+                if (@event is CallEndedEvent evt)
+                {
+                    if (_ignoreEvents.Contains(evt.CallStartedEventId))
+                        continue; //DO NOT DISPATCH EVENT
+                }
+                else
+                {
+                    algorithm.Admit(
+                        @event as CallStartedEvent,
+                        _network,
+                        new BasicBandwidthUnits(_simulatorOptions.VoiceBasicBandwidthUnits, _simulatorOptions.DataBasicBandwidthUnits, _simulatorOptions.VideoBasicBandwidthUnits),
+                        _ignoreEvents);
+                }
+            }
+
+            return algorithm._result;
         }
 
         private void GenerateEvents()
@@ -51,28 +67,6 @@ namespace VerticalHandoverPrediction
 
                 _eventQueue.Enqueue(startEvent);
                 _eventQueue.Enqueue(endEvent);
-            }
-        }
-
-        private void HandleEvent<TAlgorithm>(IEvent @event) where TAlgorithm : Algorithm
-        {
-            Algorithm algorithm = null;
-            if (typeof(TAlgorithm) == typeof(NonPredictiveAlgorithm))
-            {
-                algorithm = new NonPredictiveAlgorithm();
-            } 
-            else
-            {
-                algorithm = new PredictiveAlgorithm();
-            }
-
-            if (@event is CallStartedEvent evt)
-            {
-               
-            }
-            else if (@event is CallEndedEvent)
-            {
-
             }
         }
     }

@@ -8,16 +8,16 @@ namespace VerticalHandoverPrediction
         public DateTime StartTime { get; }
         public Service Service { get; }
 
-        private Call(Service service, DateTime startTime)
+        private Call(Guid callId, Service service, DateTime startTime)
         {
-            CallId = Guid.NewGuid();
+            CallId = callId;
             Service = service;
             StartTime = startTime;
         }
 
-        public static Call CreateCall(Service service, DateTime startTime)
+        public static Call CreateCall(Guid callId, Service service, DateTime startTime)
         {
-            return new Call(service, startTime);
+            return new Call(callId, service, startTime);
         }
     }
 }

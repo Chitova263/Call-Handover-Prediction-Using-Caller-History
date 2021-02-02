@@ -26,5 +26,16 @@ namespace VerticalHandoverPrediction
                  .OrderByDescending(r => r.Value.Priority)
                  .Select(o => o.Value);
         }
+
+        public void ExecuteHandover(Rat sourceRat, Rat targetRat, Session currentSession, Call call, int requiredResources)
+        {
+            // Release Resouces from source RAT
+            var session = sourceRat.Release(currentSession, requiredResources);
+            TransferSessionTo(targetRat, session, requiredResources);
+            targetRat.AdmitIncomingCallToOngoingSession(call, session, requiredResources);
+        }
+
+        private void TransferSessionTo(Rat targetRat, Session session, int requiredResources) 
+            => targetRat.AdmitSessionDuringHandover(session, requiredResources);
     }
 }

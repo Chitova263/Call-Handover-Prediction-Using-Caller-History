@@ -46,5 +46,11 @@ namespace VerticalHandoverPrediction
 
             return new Session(startTime, call, mobileTerminalStateSequence);
         }
+
+        public void UpdateMobileTerminalStateSequence(Service incomingCall)
+        {
+            var nextState = MobileTerminalStateSequence.Last.Value | incomingCall.DeriveMobileTerminalState();
+            MobileTerminalStateSequence.AddLast(nextState);
+        }
     }
 }

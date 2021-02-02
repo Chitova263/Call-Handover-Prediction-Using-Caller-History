@@ -1,7 +1,7 @@
+using System;
+
 namespace VerticalHandoverPrediction
 {
-    using System;
-
     [Serializable]
     internal class VerticalHandoverPredictionException : Exception
     {
