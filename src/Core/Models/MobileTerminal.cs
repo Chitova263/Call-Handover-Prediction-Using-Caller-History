@@ -1,6 +1,6 @@
 using System;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Models
 {
     public sealed class MobileTerminal
     {

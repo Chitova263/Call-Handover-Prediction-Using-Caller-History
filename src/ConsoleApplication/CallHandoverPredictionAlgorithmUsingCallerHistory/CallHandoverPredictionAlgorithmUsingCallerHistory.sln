@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication", "ConsoleApplication\ConsoleApplication.csproj", "{A1BC68F7-15AF-4287-84A2-AD00F9D524D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiniteStateMachine", "FiniteStateMachine\FiniteStateMachine.csproj", "{00D95E77-0F7D-4E8F-9290-2605192EB3C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulator", "Simulator\Simulator.csproj", "{2CB16B22-DCE2-4A27-B955-25560A8D8520}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1BC68F7-15AF-4287-84A2-AD00F9D524D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1BC68F7-15AF-4287-84A2-AD00F9D524D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1BC68F7-15AF-4287-84A2-AD00F9D524D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1BC68F7-15AF-4287-84A2-AD00F9D524D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00D95E77-0F7D-4E8F-9290-2605192EB3C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00D95E77-0F7D-4E8F-9290-2605192EB3C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00D95E77-0F7D-4E8F-9290-2605192EB3C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00D95E77-0F7D-4E8F-9290-2605192EB3C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CB16B22-DCE2-4A27-B955-25560A8D8520}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CB16B22-DCE2-4A27-B955-25560A8D8520}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CB16B22-DCE2-4A27-B955-25560A8D8520}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CB16B22-DCE2-4A27-B955-25560A8D8520}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

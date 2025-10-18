@@ -1,6 +1,4 @@
-using System;
-
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Models
 {
     [Flags]
     public enum Service

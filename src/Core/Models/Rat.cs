@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using VerticalHandoverPrediction.Exceptions;
+using VerticalHandoverPrediction.Extensions;
+using VerticalHandoverPrediction.Simulator;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Models
 {
     public sealed class Rat
     {

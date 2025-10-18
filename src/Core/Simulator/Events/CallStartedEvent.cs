@@ -1,6 +1,6 @@
-using System;
+using VerticalHandoverPrediction.Models;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Simulator.Events
 {
     public record CallStartedEvent : IEvent
     {

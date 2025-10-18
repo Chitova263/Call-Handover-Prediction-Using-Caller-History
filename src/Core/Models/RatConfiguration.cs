@@ -1,4 +1,4 @@
-﻿namespace VerticalHandoverPrediction
+﻿namespace VerticalHandoverPrediction.Models
 {
     public sealed class RatConfiguration
     {

@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="2.7.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="CsvHelper" Version="12.1.2" />
     <PackageReference Include="ElectronCgi.DotNet" Version="0.0.2" />
     <PackageReference Include="FluentAssertions" Version="5.9.0" />
@@ -20,5 +16,37 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Serilog" Version="2.8.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="FiniteStateMachine\ITransitionRuleBuilder.cs">
+      <Link>FSM\ITransitionRuleBuilder.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\ITransitionRuleBuilderOnTrigger.cs">
+      <Link>FSM\ITransitionRuleBuilderOnTrigger.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\ITransitionRuleBuilderTransitionTo.cs">
+      <Link>FSM\ITransitionRuleBuilderTransitionTo.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\ITransitionRuleBuilderWhenInState.cs">
+      <Link>FSM\ITransitionRuleBuilderWhenInState.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\TransitionRule.cs">
+      <Link>FSM\TransitionRule.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\TransitionRuleBuilder.cs">
+      <Link>FSM\TransitionRuleBuilder.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\TransitionRuleSet.cs">
+      <Link>FSM\TransitionRuleSet.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\TransitionRuleSetKey.cs">
+      <Link>FSM\TransitionRuleSetKey.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\FiniteStateMachine.cs">
+      <Link>FSM\FiniteStateMachine.cs</Link>
+    </Compile>
+    <Compile Update="FiniteStateMachine\FiniteStateMachineBuilder.cs">
+      <Link>FSM\FiniteStateMachineBuilder.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

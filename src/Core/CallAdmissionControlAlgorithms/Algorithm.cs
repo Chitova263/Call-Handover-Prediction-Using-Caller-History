@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using VerticalHandoverPrediction.Models;
+using VerticalHandoverPrediction.Simulator;
+using VerticalHandoverPrediction.Simulator.Events;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.CallAdmissionControlAlgorithms
 {
     public abstract class Algorithm : IAlgorithm
     {

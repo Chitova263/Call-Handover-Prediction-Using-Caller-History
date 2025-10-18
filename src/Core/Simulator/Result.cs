@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using VerticalHandoverPrediction.Models;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Simulator
 {
     public sealed class Result
     {

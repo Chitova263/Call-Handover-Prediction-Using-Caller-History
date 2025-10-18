@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace VerticalHandoverPrediction
+﻿namespace VerticalHandoverPrediction.Models
 {
     public class NetworkBuilder
     {

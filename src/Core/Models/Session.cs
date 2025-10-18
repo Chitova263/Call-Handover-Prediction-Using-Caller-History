@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
+using VerticalHandoverPrediction.Extensions;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Models
 {
     public sealed class Session
     {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace VerticalHandoverPrediction
+﻿namespace VerticalHandoverPrediction.Models
 {
     public sealed class Network
     {

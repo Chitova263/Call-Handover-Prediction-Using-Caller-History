@@ -1,6 +1,6 @@
-﻿using System;
+﻿using VerticalHandoverPrediction.Models;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Simulator
 {
     public sealed class SimulatorBuilder
     {

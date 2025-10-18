@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VerticalHandoverPrediction
+﻿namespace VerticalHandoverPrediction.Simulator
 {
     public record BasicBandwidthUnits(int Voice, int Data, int Video);
    

@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using VerticalHandoverPrediction.Exceptions;
+using VerticalHandoverPrediction.Extensions;
+using VerticalHandoverPrediction.Models;
+using VerticalHandoverPrediction.Simulator;
+using VerticalHandoverPrediction.Simulator.Events;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.CallAdmissionControlAlgorithms
 {
     public sealed class NonPredictiveAlgorithm : Algorithm
     {

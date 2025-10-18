@@ -1,8 +1,10 @@
 ﻿using Medallion.Collections;
-using System;
-using System.Collections.Generic;
+using VerticalHandoverPrediction.CallAdmissionControlAlgorithms;
+using VerticalHandoverPrediction.Extensions;
+using VerticalHandoverPrediction.Models;
+using VerticalHandoverPrediction.Simulator.Events;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Simulator
 {
     public sealed class Simulator
     {

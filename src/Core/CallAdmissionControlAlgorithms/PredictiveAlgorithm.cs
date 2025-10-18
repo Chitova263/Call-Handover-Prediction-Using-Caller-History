@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using VerticalHandoverPrediction.Models;
+using VerticalHandoverPrediction.Simulator;
+using VerticalHandoverPrediction.Simulator.Events;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.CallAdmissionControlAlgorithms
 {
     public sealed class PredictiveAlgorithm : Algorithm
     {

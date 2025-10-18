@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\FiniteStateMachine\FiniteStateMachine.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MedallionCollections" Version="1.1.0" />
+    </ItemGroup>
+
+</Project>

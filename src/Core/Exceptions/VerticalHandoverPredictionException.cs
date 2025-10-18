@@ -1,6 +1,4 @@
-using System;
-
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Exceptions
 {
     [Serializable]
     internal class VerticalHandoverPredictionException : Exception

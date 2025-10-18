@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+using VerticalHandoverPrediction.Simulator.Events;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Simulator
 {
     public class DateTimeComparer : IComparer<IEvent>
     {

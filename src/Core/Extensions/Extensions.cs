@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using VerticalHandoverPrediction.Exceptions;
+using VerticalHandoverPrediction.Models;
+using VerticalHandoverPrediction.Simulator;
 
-namespace VerticalHandoverPrediction
+namespace VerticalHandoverPrediction.Extensions
 {
     public static class Extensions
     {
